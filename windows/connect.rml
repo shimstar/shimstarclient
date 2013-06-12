@@ -1,0 +1,110 @@
+<rml>
+	<head>
+		<title>Options</title>
+		<link type="text/template" href="window.rml" />
+		<style>
+			body
+			{
+				width: 850px;
+				height: 350px;
+				
+				margin: auto;
+			}
+
+			div#title_bar div#icon
+			{
+				icon-image-s: 230px 281px;
+				icon-image-t: 152px 191px;
+
+				display: none;
+			}
+
+			form div
+			{
+				width: 200px;
+				margin: auto;
+			}
+		</style>
+	<script>
+#~ from shimstar.network.network import *
+from shimstar.gui.system.menuconnectrocket import *
+from shimstar.core.shimconfig import *
+from shimstar.network.networkmainserver import *
+from shimstar.network.netmessage import *
+
+def onClose(doc):
+	pass
+	
+def onLoad(doc):
+	titleBar=doc.GetElementById("title")
+	titleBar.inner_rml="Connexion"
+	
+	ServerElement=document.GetElementById('server')
+	if NetworkMainServer.getInstance().isConnected()==False:
+		serverStatus=document.CreateTextNode("Server : Offline")
+
+		ServerElement.inner_rml="Server : <span style='color:#ff0000;'>Offline</span>"
+		connectElement=document.GetElementById('connect')
+		connectElement.style.color="red"
+		connectElement.disabled=1
+		createElement=document.GetElementById('create')
+		createElement.style.color="red"
+		createElement.disabled=1
+	else:
+		ServerElement.inner_rml="Server : <span style='color:#00ff00;'>Online</span>"
+	
+	UsrElement=document.GetElementById('name')
+	UsrElement.value=shimConfig.getInstance().getUser()
+	
+	PwdElement=document.GetElementById('pwd')
+	PwdElement.value=shimConfig.getInstance().getPwd()
+	
+	doc.GetElementById("name").Focus()
+
+def Connect(document):
+	if NetworkMainServer.getInstance().isConnected()!=False:
+		user=document.GetElementById('name').value
+		pwd=document.GetElementById('pwd').value
+		msg=netMessage(C_NETWORK_CONNECT)
+		msg.addString(user)
+		msg.addString(pwd)
+		NetworkMainServer.getInstance().sendMessage(msg)
+		
+def createNewAccount(document):
+	document.context.LoadDocument('windows/newaccount.rml').Show()
+	document.Hide()
+	</script>
+	
+	</head>
+	<body template="pywindow" onLoad="onLoad(document);">
+		<form name="formtest" onsubmit="">
+				<div style="position:absolute; top:70px; left:-250px;width:250px;tab-index:none;">
+					<button class="roundleft" style="width:250px;height:30px;tab-index:none;">Identifiant</button>
+				</div>
+				<div style="position:absolute; top:50px; left:40px;width:250px;">
+					<input type="text" id="name" name="name" value="" align="center" style="width:350px;height:40px;"/>
+				</div>
+				<div style="position:absolute; top:130px; left:-250px;width:250px;tab-index:none;">
+					<button class="roundleft" style="width:250px;height:30px;tab-index:none;">Password</button>
+				</div>
+				<div style="position:absolute; top:110px; left:40px;width:250px;">
+					<input type="password" id="pwd" name="pwd" value="" align="center" style="width:350px;height:40px;"/>
+				</div>
+				
+				<div style="position:absolute; top:250px; left:-250px;tab-index:none;">
+					<button class="roundleft" style="width:250px;height:30px;tab-index:none;" id="server"></button>
+				</div>
+				<div style="position:absolute; top:220px; left:100px;tab-index:none;">
+					<button class="topress" style="width:250px;height:30px;tab-index:none;" id="connect" onclick="Connect(document)">Connect</button>
+				</div>
+				<div style="position:absolute; top:270px; left:100px;tab-index:none;">
+					<button class="topress" style="width:250px;height:30px;tab-index:none;" id="create" onclick="createNewAccount(document);">Nouveau compte</button>
+				</div>
+				
+				<div style="position:absolute; top:350px; left:-250px;tab-index:none;">
+					<button class="roundleft" style="width:500px;height:30px;tab-index:none;display:None;" id="error"></button>
+				</div>
+	
+		</form>
+	</body>
+</rml>

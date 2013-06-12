@@ -1,0 +1,264 @@
+import xml.dom.minidom
+from math import sin, cos, pi
+from math import sqrt
+
+from pandac.PandaModules import *
+
+from shimstar.items.slot import *
+from shimstar.items.engine import *
+from shimstar.items.weapon import *
+from shimstar.items.item import *
+from shimstar.items.itemfactory import *
+from shimstar.user.user import *
+from shimstar.core.shimconfig import *
+
+DEG_TO_RAD = pi / 180
+
+class Ship:
+	def __init__(self,id,xmlPart):
+		self.name = "ship" + str(id)
+		self.id=int(id)
+		self.mainShip = False
+		self.weapons=None
+		self.engine = None
+		self.actualSpeed = 0
+		self.maniability = 0
+		self.node = None
+		self.img = ""
+		self.group = 0
+		self.mass = 0
+		self.engineSound=None
+		self.egg = ""
+		self.lastMove=globalClock.getRealTime()
+		self.hullpoints = 0
+		self.maxhull = 0
+		self.maxTorque = 30
+		self.currentTorqueX = 0
+		self.currentTorqueY = 0
+		self.itemInInventory = []
+		self.lastDiffQuat=Quat(0,0,0,0)
+		self.slots=[]
+		self.itemInInventory= []
+		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
+		self.loadXml(xmlPart)
+		
+	def loadXml(self,xmlPart):
+		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
+		self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
+		self.maniability=int(xmlPart.getElementsByTagName('maniability')[0].firstChild.data)
+		self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
+		self.maxhull=int(xmlPart.getElementsByTagName('maxhullpoints')[0].firstChild.data)
+		self.egg=str(xmlPart.getElementsByTagName('egg')[0].firstChild.data)
+		self.img=str(xmlPart.getElementsByTagName('img')[0].firstChild.data)
+		slotss=xmlPart.getElementsByTagName('slot')
+		for s in slotss:
+			tempSlot=Slot(s)
+			self.slots.append(tempSlot)
+			if tempSlot.getItem()!=None:
+				it=tempSlot.getItem()
+				if it.getTypeItem()==C_ITEM_WEAPON:
+					self.weapons=it
+				if it.getTypeItem()==C_ITEM_ENGINE:
+					self.engine=it
+					
+		inventory=xmlPart.getElementsByTagName('inventory')
+		for inv in inventory:
+			items=inv.getElementsByTagName('item')
+			for itXml in items:
+				typeItem=int(itXml.getElementsByTagName('typeitem')[0].firstChild.data)
+				idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
+				item=itemFactory.getItemFromXml(itXml,typeItem)
+				self.itemInInventory.append(item)
+		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+					
+		
+	def getId(self):
+		return self.id
+		
+	def getItemInInventory(self):
+		return self.itemInInventory
+		
+	def addItemInInventory(self, item):
+		self.itemInInventory.append(item)
+		
+	def removeItemInInventory(self, idItem):
+		itFound=None
+		for it in self.itemInInventory:
+			if it.getId()==idItem:
+				itFound=it
+				break
+		if itFound!=None:
+			self.itemInInventory.remove(itFound)
+		
+	def getFirstPlaceFreeInInventory(self):
+		"""
+			return the first place free in the inventory. The item have each a number allowing to locate it when the inventory is shown.
+			This function returns first place not allocated.
+		"""
+		places=[]
+		max=0
+		for i in self.itemInInventory:
+			places.append(i.getLocation())
+			if max<i.getLocation():
+				max=i.getLocation()
+		places.sort()
+		returnValue=-1
+		val=0
+		for p in places:
+			if (val)!=int(p):
+				if(val)<int(p):
+					returnValue=val
+				else:
+					returnValue=int(p)
+				break
+			val+=1
+			
+		if returnValue==-1:
+			returnValue=max+1
+		return returnValue
+
+	def uninstallItemBySlotId(self, slotId):
+		for s in self.slots:
+			if s.getId()==int(slotId):
+				self.uninstallItem(s)
+				break
+
+	def getItemInstalledByCategory(self, cat):
+		items = []
+		for it in self.items:
+			if it.getTypeItem() == cat:
+				items.append(it)
+		return items
+
+	def uninstallItem(self,slot):
+		self.itemInInventory.append(slot.getItem())
+		slot.setItem(None)
+		network.reference.sendMessage(C_CHAR_UPDATE, str(self.character.getUserId()) + "/" + str(self.character.getId()) + "/uninstall=" + str(slot.getId()))
+
+	def installItem(self, item,slot):
+		slotToInstall=None
+		for s in self.slots:
+			if s.getId()==int(slot):
+				slotToInstall=s
+				break
+		if slotToInstall!=None:
+			if slotToInstall.getItem()!=None:
+				self.uninstallItem(slotToInstall)
+			
+			itemToInstall=None
+			for i in self.itemInInventory:
+				if i.getId()==int(item):
+					itemToInstall=i
+					break
+			if itemToInstall!=None:				
+				slotToInstall.setItem(itemToInstall)
+				network.reference.sendMessage(C_CHAR_UPDATE, str(self.character.getUserId()) + "/" + str(self.character.getId()) + "/install=" + str(itemToInstall.getId()) + "#" + str(slotToInstall.getId()))
+				self.itemInInventory.remove(itemToInstall)
+						
+	def addMinerals(self, id,typeMineral, qt):
+		alreadyGot = False
+		for i in self.itemInInventory:
+			if i.getTypeItem() == C_ITEM_MINERAL:
+				if i.getId() == id:
+					i.addMineral(qt)
+					alreadyGot = True
+					break
+					
+		if alreadyGot == False:
+			newItem = mineral(typeMineral)
+			newItem.addMineral(qt)
+			newItem.setId(id)
+			self.itemInInventory.append(newItem)
+			
+	def removeMinerals(self, id, qt):
+		for i in self.itemInInventory:
+			if i.getTypeItem() == C_ITEM_MINERAL:
+				if i.getId() == id:
+					i.removeMineral(qt)
+					break
+					
+	def getSlots(self):
+		return self.slots
+
+	def getWeapon(self):
+		return self.weapons
+
+	def changeZone(self):
+		self.actualSpeed = 0
+
+	def getPos(self):
+		return self.node.getPos()
+		
+	def getHpr(self):
+		return self.node.getHpr()
+		
+	def getManiability(self):
+		return self.maniability
+		
+	def getNode(self):
+		return self.node
+		
+	def getName(self):
+		return self.name
+		
+	def getImg(self):
+		return self.img
+		
+	def setVisible(self):
+		self.node.reparentTo(render)
+		self.node.setName(self.name)
+				
+	def getSpeed(self):
+		return self.actualSpeed
+		
+	def getSpeedMax(self):
+		return self.engine.getSpeedMax()
+	
+	def setHpr(self, hpr):
+		self.node.setHpr(hpr)
+			
+	def shot(self):
+		if self.weapons!=None:
+			return self.weapons.shot( self.node.getPos(), self.node.getQuat())
+		return None
+
+	def destroy(self):
+		self.node.detachNode()
+		self.node.removeNode()		
+				
+	def getPrcentHull(self):
+		prcent = float(self.hullpoints) / float(self.maxhull) 
+		return float(prcent),self.hullpoints,self.maxhull
+				
+	def getMaxHullPoints(self):
+		return self.maxhull
+				
+	## Return True if ship has hull>0
+	## Return False if shup has hull<=0
+	def takeDamage(self, hitpoints):
+		#~ audio3d = shimConfig.getInstance().getAudio3DManager()
+		#~ exploSound= audio3d.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/enemy_explosion1.ogg")
+		#~ audio3d.setSoundVelocityAuto( exploSound) 
+		#~ audio3d.setListenerVelocityAuto() 
+		#~ audio3d.attachSoundToObject(exploSound, self.node)
+		#~ exploSound.setLoop(False)
+		#~ exploSound.play()
+		#~ audio3d.setDropOffFactor(0.1) 
+		#~ self.explodeSound.append(exploSound)
+		self.hullpoints -= hitpoints
+		if self.hullpoints <= 0:
+			#~ self.setVisible(False)
+			return False
+		return True
+		
+	def getHullPoints(self):
+		return self.hullpoints
+		
+	def removeBullets(self):
+		self.weapons.removeShots()
+		
+	def addBullet(self, name, pos, hpr, time):
+		bul = bullet(time, pos, hpr, self.egg, self.lifeTime, self.speed, self, name)
+		self.bullets.append(bul)
+			
+		

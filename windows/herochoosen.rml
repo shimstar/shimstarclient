@@ -1,0 +1,81 @@
+<rml>
+	<head>
+		<title>herochoosen</title>
+		<link type="text/template" href="window.rml" />
+		<style>
+			body
+			{
+				width: 500px;
+				height: 500px;
+				position: absolute;
+				top : 25px;
+				left : 300px;
+				margin: auto;
+			}
+
+			div#title_bar div#icon
+			{
+				icon-image-s: 230px 281px;
+				icon-image-t: 152px 191px;
+
+				display: none;
+			}
+
+			form div
+			{
+				width: 200px;
+				margin: auto;
+			}
+		</style>
+	<script>
+from shimstar.network.networkmainserver import *
+from shimstar.network.netmessage import *
+from shimstar.user.user import *
+def close(doc):
+	doc.Hide()
+	
+def deleteHero(doc):
+	listOfDoc=doc.context.documents
+	deletedHeroDoc=None
+	for l in listOfDoc:
+		if l.title=="herodelete":
+			deletedHeroDoc=l
+			break
+	if deletedHeroDoc!=None:
+		deletedHeroDoc.GetElementById("idchar").value=doc.GetElementById("idchar").value
+		deletedHeroDoc.Show()
+		
+def chooseHero(doc):
+	User.getInstance().chooseCharacter(int(doc.GetElementById("idchar").value))
+	msg=netMessage(C_NETWORK_USER_CHOOSE_HERO)
+	msg.addInt(User.getInstance().getId())
+	msg.addInt(int(doc.GetElementById("idchar").value))
+	NetworkMainServer.getInstance().sendMessage(msg)
+	User.getInstance().getCurrentCharacter().changeZone()
+</script>
+	
+	</head>
+	<body template="pywindow" onLoad="">
+		<div style="position:absolute; top:-1080px; left:-1050px;">
+			<input type="hidden" name="idchar" id="idchar" value=""/>
+		</div>
+		<div style="position:absolute; top:80px; left:-150px;">
+				<img src="" id="facechar" width="200" height="200"/>
+		</div>
+		<div style="position:absolute; top:60px; left: 100px;">
+			<button id="namechar" class="roundleft" style="width:250px;height:30px;"></button>
+		</div>
+		<div style="position:absolute; top:120px; left: 100px;">
+			<button id="zonechar" class="roundleft" style="width:250px;height:30px;"></button>
+		</div>
+		<div style="position:absolute; top:370px; left:0px;">
+		<button class="topress" style="width:250px;height:30px;" onClick="chooseHero(document)">Jouer</button>
+		</div>
+		<div style="position:absolute; top:420px; left:0px;">
+		<button  class="topress" style="width:250px;height:30px;" onClick="deleteHero(document)">Supprimer</button>
+		</div>
+		<div style="position:absolute; top:470px; left:0px;">
+		<button class="topress" style="width:250px;height:30px;" onclick="close(document)">Annuler</button>
+		</div>
+	</body>
+</rml>

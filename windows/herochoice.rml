@@ -1,0 +1,85 @@
+<rml>
+	<head>
+		<title>Options</title>
+		<link type="text/template" href="window.rml" />
+		<style>
+			body
+			{
+				width: 1100px;
+				height: 250px;
+				position: absolute;
+				top : 30px;
+				left : 30px;
+				margin: auto;
+			}
+
+			div#title_bar div#icon
+			{
+				icon-image-s: 230px 281px;
+				icon-image-t: 152px 191px;
+
+				display: none;
+			}
+
+			form div
+			{
+				width: 200px;
+				margin: auto;
+			}
+		</style>
+	<script>
+
+from shimstar.world.zone.zone import *
+from shimstar.user.character.character import *
+from shimstar.user.user import *
+from shimstar.core.shimconfig import *
+
+def onHeroChoice(doc,idChar):
+	ch=User.getInstance().getCharacterById(int(idChar))
+	listOfDoc=doc.context.documents
+	choosendHeroDoc=None
+	for l in listOfDoc:
+		if l.title=="herochoosen":
+			choosendHeroDoc=l
+			break
+			
+	if choosendHeroDoc!=None:
+		choosendHeroDoc.GetElementById("title").inner_rml=ch.getName()
+		choosendHeroDoc.GetElementById("namechar").inner_rml=ch.getName()
+		zoneName,zoneType=Zone.getTinyInfosFromZone(int(ch.getIdZone()))
+		
+		if zoneType==1:
+			text="Zone : " + zoneName
+		else:
+			text="Station : " + zoneName
+		choosendHeroDoc.GetElementById("zonechar").inner_rml=text
+		choosendHeroDoc.GetElementById("idchar").value=str(ch.getId())
+		choosendHeroDoc.GetElementById("facechar").SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\faces\\" + ch.getFace() + ".png")
+		choosendHeroDoc.Show()
+
+def onLoad(doc):
+	titleBar=doc.GetElementById("title")
+	titleBar.inner_rml="Choix du Hero"
+		
+			
+def newHero(doc):
+	listOfDoc=doc.context.documents
+	newHeroDoc=None
+	for l in listOfDoc:
+		if l.title=="newhero":
+			newHeroDoc=l
+			break
+	
+	if newHeroDoc!=None:
+		newHeroDoc.Show()
+	</script>
+	
+	</head>
+	<body template="pywindow" onLoad="onLoad(document);">
+		<div id="contentHero">
+		</div>
+		<div style="position:absolute; top:230px; left:0px;">
+			<button class="topress" style="width:250px;height:30px;" onclick="newHero(document)">Nouveau hero</button>
+		</div>
+	</body>
+</rml>

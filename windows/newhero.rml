@@ -1,0 +1,113 @@
+<rml>
+	<head>
+		<title>newhero</title>
+		<link type="text/template" href="window.rml" />
+		<style>
+			body
+			{
+				width: 500px;
+				height: 500px;
+				position: absolute;
+				top : 25px;
+				left : 300px;
+				margin: auto;
+			}
+
+			div#title_bar div#icon
+			{
+				icon-image-s: 230px 281px;
+				icon-image-t: 152px 191px;
+
+				display: none;
+			}
+
+			form div
+			{
+				width: 200px;
+				margin: auto;
+			}
+		</style>
+	<script>
+import os,sys
+from shimstar.user.user import *
+from shimstar.core.constantes import *
+from shimstar.core.shimconfig import *
+
+def close(doc):
+	doc.Hide()
+	
+def changeImg(doc,sens):
+	img=doc.GetElementById('facechar')
+	src=img.GetAttribute('src')
+	imgName=src.split('images\\faces\\')[1]
+	path=shimConfig.getInstance().getRessourceDirectory() + "\\images\\faces"
+	dirList=os.listdir(path)
+	prev=""
+	last=""
+	i=0
+	for f in dirList:
+		if f==imgName:
+			break
+		i+=1
+	newImage=""
+	if sens==1:
+		if i==0:
+			i=len(dirList)-1
+		else:
+			i-=1
+			
+	if sens==0:
+		if i==(len(dirList)-1):
+			i=0
+		else:
+			i+=1
+	newImage=dirList[i]
+	img.SetAttribute('src',shimConfig.getInstance().getRessourceDirectory() + "images\\faces\\" + str(newImage))
+
+def newHero(doc):
+	name=doc.GetElementById('name').value
+	face=doc.GetElementById('facechar').GetAttribute('src')
+	face=face.split('images\\faces\\')
+	face=face[1]
+	face=face.split('.')
+	faceImg=face[0]
+	#~ User.getInstance().addCharacter(name,faceImg)
+	msg=netMessage(C_USER_ADD_CHAR)
+	msg.addInt(User.getInstance().getId())
+	msg.addString(name)
+	msg.addString(face)
+	NetworkMainServer.getInstance().sendMessage(msg)
+	doc.GetElementById('name').value=""
+	doc.Hide()
+	
+def onLoad(doc):
+	img=doc.GetElementById("facechar")
+	img.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\faces\\face1.png")
+	
+	</script>
+	
+	</head>
+	<body template="pywindow" onLoad="onLoad(document);">
+		<div style="position:absolute; top:120px; left:0px;">
+				<img src="" id="facechar" width="200" height="200"/>
+		</div>
+		<div style="position:absolute; top:190px; left: -150px;">
+			<button id="moins" class="roundleft" style="width:30px;height:30px;" onclick="changeImg(document,1)">&lt;</button>
+		</div>
+		<div style="position:absolute; top:190px; left: 150px;">
+			<button id="plus" class="roundleft" style="width:30px;height:30px;" onclick="changeImg(document,0)">&gt;</button>
+		</div>
+		<div style="position:absolute; top:360px; left:-150px;">
+		<button class="roundleft" style="width:150px;height:30px;">Nom : </button>
+		</div>
+		<div style="position:absolute; top:340px; left:120px;">
+			<input type="text" id="name" name="name" value="" align="center" style="width:350px;height:40px;"/>
+		</div>
+		<div style="position:absolute; top:420px; left:0px;">
+		<button class="topress" style="width:250px;height:30px;" onclick="newHero(document)">Creer</button>
+		</div>
+		<div style="position:absolute; top:470px; left:0px;">
+		<button class="topress" style="width:250px;height:30px;" onclick="close(document)">Annuler</button>
+		</div>
+	</body>
+</rml>
