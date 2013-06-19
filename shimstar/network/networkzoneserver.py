@@ -29,7 +29,7 @@ class NetworkZoneServer(threading.Thread):
 		
 	@staticmethod
 	def getInstance():
-		return NetworkMainServer.instance
+		return NetworkZoneServer.instance
 		
 	def isConnected(self):
 		if self.myConnection==None:

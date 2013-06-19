@@ -6,6 +6,8 @@ from direct.stdpy import threading
 from shimstar.core.constantes import *
 from shimstar.network.message import *
 from shimstar.network.networkzoneserver import *
+from shimstar.network.networkzoneudp import *
+from shimstar.game.gamestate import *
 
 class NetworkMainServer(threading.Thread):
 	instance=None
@@ -68,10 +70,13 @@ class NetworkMainServer(threading.Thread):
 		elif msgID==C_NETWORK_INFO_ZONE:
 			ip=myIterator.getString()
 			port=myIterator.getUint32()
-			print "infozone : " + str(ip) + "/" + str(port)
+			portudp=myIterator.getUint32()
 			if NetworkZoneServer.getInstance()!=None:
 				NetworkZoneServer.getInstance().stop()
 			NetworkZoneServer(ip,port)
+			if NetworkZoneUdp.getInstance()!=None:
+				NetworkZoneUdp.getInstance().stop()
+			NetworkZoneUdp(ip,portudp)
 			GameState.getInstance().setState(C_RECEIVED_INFOZONE)
 		
 	def getListOfMessageById(self,id):

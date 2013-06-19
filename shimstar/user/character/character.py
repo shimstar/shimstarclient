@@ -34,6 +34,9 @@ class Character:
 		if sh!=None:
 			for s in sh:
 				self.ship=Ship(0,s)
+				
+	def getShip(self):
+		return self.ship
 		
 	def getName(self):
 		return self.name

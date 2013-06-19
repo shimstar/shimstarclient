@@ -15,6 +15,7 @@ from shimstar.gui.system.menuchooseherorocket import *
 from shimstar.network.networkmainserver import *
 from shimstar.user.user import *
 from shimstar.world.zone.zone import *
+from shimstar.game.gameinspace import *
 
 base.win.setCloseRequestEvent("CLOSEF4")
 
@@ -45,19 +46,30 @@ class ShimStarClient(DirectObject):
 			else:
 				self.menu=menuchooseHeroRocket()				
 		elif state==C_CHANGEZONE:
-			#~ print "asking change zone"
 			idZone=User.getInstance().getCurrentCharacter().getIdZone()
-			
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
 			print str(idZone) + "/" + str(name) + str(typeZone)
 			if typeZone==C_TYPEZONE_SPACE:
-				#~ print "totoo"
 				msg=netMessage(C_NETWORK_INFO_ZONE)
 				msg.addInt(idZone)
 				NetworkMainServer.getInstance().sendMessage(msg)
 				GameState.getInstance().setState(C_WAITING_INFOZONE)
 		elif state==C_RECEIVED_INFOZONE:
-			print "PPPP"
+			msg=netMessage(C_NETWORK_CONNECT)
+			msg.addInt(User.getInstance().getId())
+			msg.addInt(User.getInstance().getCurrentCharacter().getId())
+			NetworkZoneServer.getInstance().sendMessage(msg)
+			
+			idZone=User.getInstance().getCurrentCharacter().getIdZone()
+			name,typeZone=Zone.getTinyInfosFromZone(idZone)
+			if typeZone==C_TYPEZONE_SPACE:
+				if isinstance(self.menu,GameInSpace)!=True:
+					self.menu.destroy()
+					self.menu=None
+					self.menu=GameInSpace()
+				else:
+					self.menu=GameInSpace()
+				self.menu.start()
 		elif state==C_QUIT:
 			sys.exit()
 		return Task.cont

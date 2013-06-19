@@ -13,7 +13,7 @@ class netMessage:
 	def myNewPyDatagram(self,id):
 		# send a test message
 		myPyDatagram=PyDatagram()
-		myPyDatagram.addUint8(id)
+		myPyDatagram.addUint32(id)
 		return myPyDatagram
 		
 	def addFloat(self,param):

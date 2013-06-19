@@ -3,7 +3,8 @@ import os, sys
 from direct.stdpy import threading
 
 from shimstar.core.shimconfig import *
-
+from shimstar.world.zone.asteroid import *
+from shimstar.world.zone.station import *
 
 C_TYPEZONE_SPACE=1
 C_TYPEZONE_STATION=2
@@ -23,14 +24,14 @@ class Zone(threading.Thread):
 		self.boxScale=0
 		self.file=""
 		self.id=id
-		zone.instance=self
+		Zone.instance=self
 		self.typeZone=0
 		self.box=None
 		self.loadXml()
 		
 	@staticmethod
 	def getInstance():
-		return zone.instance
+		return Zone.instance
 		
 	def run(self):
 		while not self.stopThread:
@@ -52,25 +53,25 @@ class Zone(threading.Thread):
 				self.egg=str(z.getElementsByTagName('egg')[0].firstChild.data)
 				self.scale=float(z.getElementsByTagName('scale')[0].firstChild.data)
 				self.music=str(z.getElementsByTagName('music')[0].firstChild.data)
-				if self.visible==True:
-					self.box = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +self.egg)
-					self.box.setScale(self.scale)
-					self.box.reparentTo(render)
-					self.box.setLightOff()
-					self.box.clearFog()
+				#~ if self.visible==True:
+				self.box = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +self.egg)
+				self.box.setScale(self.scale)
+				self.box.reparentTo(render)
+				self.box.setLightOff()
+				self.box.clearFog()
 				asts=z.getElementsByTagName('asteroid')
 				for a in asts:
-					self.listOfAsteroid.append(asteroid(a))
+					self.listOfAsteroid.append(Asteroid(a))
 					
 				stations=z.getElementsByTagName('station')
 				for s in stations:
-					stationLoaded=station(0,s,self.visible)
+					stationLoaded=Station(0,s)
 					self.listOfStation.append(stationLoaded)
 					
-				wormHole=z.getElementsByTagName('wormhole')
-				for w in wormHole:
-					wormHoleLoaded=wormhole(w)
-					self.listOfWormHole.append(wormHoleLoaded)
+				#~ wormHole=z.getElementsByTagName('wormhole')
+				#~ for w in wormHole:
+					#~ wormHoleLoaded=wormhole(w)
+					#~ self.listOfWormHole.append(wormHoleLoaded)
 					
 	def getMusic(self):
 		return self.music
@@ -112,3 +113,4 @@ class Zone(threading.Thread):
 			j.destroy()
 		self.box.detachNode()
 		self.box.removeNode()
+		
