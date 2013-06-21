@@ -31,8 +31,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		self.cWriter.setRawMode(0)
 		self.ip=ip
 		self.port=port
-		
-
+	
 	# how long until we give up trying to reach the server?
 		timeout_in_miliseconds=3000  # 3 seconds
 	
@@ -81,15 +80,16 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		
 	def sendMessage(self,msg):
 		#~ print "MESSAGE OUT UDP : ##############" + str(id )
-		print self.serverAddr.getPort()
-		print msg.getMsg()
+		#~ print self.serverAddr.getPort()
+		#~ print msg.getMsg()
 		self.cWriter.send(msg.getMsg(),self.myConnection,self.serverAddr)
 						
 	def myProcessDataFunction(self,netDatagram):
 		myIterator=PyDatagramIterator(netDatagram)
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
-		if msgID==C_UPDATE_POS_CHAR:
+		#~ print msgID
+		if msgID==C_NETWORK_CHARACTER_UPDATE_POS:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getUint32())
@@ -100,145 +100,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
 			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_POS_NPC:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_CHAR_COIN:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_CHAR_BUYITEM:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_CHAR_SELLITEM:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_CHAR_SHOT:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getString())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_NPC_INCOMING:
-			msgTab=[]
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_NEWPLAYER_INCOMING:
-			msgTab=[]
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_JUNK_REMOVE:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getString())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_ADD_JUNK:
-			msgTab=[]
-			msgTab.append(myIterator.getString())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_ADD_EXPLOSION:
-			msgTab=[]
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_CHAR_UPDATE_UPMISSION:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getString())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_CHAR_COLLECT:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_CHAR_TAKEDAMAGE:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_NPC_TAKEDAMAGE:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			#~ msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_PING:
-			msgTab=[]
-			msgTab.append(myIterator.getStdfloat())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		elif msgID==C_UPDATE_NPC_SHOT:
-			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getString())
-			temp=message(msgID,msgTab)
-			self.listOfMessage.append(temp)
-		else:
-			msg=myIterator.getString()		
-			msgtab=msg.split("@")
-			temp=message(msgID,msgtab[1])
 			self.listOfMessage.append(temp)
 		
 	def getListOfMessageById(self,id):

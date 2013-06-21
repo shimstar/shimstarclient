@@ -59,7 +59,7 @@ class ShimStarClient(DirectObject):
 			msg.addInt(User.getInstance().getId())
 			msg.addInt(User.getInstance().getCurrentCharacter().getId())
 			NetworkZoneServer.getInstance().sendMessage(msg)
-			
+			NetworkZoneUdp.getInstance().start()
 			idZone=User.getInstance().getCurrentCharacter().getIdZone()
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
 			if typeZone==C_TYPEZONE_SPACE:
