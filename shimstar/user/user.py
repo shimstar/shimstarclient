@@ -2,18 +2,22 @@ import xml.dom.minidom
 from shimstar.user.character.character import *
 
 class User:
+	listOfUser={}
 	instance=None
-	def __init__(self,xmlPart):
+	def __init__(self,xmlPart,currentPlayer=False):
 		self.listOfCharacter=[]
 		self.login=""
 		self.password=""
 		self.id=0
 		self.loadXmlPart(xmlPart)
-		User.instance=self
+		User.listOfUser[self.id]=self
+		if currentPlayer==True:
+			User.instance=self
 		
 	@staticmethod
 	def getInstance():
 		return User.instance
+		
 	
 	def getCharacters(self):
 		return self.listOfCharacter

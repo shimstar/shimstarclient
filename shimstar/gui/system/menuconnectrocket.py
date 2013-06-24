@@ -62,7 +62,7 @@ class menuconnectRocket(DirectObject):
 					fileHandle = open ("test.xml", 'w' ) 
 					fileHandle.write(netMsg[1])
 					fileHandle.close()
-					User(netMsg[1])
+					User(netMsg[1],True)
 					GameState.getInstance().setState(C_CHOOSE_HERO)
 					usr=self.doc.GetElementById('name').value
 					pwd=self.doc.GetElementById('pwd').value

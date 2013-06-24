@@ -35,6 +35,10 @@ class Character:
 			for s in sh:
 				self.ship=Ship(0,s)
 				
+	def run(self):
+		if self.ship!=None:
+			self.ship.move()
+				
 	def getShip(self):
 		return self.ship
 		

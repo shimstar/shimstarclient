@@ -37,10 +37,85 @@ class Ship:
 		self.currentTorqueY = 0
 		self.itemInInventory = []
 		self.lastDiffQuat=Quat(0,0,0,0)
+		self.oldQuat=Quat(0,0,0,0)
+		self.pointerToGo = loader.loadModelCopy(shimConfig.getInstance().getConvRessourceDirectory() +  "models/arrow")
+		self.pointerToGo.reparentTo(render)
+		self.pointerToGo.hide()
+		self.pointerToGoOld = loader.loadModelCopy(shimConfig.getInstance().getConvRessourceDirectory() + "models/arrow")
+		self.pointerToGoOld.reparentTo(render)
+		self.pointerToGoOld.hide()
+		self.oldPos=(0,0,0)
+		self.newPosition = False
+		self.firstMove=False
+		self.renderCounter = 0
 		self.slots=[]
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadXml(xmlPart)
+		
+	def setPosToGo(self, pos):
+		self.pointerToGoOld.setPos(Vec3(self.pointerToGo.getPos()))
+		self.pointerToGo.setPos(pos)
+		self.newPosition = True
+		self.renderCounter = 0
+		
+	def setHprToGo(self, hpr):
+		self.pointerToGoOld.setQuat(Quat(self.pointerToGo.getQuat()))
+		self.pointerToGo.setQuat(hpr)
+		
+	def move(self):
+		dt=globalClock.getRealTime()-self.lastMove
+		if dt>0.01:
+			if True:
+				if self.firstMove==True:
+					self.node.setPos(self.pointerToGo.getPos())
+					self.node.setQuat(self.pointerToGo.getQuat())
+					self.pointerToGoOld.setPos(self.pointerToGo.getPos())
+					self.pointerToGoOld.setQuat(self.pointerToGo.getQuat())
+					self.firstMove=False
+				else:
+					self.renderCounter += 1
+					lastPosServer = self.pointerToGo.getPos()
+					oldPosServer = self.pointerToGoOld.getPos()
+					targetPos = lastPosServer + (lastPosServer - oldPosServer) * self.renderCounter * 1 / C_SENDTICKS * dt
+					currentPos = self.node.getPos()
+					ratioPos = currentPos * 0.98 + targetPos * 0.02                               # ensure pseudo-continuous position
+					oldLinearVel = currentPos - self.oldPos
+					newLinearVel = oldLinearVel * 0.9 + (ratioPos - currentPos) * 0.1             # ensure pseudo-continuous linear velocity
+					
+					self.node.setPos(currentPos + newLinearVel)
+					self.oldPos = Vec3(currentPos)
+					
+					lastQuatServer = self.pointerToGo.getQuat()
+					oldQuatServer = self.pointerToGoOld.getQuat()
+					diffQuat=Quat(lastQuatServer - oldQuatServer) 
+
+					if diffQuat.getR()>0.6 or diffQuat.getR()<-0.6 or diffQuat.getI()>0.6 or diffQuat.getI()<-0.6 or diffQuat.getJ()>0.6 or diffQuat.getJ()<-0.6 or diffQuat.getK()>0.6 or diffQuat.getK()<-0.6:
+						lastQuatServer.setR(-lastQuatServer.getR())
+						lastQuatServer.setI(-lastQuatServer.getI())
+						lastQuatServer.setJ(-lastQuatServer.getJ())
+						lastQuatServer.setK(-lastQuatServer.getK())
+						
+						self.pointerToGo.setQuat(lastQuatServer)
+					
+					diffQuat=Quat(lastQuatServer - oldQuatServer) 
+					self.lastDiffQuat=diffQuat
+					#~ if self.id==31:
+						#~ print "diffQuat " + str(diffQuat) + " / " + str(lastQuatServer) + "/" + str(oldQuatServer) + "/" + str(self.id) + "/" + str(oldQuatServer.getK()) + "/" + str(round(oldQuatServer.getK(),5))
+					targetQuat = lastQuatServer + (lastQuatServer - oldQuatServer) * self.renderCounter * 1 / C_SENDTICKS * dt
+					targetQuat.normalize()
+					currentQuat = self.node.getQuat()
+					ratioQuat = currentQuat * 0.98 + targetQuat * 0.02                            # ensure pseudo-continuous rotation
+					oldAngularVel = currentQuat - self.oldQuat
+					
+					newAngularVel = oldAngularVel * 0.925 + (ratioQuat - currentQuat) * 0.025         # ensure pseudo-continuous angular velocity
+					
+					finalQuat = currentQuat + newAngularVel
+					finalQuat.normalize()
+					self.oldQuat = Quat(currentQuat)
+				
+					self.node.setQuat(finalQuat)
+			self.lastMove=globalClock.getRealTime()
 		
 	def loadXml(self,xmlPart):
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)

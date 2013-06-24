@@ -119,18 +119,21 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.ignoreKey(None)
 		
 	def run(self):
+		Zone.getInstance().start()
 		while not self.stopThread:
 			ship=User.getInstance().getCurrentCharacter().getShip()
 			forwardVec=Quat(ship.node.getQuat()).getForward()
 			base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
 			base.camera.setHpr(ship.node.getHpr())
-			
-			for key in self.historyKey.keys():
+			if len(self.historyKey)>0:
 				nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+				nm.addInt(User.getInstance().getId())
 				nm.addInt(len(self.historyKey))
-				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
-					nm.addString(key)
-					nm.addInt(self.historyKey[key])
+				for key in self.historyKey.keys():
+					if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+						nm.addString(key)
+						nm.addInt(self.historyKey[key])
 				NetworkZoneUdp.getInstance().sendMessage(nm)
 			
 			self.historyKey.clear()
+			User.getInstance().getCurrentCharacter().run()

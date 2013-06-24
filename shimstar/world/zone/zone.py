@@ -5,6 +5,7 @@ from direct.stdpy import threading
 from shimstar.core.shimconfig import *
 from shimstar.world.zone.asteroid import *
 from shimstar.world.zone.station import *
+from shimstar.user.user import *
 
 C_TYPEZONE_SPACE=1
 C_TYPEZONE_STATION=2
@@ -13,6 +14,7 @@ class Zone(threading.Thread):
 	instance=None
 	def __init__(self,id):
 		threading.Thread.__init__(self)
+		self.stopThread=False
 		self.listOfAsteroid=[]
 		self.listOfStation=[]
 		self.npc=[]
@@ -35,9 +37,21 @@ class Zone(threading.Thread):
 		
 	def run(self):
 		while not self.stopThread:
-			pass
+			self.runUpdatePosChar()
 			
 		print "le thread Zone " + str(self.id) + " s'est termine proprement"
+		
+	def runUpdatePosChar(self):
+		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_UPDATE_POS)
+		
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				usr=int(netMsg[0])
+				charact=int(netMsg[1])
+				User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
+				User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
+			NetworkZoneUdp.getInstance().removeMessage(msg)
 		
 	def stop(self):
 		self.stopThread=True
