@@ -16,6 +16,7 @@ DEG_TO_RAD = pi / 180
 
 class Ship:
 	def __init__(self,id,xmlPart):
+		print "ship init"
 		self.name = "ship" + str(id)
 		self.id=int(id)
 		self.mainShip = False
@@ -264,8 +265,11 @@ class Ship:
 	def getPos(self):
 		return self.node.getPos()
 		
-	def getHpr(self):
-		return self.node.getHpr()
+	def setPos(self,pos):
+		self.node.setPos(pos)
+		
+	def setQuat(self,quat):
+		self.node.setQuat(quat)
 		
 	def getManiability(self):
 		return self.maniability

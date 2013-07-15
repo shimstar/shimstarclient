@@ -4,6 +4,7 @@ from direct.showbase.DirectObject import DirectObject
 from shimstar.world.zone.zone import *
 from shimstar.user.user import *
 from shimstar.game.gamestate import *
+from shimstar.gui.game.follower import *
 
 class GameInSpace(DirectObject,threading.Thread):
 	instance=None
@@ -102,10 +103,12 @@ class GameInSpace(DirectObject,threading.Thread):
 		if value==0:
 			if self.keysDown.has_key(key)==True:
 				del self.keysDown[key]
-				self.historyKey[key]=0
+				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+					self.historyKey[key]=0
 		else:
 			if self.keysDown.has_key(key)==False:
-				self.historyKey[key]=1
+				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+					self.historyKey[key]=1
 			self.keysDown[key]=value
 	
 
@@ -117,6 +120,31 @@ class GameInSpace(DirectObject,threading.Thread):
 	def destroy(self):
 		GameInstance=None
 		self.ignoreKey(None)
+		
+	def calcDistance(self,targetNode):
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		posShip=ship.getNode().getPos()
+		posItem=targetNode.getPos()
+		dx=posShip.getX()-posItem.getX()
+		dy=posShip.getY()-posItem.getY()
+		dz=posShip.getZ()-posItem.getZ()
+		currentDistance=int(round(sqrt(dx*dx+dy*dy+dz*dz),0))
+		return currentDistance
+		
+	def seekNearestTarget(self,typeTarget):
+		if typeTarget=="NPC":
+			listOfObj=self.currentZone.getListOfNPC()
+		print listOfObj
+		distanceMax=10000000
+		newTarget=None
+		for n in listOfObj:
+			distance=self.calcDistance(n.getShip())
+			if distance<distanceMax:
+				distanceMax=distance
+				newTarget=n
+		if newTarget!=None:
+			Follower.getInstance().setTarget(newTarget.getShip().getNode())
+		print newTarget
 		
 	def run(self):
 		Zone.getInstance().start()
@@ -136,4 +164,15 @@ class GameInSpace(DirectObject,threading.Thread):
 				NetworkZoneUdp.getInstance().sendMessage(nm)
 			
 			self.historyKey.clear()
+			
+			
+			if self.keysDown.has_key('t'):
+				if (self.keysDown['t']!=0):
+					self.seekNearestTarget("NPC")
+					self.keysDown['t']=0
+						
 			User.getInstance().getCurrentCharacter().run()
+			listOfNpc=self.currentZone.getListOfNPC()
+			for n in listOfNpc:
+				n.run()
+			

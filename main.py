@@ -2,6 +2,8 @@ from pandac.PandaModules import loadPrcFileData
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
 #~ loadPrcFileData('','want-pstats 1')
+loadPrcFileData('', 'sync-video #t')
+
 import sys,os
 from array import array
 import direct.directbase.DirectStart
@@ -59,6 +61,7 @@ class ShimStarClient(DirectObject):
 			msg.addInt(User.getInstance().getId())
 			msg.addInt(User.getInstance().getCurrentCharacter().getId())
 			NetworkZoneServer.getInstance().sendMessage(msg)
+			NetworkZoneServer.getInstance().start()
 			NetworkZoneUdp.getInstance().start()
 			idZone=User.getInstance().getCurrentCharacter().getIdZone()
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)

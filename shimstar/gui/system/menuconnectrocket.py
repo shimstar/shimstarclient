@@ -53,7 +53,6 @@ class menuconnectRocket(DirectObject):
 			for msg in temp:
 				netMsg=msg.getMessage()
 				state=int(netMsg[0])
-				print state
 				diag=self.doc.GetElementById("error")
 				diag.SetAttribute("style","display:Block;")
 				### Connexion accepted

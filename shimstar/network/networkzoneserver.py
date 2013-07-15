@@ -9,6 +9,7 @@ from shimstar.network.message import *
 class NetworkZoneServer(threading.Thread):
 	instance=None
 	def __init__(self,ip,port):
+		print "NetworkZoneServer::__init__" + str(ip) + "/" + str(port)
 		threading.Thread.__init__(self)
 		NetworkZoneServer.instance=self
 		self.port=port
@@ -20,7 +21,7 @@ class NetworkZoneServer(threading.Thread):
 		self.cManager = QueuedConnectionManager()
 		self.cReader = QueuedConnectionReader(self.cManager, 0)
 		self.cWriter = ConnectionWriter(self.cManager,0)
-		
+		print self.cWriter
 		self.myConnection=self.cManager.openTCPClientConnection(self.ip,self.port,self.timeout_in_miliseconds)
 		if self.myConnection:
 			self.cReader.addConnection(self.myConnection)  # receive messages from server
@@ -53,8 +54,9 @@ class NetworkZoneServer(threading.Thread):
 	def myProcessDataFunction(self,netDatagram):
 		myIterator=PyDatagramIterator(netDatagram)
 		connexion=netDatagram.getConnection()
-		msgID=myIterator.getUint8()
+		msgID=myIterator.getUint32()
 		msgTab=[]
+		print msgID
 		if msgID==C_NETWORK_CONNECT:
 			state=myIterator.getUint32()
 			msgTab.append(state)
@@ -65,7 +67,18 @@ class NetworkZoneServer(threading.Thread):
 		elif msgID==C_NETWORK_INFO_ZONE:
 			ip=myIterator.getString()
 			port=myIterator.getUint32()
-			
+		elif msgID==C_NETWORK_NPC_INCOMING:
+			xml=myIterator.getString()
+			msgTab.append(xml)
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		
 	def getListOfMessageById(self,id):
 		msgToReturn=[]
