@@ -90,7 +90,7 @@ class Zone(threading.Thread):
 				npcId=int(netMsg[0])
 				for n in self.npc:
 						if npcId==n.getId():
-							print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
+							#~ print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
 							n.ship.setHprToGo((netMsg[1],netMsg[2],netMsg[3],netMsg[4]))
 							n.ship.setPosToGo((netMsg[5],netMsg[6],netMsg[7]))
 			NetworkZoneUdp.getInstance().removeMessage(msg)

@@ -34,6 +34,7 @@ class Character:
 		if sh!=None:
 			for s in sh:
 				self.ship=Ship(0,s)
+				self.ship.setOwner(self)
 				
 	def run(self):
 		if self.ship!=None:

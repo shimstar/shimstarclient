@@ -7,6 +7,7 @@ from shimstar.items.item import *
 
 class Weapon(ShimstarItem):
 	def __init__(self,templateId=None,xmlPart=None):
+		super(Weapon,self).__init__(id,xmlPart)	
 		self.range=0
 		self.damage=0
 		self.bullets=[]
@@ -21,7 +22,6 @@ class Weapon(ShimstarItem):
 		else:
 			self.template=WeaponTemplate.getTemplate(templateId)
 			self.name,self.egg,self.damage,self.range,self.cadence,self.speed,self.sell,self.energyCost,self.space,self.img,self.cost,self.bulletSound,self.skillsItem=self.template.getInfos()
-		weapon.nbWeapon+=1
 		
 	def loadXml(self,xmlPart):
 		self.id=int(xmlPart.getElementsByTagName('iditem')[0].firstChild.data)

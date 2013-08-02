@@ -26,6 +26,7 @@ class ShimStarClient(DirectObject):
 		GameState().setState(0)
 		NetworkMainServer.getInstance().start()
 		self.menu=None
+		base.disableMouse()
 		base.setFrameRateMeter(True)
 		taskMgr.add(self.dispatch,"dispatch Main",-40)  
 	

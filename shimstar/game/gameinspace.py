@@ -5,10 +5,13 @@ from shimstar.world.zone.zone import *
 from shimstar.user.user import *
 from shimstar.game.gamestate import *
 from shimstar.gui.game.follower import *
+from shimstar.gui.game.rocketshipinfo import *
+from shimstar.gui.game.rockettarget import *
 
 class GameInSpace(DirectObject,threading.Thread):
 	instance=None
 	def __init__(self):
+		print "GameInSpace::__init__"
 		threading.Thread.__init__(self)
 		self.Terminated = False
 		self.stopThread=False
@@ -16,10 +19,11 @@ class GameInSpace(DirectObject,threading.Thread):
 		GameInSpace.instance = None
 		self.keysDown={}
 		self.historyKey={}
-		self.mousebtn={}
+		self.mousebtn = [0,0,0]
 		self.enableKey(None)
 		base.camera.setPos(0,-600,50)
 		GameState.getInstance().setState(C_PLAYING)
+		self.ticksRenderUI=0
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -51,10 +55,13 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("n-up",self.keyDown,['n',0])
 		self.accept("escape",self.quitGame,)
 		self.accept("CLOSEF4",self.quitGame,)
+		self.accept("mouse1", self.setMouseBtn, [0, 1])
+		self.accept("mouse1-up", self.setMouseBtn, [0, 0])
 		self.accept("mouse2", self.setMouseBtn, [1, 1])
 		self.accept("mouse2-up", self.setMouseBtn, [1, 0])
 		self.accept("mouse3", self.setMouseBtn, [2, 1])
 		self.accept("mouse3-up", self.setMouseBtn, [2, 0])
+		self.setupRocketUI()
 		
 	def quitGame(self):
 		self.stopThread=True
@@ -89,15 +96,22 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.ignore("t-up")
 		self.ignore("escape")
 		self.ignore("enter")
-		self.accept("mouse2", self.setMouseBtn, [1, 1])
-		self.accept("mouse2-up", self.setMouseBtn, [1, 0])
-		self.accept("mouse3", self.setMouseBtn, [2, 1])
-		self.accept("mouse3-up", self.setMouseBtn, [2, 0])
+		self.ignore("mouse1")
+		self.ignore("mouse1-up")
+		self.ignore("mouse2")
+		self.ignore("mouse2-up")
+		self.ignore("mouse3")
+		self.ignore("mouse3-up")
 		self.ignore("CLOSEF4")
 		for key in self.keysDown.keys():
 				del self.keysDown[key]
 				self.historyKey[key]=0
 				
+	def setupRocketUI(self):
+		self.context = shimRocket.getInstance().getContext()
+		self.background = self.context.LoadDocument('windows/backgroundgame.rml')
+		self.background.Show()
+		rocketShipInfo.getInstance().showWindow()
 				
 	def keyDown(self,key,value):
 		if value==0:
@@ -134,7 +148,6 @@ class GameInSpace(DirectObject,threading.Thread):
 	def seekNearestTarget(self,typeTarget):
 		if typeTarget=="NPC":
 			listOfObj=self.currentZone.getListOfNPC()
-		print listOfObj
 		distanceMax=10000000
 		newTarget=None
 		for n in listOfObj:
@@ -144,7 +157,8 @@ class GameInSpace(DirectObject,threading.Thread):
 				newTarget=n
 		if newTarget!=None:
 			Follower.getInstance().setTarget(newTarget.getShip().getNode())
-		print newTarget
+			rocketTarget.getInstance().showWindow(newTarget.getShip())
+		
 		
 	def run(self):
 		Zone.getInstance().start()
@@ -153,6 +167,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			forwardVec=Quat(ship.node.getQuat()).getForward()
 			base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
 			base.camera.setHpr(ship.node.getHpr())
+			
 			if len(self.historyKey)>0:
 				nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
 				nm.addInt(User.getInstance().getId())
@@ -165,6 +180,8 @@ class GameInSpace(DirectObject,threading.Thread):
 			
 			self.historyKey.clear()
 			
+			if self.mousebtn[0]==1:
+				ship.shot()
 			
 			if self.keysDown.has_key('t'):
 				if (self.keysDown['t']!=0):
@@ -175,4 +192,9 @@ class GameInSpace(DirectObject,threading.Thread):
 			listOfNpc=self.currentZone.getListOfNPC()
 			for n in listOfNpc:
 				n.run()
+				
+			dt=globalClock.getRealTime()-self.ticksRenderUI
+			if dt>0.1:
+				rocketShipInfo.getInstance().render()
+				rocketTarget.getInstance().render()
 			

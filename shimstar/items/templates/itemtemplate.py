@@ -23,6 +23,8 @@ class ItemTemplate(object):
 			sk=int(xmlPart.getElementsByTagName('skillid')[0].firstChild.data)
 			lvl=int(xmlPart.getElementsByTagName('skilllevel')[0].firstChild.data)
 			self.skillItems[sk]=lvl
+		print "ItemTempalte::__init__" + str(self.templateId)
+		ItemTemplate.listOfTemplate[self.templateId]=self
 		
 	def getTypeItem(self):
 		return self.typeItem
@@ -56,6 +58,7 @@ class ItemTemplate(object):
 	
 	@staticmethod
 	def loadXml():
+		#~ print "ItemTemplate::loadXml()"
 		dom = xml.dom.minidom.parse(shimConfig.getInstance().getRessourceDirectory() +"config\\itemtemplates.xml")
 		it=dom.getElementsByTagName('item')
 		for i in it:
@@ -72,8 +75,11 @@ class ItemTemplate(object):
 	def getTemplate(idTemplate):
 		if len(ItemTemplate.listOfTemplate)==0:
 			ItemTemplate.loadXml()
+		
+		if ItemTemplate.listOfTemplate.has_key(idTemplate)==False:
+			ItemTemplate.loadXml()
 		if ItemTemplate.listOfTemplate.has_key(idTemplate)==True:
 			return ItemTemplate.listOfTemplate[idTemplate]
-			
+		
 		return None
 		

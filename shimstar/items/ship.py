@@ -26,6 +26,7 @@ class Ship:
 		self.maniability = 0
 		self.node = None
 		self.img = ""
+		self.owner=None
 		self.group = 0
 		self.mass = 0
 		self.engineSound=None
@@ -53,6 +54,12 @@ class Ship:
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadXml(xmlPart)
+		
+	def setOwner(self,owner):
+		self.owner=owner
+		
+	def getOwner(self):
+		return self.owner
 		
 	def setPosToGo(self, pos):
 		self.pointerToGoOld.setPos(Vec3(self.pointerToGo.getPos()))
@@ -297,6 +304,7 @@ class Ship:
 		self.node.setHpr(hpr)
 			
 	def shot(self):
+		print "ship::shot" + str(self.weapons)
 		if self.weapons!=None:
 			return self.weapons.shot( self.node.getPos(), self.node.getQuat())
 		return None

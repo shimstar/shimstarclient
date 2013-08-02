@@ -1,0 +1,74 @@
+<rml>
+	<head>
+		<title>herodelete</title>
+		<link type="text/template" href="window.rml" />
+		<style>
+			body
+			{
+				width: 32px;
+				height: 32px;
+				position: absolute;
+			/*top : 25px;
+				left : 300px;*/
+				margin: auto;
+			}
+
+			div#title_bar div#icon
+			{
+				icon-image-s: 230px 281px;
+				icon-image-t: 152px 191px;
+
+				display: none;
+			}
+
+			form div
+			{
+				width: 200px;
+				margin: auto;
+			}
+		</style>
+	<script>
+from shimstar.core.shimconfig import *
+from shimstar.user.user import *
+from shimstar.gui.game.rockettarget import *
+def config(doc):
+	b=doc.GetElementById('target')
+	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\target.png")
+	b=doc.GetElementById('pg')
+	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\pgb60.png")
+	b=doc.GetElementById('info')
+	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\orb_info.png")
+	b=doc.GetElementById('mine')
+	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\shovel.png")
+def shot():
+	ship=user.instance.getCurrentCharacter().ship
+	ship.shot()
+def doCollect():
+	rocketTarget.getInstance().collect()
+
+	</script>
+	</head>
+	<body onLoad="config(document);">
+			<div style="position:absolute; top:-20px; left:0px;height:10px;font-size:8px;text-align:center;" id="name">
+			</div>
+		<div style="position:absolute; top:-10px; left:0px;height:20px;">
+			<img src="" id="pg" height="5" width="65" style="display:None;"/>
+		</div>
+		<div style="position:absolute; top:0px; left:0px;">
+		<img src="" id="target"/>
+		</div>
+		<div style="position:absolute; top:5px; left:60px;">
+		<img src="" id="info"/>
+		</div>
+		<div style="position:absolute; top:25px; left:60px;" id="divgate">
+		<img src="" id="gate"/>
+		</div>
+		<div style="position:absolute; top:25px; left:60px;display:None;" id="divmine" onclick="doCollect();">
+		<img src="" id="mine"/>
+		</div>
+		<div style="position:absolute; top:60px; left:20px;height:10px;font-size:8px;text-align:center;" id="distance">
+			200m
+			</div>
+			
+	</body>
+</rml>

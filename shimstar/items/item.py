@@ -2,7 +2,7 @@ from shimstar.core.decorators import *
 import xml.dom.minidom
 from shimstar.items.templates.itemtemplate import *
 
-class ShimstarItem:
+class ShimstarItem(object):
 	def __init__(self,id=None,xmlPart=None):
 		self.container=0
 		self.owner=0

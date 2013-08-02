@@ -38,6 +38,7 @@ class NPC:
 			for s in sh:
 				self.ship=Ship(0,s)
 				self.ship.setVisible()
+				self.ship.setOwner(self)
 		
 	def setPos(self,pos):
 		self.ship.setPos(pos)
