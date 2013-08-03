@@ -24,6 +24,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		base.camera.setPos(0,-600,50)
 		GameState.getInstance().setState(C_PLAYING)
 		self.ticksRenderUI=0
+		self.updateInput=0
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -167,26 +168,38 @@ class GameInSpace(DirectObject,threading.Thread):
 			forwardVec=Quat(ship.node.getQuat()).getForward()
 			base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
 			base.camera.setHpr(ship.node.getHpr())
-			
-			if len(self.historyKey)>0:
-				nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-				nm.addInt(User.getInstance().getId())
-				nm.addInt(len(self.historyKey))
-				for key in self.historyKey.keys():
-					if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
-						nm.addString(key)
-						nm.addInt(self.historyKey[key])
-				NetworkZoneUdp.getInstance().sendMessage(nm)
-			
-			self.historyKey.clear()
-			
-			if self.mousebtn[0]==1:
-				ship.shot()
-			
-			if self.keysDown.has_key('t'):
-				if (self.keysDown['t']!=0):
-					self.seekNearestTarget("NPC")
-					self.keysDown['t']=0
+			if globalClock.getRealTime()-self.updateInput>0.1:
+				self.updateInput=globalClock.getRealTime()
+				if len(self.historyKey)>0:
+					nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+					nm.addInt(User.getInstance().getId())
+					nm.addInt(len(self.historyKey))
+					for key in self.historyKey.keys():
+						if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+							nm.addString(key)
+							nm.addInt(self.historyKey[key])
+					NetworkZoneUdp.getInstance().sendMessage(nm)
+				
+				self.historyKey.clear()
+				
+				if self.mousebtn[0]==1:
+					if ship.shot()==True:
+						nm=netMessage(C_NETWORK_CHAR_SHOT)
+						nm.addInt(ship.getOwner().getUserId())
+						nm.addInt(ship.getOwner().getId())
+						nm.addFloat(ship.getPos().getX())
+						nm.addFloat(ship.getPos().getY())
+						nm.addFloat(ship.getPos().getZ())
+						nm.addFloat(ship.getQuat().getR())
+						nm.addFloat(ship.getQuat().getI())
+						nm.addFloat(ship.getQuat().getJ())
+						nm.addFloat(ship.getQuat().getK())
+						NetworkZoneUdp.getInstance().sendMessage(nm)
+				
+				if self.keysDown.has_key('t'):
+					if (self.keysDown['t']!=0):
+						self.seekNearestTarget("NPC")
+						self.keysDown['t']=0
 						
 			User.getInstance().getCurrentCharacter().run()
 			listOfNpc=self.currentZone.getListOfNPC()

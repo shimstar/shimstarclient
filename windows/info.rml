@@ -29,14 +29,13 @@
 		</style>
 	<script>
 from shimstar.game.gamestate import *	
-from shimstar.constantes import *
+from shimstar.core.constantes import *
 from shimstar.world.zone.zone import *
 from shimstar.gui.game.rockettarget import *
 
 def onLoad(doc):
 	titleBar=doc.GetElementById("title")
 	titleBar.inner_rml="Info"
-	print "here"
 	doc.AddEventListener("click","stopPropa()")
 
 def stopPropa():

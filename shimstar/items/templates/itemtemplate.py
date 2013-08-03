@@ -23,8 +23,8 @@ class ItemTemplate(object):
 			sk=int(xmlPart.getElementsByTagName('skillid')[0].firstChild.data)
 			lvl=int(xmlPart.getElementsByTagName('skilllevel')[0].firstChild.data)
 			self.skillItems[sk]=lvl
-		print "ItemTempalte::__init__" + str(self.templateId)
 		ItemTemplate.listOfTemplate[self.templateId]=self
+		print "ItemTemplate::init " + str(self.templateId) + "/" + str(self.typeItem)
 		
 	def getTypeItem(self):
 		return self.typeItem

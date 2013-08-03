@@ -20,7 +20,7 @@ class Character:
 		self.lastStation=0
 		self.visible=False
 		self.loadXmlPart(xmlPart)
-		self.userRef=userRef
+		self.userRef=userRef #user obj
 		
 	def loadXmlPart(self,xmlPart):
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
@@ -35,6 +35,9 @@ class Character:
 			for s in sh:
 				self.ship=Ship(0,s)
 				self.ship.setOwner(self)
+				
+	def getUserId(self):
+		return self.userRef.getId()
 				
 	def run(self):
 		if self.ship!=None:

@@ -16,7 +16,7 @@ DEG_TO_RAD = pi / 180
 
 class Ship:
 	def __init__(self,id,xmlPart):
-		print "ship init"
+		#~ print "ship init"
 		self.name = "ship" + str(id)
 		self.id=int(id)
 		self.mainShip = False
@@ -26,7 +26,7 @@ class Ship:
 		self.maniability = 0
 		self.node = None
 		self.img = ""
-		self.owner=None
+		self.owner=None  # owner obj (npc or character)
 		self.group = 0
 		self.mass = 0
 		self.engineSound=None
@@ -70,6 +70,9 @@ class Ship:
 	def setHprToGo(self, hpr):
 		self.pointerToGoOld.setQuat(Quat(self.pointerToGo.getQuat()))
 		self.pointerToGo.setQuat(hpr)
+		
+	def getQuat(self):
+		return self.node.getQuat()
 		
 	def move(self):
 		dt=globalClock.getRealTime()-self.lastMove
@@ -141,9 +144,9 @@ class Ship:
 				it=tempSlot.getItem()
 				if it.getTypeItem()==C_ITEM_WEAPON:
 					self.weapons=it
+					it.setShip(self)
 				if it.getTypeItem()==C_ITEM_ENGINE:
 					self.engine=it
-					
 		inventory=xmlPart.getElementsByTagName('inventory')
 		for inv in inventory:
 			items=inv.getElementsByTagName('item')
@@ -299,12 +302,8 @@ class Ship:
 		
 	def getSpeedMax(self):
 		return self.engine.getSpeedMax()
-	
-	def setHpr(self, hpr):
-		self.node.setHpr(hpr)
 			
 	def shot(self):
-		print "ship::shot" + str(self.weapons)
 		if self.weapons!=None:
 			return self.weapons.shot( self.node.getPos(), self.node.getQuat())
 		return None

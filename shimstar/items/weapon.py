@@ -1,6 +1,5 @@
 import os, sys
 
-#~ from shimstar.items.bullet import *
 from shimstar.core.constantes import *
 from shimstar.items.templates.weapontemplate import *
 from shimstar.items.item import *
@@ -14,8 +13,11 @@ class Weapon(ShimstarItem):
 		self.cadence=0
 		self.lastShot=0
 		self.speed=0
+		self.ship=None
 		self.bulletSound=""
+		self.lastShot=0
 		self.idTemplate=templateId
+		self.typeItem=C_ITEM_WEAPON
 
 		if xmlPart!=None:
 			self.loadXml(xmlPart)
@@ -33,6 +35,12 @@ class Weapon(ShimstarItem):
 		if len(xmlPart.getElementsByTagName('location'))>0:
 			self.location=int(xmlPart.getElementsByTagName('location')[0].firstChild.data)
 			
+	def setShip(self,ship):
+		self.ship=ship
+		
+	def getShip(self):
+		return self.ship
+			
 	def getDamage(self):
 		return self.damage
 		
@@ -44,4 +52,10 @@ class Weapon(ShimstarItem):
 	
 	def getSpeed(self):
 		return self.speed
+		
+	def shot(self,pos,quat):
+		if globalClock.getRealTime()-self.lastShot>self.cadence:
+			self.lastShot=globalClock.getRealTime()
+			return True
+		return False
 		

@@ -23,7 +23,6 @@ class Slot:
 		itemXml=xmlPart.getElementsByTagName('item')
 		for itXml in itemXml:
 			typeItem=int(itXml.getElementsByTagName('typeitem')[0].firstChild.data)
-			print "Slot::loadXml"  + str(typeItem) + "/" + str(C_ITEM_WEAPON)
 			if typeItem==C_ITEM_ENGINE:
 				self.item=Engine(0,itXml)
 			elif typeItem==C_ITEM_WEAPON:

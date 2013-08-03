@@ -6,11 +6,12 @@ from shimstar.items.item import *
 
 class Engine(ShimstarItem):
 	def __init__(self,templateId=None,xmlPart=None):
+		super(Engine,self).__init__(templateId,xmlPart)	
 		self.typeItem=C_ITEM_ENGINE
 		self.speedMax=0
 		self.fileToSound=""
 		self.idTemplate=templateId
-		if xmlPart==None:
+		if xmlPart!=None:
 			self.loadXml(xmlPart)
 		else:
 			temp=EngineTemplate.getTemplate(self.idTemplate)

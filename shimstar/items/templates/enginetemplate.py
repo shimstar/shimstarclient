@@ -35,7 +35,10 @@ class EngineTemplate(ItemTemplate):
 		
 	@staticmethod
 	def getTemplate(idTemplate):
+		
 		if len(EngineTemplate.listOfTemplate)==0:
+			EngineTemplate.loadXml()
+		if EngineTemplate.listOfTemplate.has_key(idTemplate)==False:
 			EngineTemplate.loadXml()
 		if EngineTemplate.listOfTemplate.has_key(idTemplate)==True:
 			return EngineTemplate.listOfTemplate[idTemplate]

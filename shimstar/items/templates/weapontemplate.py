@@ -49,6 +49,8 @@ class WeaponTemplate(ItemTemplate):
 	def getTemplate(idTemplate):
 		if len(WeaponTemplate.listOfTemplate)==0:
 			WeaponTemplate.loadXml()
+		if WeaponTemplate.listOfTemplate.has_key(idTemplate)==False:
+			WeaponTemplate.loadXml()
 		if WeaponTemplate.listOfTemplate.has_key(idTemplate)==True:
 			return WeaponTemplate.listOfTemplate[idTemplate]
 			
