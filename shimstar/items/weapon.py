@@ -3,6 +3,7 @@ import os, sys
 from shimstar.core.constantes import *
 from shimstar.items.templates.weapontemplate import *
 from shimstar.items.item import *
+from shimstar.items.bullet import *
 
 class Weapon(ShimstarItem):
 	def __init__(self,templateId=None,xmlPart=None):
@@ -58,4 +59,7 @@ class Weapon(ShimstarItem):
 			self.lastShot=globalClock.getRealTime()
 			return True
 		return False
+		
+	def addBullet(self,bulId,pos,quat):
+		b=Bullet(bulId,pos,quat,self.egg,self.range,self.speed,self,self.bulletSound)
 		

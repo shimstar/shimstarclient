@@ -46,6 +46,9 @@ class Character:
 	def getShip(self):
 		return self.ship
 		
+	def addBullet(self,bulId,pos,quat):
+		self.ship.addBullet(bulId,pos,quat)
+		
 	def getName(self):
 		return self.name
 		

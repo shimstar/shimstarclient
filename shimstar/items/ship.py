@@ -303,6 +303,9 @@ class Ship:
 	def getSpeedMax(self):
 		return self.engine.getSpeedMax()
 			
+	def addBullet(self,bulId,pos,quat):
+		self.weapons.addBullet(bulId,pos,quat)
+			
 	def shot(self):
 		if self.weapons!=None:
 			return self.weapons.shot( self.node.getPos(), self.node.getQuat())
@@ -340,11 +343,4 @@ class Ship:
 	def getHullPoints(self):
 		return self.hullpoints
 		
-	def removeBullets(self):
-		self.weapons.removeShots()
-		
-	def addBullet(self, name, pos, hpr, time):
-		bul = bullet(time, pos, hpr, self.egg, self.lifeTime, self.speed, self, name)
-		self.bullets.append(bul)
-			
 		

@@ -50,6 +50,7 @@ class Zone(threading.Thread):
 			self.runUpdatePosChar()
 			self.runNewNpc()
 			self.runUpdatePosNPC()
+			self.runNewShot()
 			
 		print "le thread Zone " + str(self.id) + " s'est termine proprement"
 		
@@ -93,6 +94,22 @@ class Zone(threading.Thread):
 							#~ print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
 							n.ship.setHprToGo((netMsg[1],netMsg[2],netMsg[3],netMsg[4]))
 							n.ship.setPosToGo((netMsg[5],netMsg[6],netMsg[7]))
+			NetworkZoneUdp.getInstance().removeMessage(msg)
+			
+	def runNewShot(self):
+		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_NEW_SHOT)
+		
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				usrID=int(netMsg[0])
+				bulId=int(netMsg[1])
+				pos=(netMsg[2],netMsg[3],netMsg[4])
+				quat=(netMsg[5],netMsg[6],netMsg[7],netMsg[8])
+				user=User.getUserById(usrID)
+				Bullet.lock.acquire()
+				user.getCurrentCharacter().addBullet(bulId,pos,quat)
+				Bullet.lock.release()
 			NetworkZoneUdp.getInstance().removeMessage(msg)
 		
 	def stop(self):

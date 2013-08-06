@@ -88,7 +88,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		myIterator=PyDatagramIterator(netDatagram)
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
-		#~ print msgID
+		#~ print "zoneudp" + str(msgID)
 		if msgID==C_NETWORK_CHARACTER_UPDATE_POS:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
@@ -104,6 +104,19 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_UPDATE_POS:
 			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_NEW_SHOT:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())

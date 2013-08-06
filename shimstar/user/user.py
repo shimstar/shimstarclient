@@ -25,6 +25,13 @@ class User:
 	def getId(self):
 		return self.id
 		
+	@staticmethod
+	def getUserById(id):
+		for usr in User.listOfUser:
+			if User.listOfUser[usr].getId()==id:
+				return User.listOfUser[usr]
+		return None
+		
 	def chooseCharacter(self,id):
 		for ch in self.listOfCharacter:
 			if ch.getId()==id:

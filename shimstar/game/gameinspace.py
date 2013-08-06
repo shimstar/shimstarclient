@@ -205,7 +205,12 @@ class GameInSpace(DirectObject,threading.Thread):
 			listOfNpc=self.currentZone.getListOfNPC()
 			for n in listOfNpc:
 				n.run()
-				
+			
+			Bullet.lock.acquire()
+			for b in Bullet.listOfBullet:
+				Bullet.listOfBullet[b].move()
+			Bullet.lock.release()
+			
 			dt=globalClock.getRealTime()-self.ticksRenderUI
 			if dt>0.1:
 				rocketShipInfo.getInstance().render()
