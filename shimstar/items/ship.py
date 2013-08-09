@@ -23,7 +23,6 @@ class Ship:
 		self.weapons=None
 		self.engine = None
 		self.actualSpeed = 0
-		self.maniability = 0
 		self.node = None
 		self.img = ""
 		self.owner=None  # owner obj (npc or character)
@@ -131,7 +130,6 @@ class Ship:
 	def loadXml(self,xmlPart):
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
-		self.maniability=int(xmlPart.getElementsByTagName('maniability')[0].firstChild.data)
 		self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
 		self.maxhull=int(xmlPart.getElementsByTagName('maxhullpoints')[0].firstChild.data)
 		self.egg=str(xmlPart.getElementsByTagName('egg')[0].firstChild.data)
@@ -280,9 +278,6 @@ class Ship:
 		
 	def setQuat(self,quat):
 		self.node.setQuat(quat)
-		
-	def getManiability(self):
-		return self.maniability
 		
 	def getNode(self):
 		return self.node
