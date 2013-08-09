@@ -172,8 +172,8 @@ class rocketTarget():
 			if globalClock.getRealTime()-self.lastCalcDistance>0.1:
 				self.lastCalcDistance=globalClock.getRealTime()
 				if self.obj.getNode().isEmpty()==False and self.obj.getNode()!=None:
-				
 					#~ print self.obj.getNode().getPos()
+					self.distance=calcDistance(self.obj.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
 					distanceEle=self.info.GetElementById("distance")
 					distanceEle.inner_rml="distance : " + str(self.distance) + " m"
 					if isInView(self.obj.getNode())==True: 
@@ -185,9 +185,9 @@ class rocketTarget():
 						z=C_USER_HEIGHT-(z*C_USER_HEIGHT/2)-30
 						x+=C_RATIO
 						x=(x*C_USER_WIDTH/(C_RATIO*2))-30
-						if globalClock.getRealTime()-self.lastCalcDistance>0.3:					
-							distEle=self.window.GetElementById("distance")
-							distEle.inner_rml=str(self.distance)
+								
+						distEle=self.window.GetElementById("distance")
+						distEle.inner_rml=str(self.distance)
 						
 						self.window.SetAttribute("style","body{width:300px;height:250px;top:" + str(z) + "px;left:" + str(x) + "px;}")
 						if isinstance(self.obj,Ship)==True:

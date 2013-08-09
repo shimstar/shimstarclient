@@ -41,6 +41,13 @@ class Bullet(threading.Thread):
 	@staticmethod			
 	def getBullets():
 		return Bullet.listOfBullet
+		
+	@staticmethod			
+	def removeBullet(id):
+		print "bullet:removebullet"
+		if Bullet.listOfBullet.has_key(id)==True:
+			Bullet.listOfBullet[id].destroy()
+			del Bullet.listOfBullet[id]
 			
 	def initAudio(self):
 		audio3d = shimConfig.getInstance().getAudio3DManager()
@@ -77,7 +84,6 @@ class Bullet(threading.Thread):
 		#~ self.node.setLightOff()
 		self.node.detachNode()
 		self.node.removeNode()
-		menuState.instance.AddObjToRemoveCollide(self.objColl,self.name)
 		
 	def stateBullet(self):
 		"""
@@ -102,7 +108,8 @@ class Bullet(threading.Thread):
 		dt=globalClock.getRealTime()-self.lastMove
 		self.lastMove=globalClock.getRealTime()
 		if dt<1 and dt>-1:
-			self.node.setPos(self.node,Vec3(0,1*dt*self.speed,0))
+			if self.node!=None and self.node.isEmpty()!=True:
+				self.node.setPos(self.node,Vec3(0,1*dt*self.speed,0))
 		
 	def getName(self):
 		return self.name

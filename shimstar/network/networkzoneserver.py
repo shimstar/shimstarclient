@@ -56,7 +56,7 @@ class NetworkZoneServer(threading.Thread):
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
 		msgTab=[]
-		print msgID
+		#~ print msgID
 		if msgID==C_NETWORK_CONNECT:
 			state=myIterator.getUint32()
 			msgTab.append(state)
@@ -77,6 +77,37 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_NEW_SHOT:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_REMOVE_SHOT:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_EXPLOSION:
+			msgTab=[]
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_TAKE_DAMAGE_NPC:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		

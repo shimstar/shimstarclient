@@ -1,8 +1,6 @@
 from pandac.PandaModules import loadPrcFileData 
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
-#~ loadPrcFileData('','want-pstats 1')
-loadPrcFileData('', 'sync-video #t')
 
 import sys,os
 from array import array
@@ -18,6 +16,7 @@ from shimstar.network.networkmainserver import *
 from shimstar.user.user import *
 from shimstar.world.zone.zone import *
 from shimstar.game.gameinspace import *
+from shimstar.game.explosion import *
 
 base.win.setCloseRequestEvent("CLOSEF4")
 
@@ -28,7 +27,11 @@ class ShimStarClient(DirectObject):
 		self.menu=None
 		base.disableMouse()
 		base.setFrameRateMeter(True)
+		self.preLoad()
 		taskMgr.add(self.dispatch,"dispatch Main",-40)  
+		
+	def preLoad(self):
+		Explosion.preload()
 	
 	def dispatch(self,task):
 		state=GameState.getInstance().getState()

@@ -4,6 +4,7 @@ from direct.showbase.DirectObject import DirectObject
 from shimstar.world.zone.zone import *
 from shimstar.user.user import *
 from shimstar.game.gamestate import *
+from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
 from shimstar.gui.game.rocketshipinfo import *
 from shimstar.gui.game.rockettarget import *
@@ -19,12 +20,14 @@ class GameInSpace(DirectObject,threading.Thread):
 		GameInSpace.instance = None
 		self.keysDown={}
 		self.historyKey={}
+		self.expTask=[]
 		self.mousebtn = [0,0,0]
 		self.enableKey(None)
 		base.camera.setPos(0,-600,50)
 		GameState.getInstance().setState(C_PLAYING)
 		self.ticksRenderUI=0
 		self.updateInput=0
+		self.listOfExplosion=[]
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -159,14 +162,54 @@ class GameInSpace(DirectObject,threading.Thread):
 		if newTarget!=None:
 			Follower.getInstance().setTarget(newTarget.getShip().getNode())
 			rocketTarget.getInstance().showWindow(newTarget.getShip())
+
+	def runNewExplosion(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_EXPLOSION)
 		
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				pos=(netMsg[0],netMsg[1],netMsg[2])
+				self.listOfExplosion.append(Explosion(render,pos,20))
+				self.expTask.append(taskMgr.add(self.runUpdateExplosion, "explosionTask" + str(Explosion.nbExplo-1)))
+				inProgress=len(self.listOfExplosion)-1
+				self.expTask[inProgress].fps = 30                                 #set framerate
+				self.expTask[inProgress].obj = self.listOfExplosion[inProgress].getExpPlane()
+				self.expTask[inProgress].textures = self.listOfExplosion[inProgress].getexpTexs()
+				self.expTask[inProgress].timeFps = self.listOfExplosion[inProgress].getTimeFps()			
+			NetworkZoneServer.getInstance().removeMessage(msg)
+		
+	def runUpdateExplosion(self, task):		
+		if GameState.getInstance().getState()==C_PLAYING:
+			currentFrame = int(task.time * task.fps)
+			
+			task.obj.setTexture(task.textures[currentFrame % len(task.textures)], 1)
+		
+			if currentFrame>task.timeFps:
+				tempToDelete=None
+				for expl in self.listOfExplosion:
+					if expl.getName()==task.obj.getName():
+						tempToDelete=expl
+					
+				if tempToDelete!=None:
+					self.listOfExplosion.remove(tempToDelete)
+					tempToDelete.delete()
+					
+				self.expTask.remove(task)
+						
+				return Task.done
+			else:
+				return Task.cont          #Continue the task indefinitely
+		else:
+			return Task.done
 		
 	def run(self):
 		Zone.getInstance().start()
 		while not self.stopThread:
 			ship=User.getInstance().getCurrentCharacter().getShip()
 			forwardVec=Quat(ship.node.getQuat()).getForward()
-			base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
+			#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
+			base.camera.setPos( ship.node.getPos())
 			base.camera.setHpr(ship.node.getHpr())
 			if globalClock.getRealTime()-self.updateInput>0.1:
 				self.updateInput=globalClock.getRealTime()
@@ -200,7 +243,7 @@ class GameInSpace(DirectObject,threading.Thread):
 					if (self.keysDown['t']!=0):
 						self.seekNearestTarget("NPC")
 						self.keysDown['t']=0
-						
+			
 			User.getInstance().getCurrentCharacter().run()
 			listOfNpc=self.currentZone.getListOfNPC()
 			for n in listOfNpc:
@@ -210,6 +253,8 @@ class GameInSpace(DirectObject,threading.Thread):
 			for b in Bullet.listOfBullet:
 				Bullet.listOfBullet[b].move()
 			Bullet.lock.release()
+			
+			self.runNewExplosion()
 			
 			dt=globalClock.getRealTime()-self.ticksRenderUI
 			if dt>0.1:

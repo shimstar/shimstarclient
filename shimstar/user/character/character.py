@@ -35,6 +35,7 @@ class Character:
 			for s in sh:
 				self.ship=Ship(0,s)
 				self.ship.setOwner(self)
+				#~ self.ship.setVisible()
 				
 	def getUserId(self):
 		return self.userRef.getId()

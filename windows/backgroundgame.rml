@@ -22,7 +22,7 @@ def config(doc):
 	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\reticule.png")
 	
 def shot():
-	ship=user.instance.getCurrentCharacter().ship
+	ship=User.getInstance().getCurrentCharacter().ship
 	ship.shot()
 		</script>
 	</head>

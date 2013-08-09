@@ -41,7 +41,7 @@ def config(doc):
 	b=doc.GetElementById('mine')
 	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\shovel.png")
 def shot():
-	ship=user.instance.getCurrentCharacter().ship
+	ship=User.getInstance().getCurrentCharacter().ship
 	ship.shot()
 def doCollect():
 	rocketTarget.getInstance().collect()

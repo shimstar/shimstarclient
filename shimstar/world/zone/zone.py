@@ -48,11 +48,30 @@ class Zone(threading.Thread):
 	def run(self):
 		while not self.stopThread:
 			self.runUpdatePosChar()
-			self.runNewNpc()
-			self.runUpdatePosNPC()
+			self.runNpc()
+			#~ self.runUpdatePosNPC()
 			self.runNewShot()
+			self.runUpdateShot()
 			
 		print "le thread Zone " + str(self.id) + " s'est termine proprement"
+		
+	def runNpc(self):
+		self.runNewNpc()
+		self.runUpdatePosNPC()
+		self.runDamageNpc()
+		
+	def runDamageNpc(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_TAKE_DAMAGE_NPC)
+		
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				idNpc=int(netMsg[0])
+				damage=int(netMsg[1])
+				for n in self.npc:
+					if n.getId()==idNpc:
+						n.takeDamage(damage)
+			NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runNewNpc(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NPC_INCOMING)
@@ -97,7 +116,7 @@ class Zone(threading.Thread):
 			NetworkZoneUdp.getInstance().removeMessage(msg)
 			
 	def runNewShot(self):
-		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_NEW_SHOT)
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NEW_SHOT)
 		
 		if len(tempMsg)>0:
 			for msg in tempMsg:
@@ -110,7 +129,17 @@ class Zone(threading.Thread):
 				Bullet.lock.acquire()
 				user.getCurrentCharacter().addBullet(bulId,pos,quat)
 				Bullet.lock.release()
-			NetworkZoneUdp.getInstance().removeMessage(msg)
+			NetworkZoneServer.getInstance().removeMessage(msg)
+		
+	def runUpdateShot(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_SHOT)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				Bullet.lock.acquire()
+				Bullet.removeBullet(netMsg[0])
+				Bullet.lock.release()
+			NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def stop(self):
 		self.stopThread=True
