@@ -17,6 +17,7 @@ C_SERVER_DOWN_WAITING=15
 C_WAITING_INFOZONE=16
 C_RECEIVED_INFOZONE=17
 
+
 class GameState:
 	instance=None
 	def __init__(self):

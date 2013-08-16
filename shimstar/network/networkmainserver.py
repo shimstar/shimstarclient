@@ -68,6 +68,10 @@ class NetworkMainServer(threading.Thread):
 				msgTab.append(myIterator.getString())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_CREATE_USER:
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_INFO_ZONE:
 			ip=myIterator.getString()
 			port=myIterator.getUint32()

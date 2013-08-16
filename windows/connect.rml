@@ -31,6 +31,7 @@ from shimstar.gui.system.menuconnectrocket import *
 from shimstar.core.shimconfig import *
 from shimstar.network.networkmainserver import *
 from shimstar.network.netmessage import *
+from shimstar.game.gamestate import *
 
 def onClose(doc):
 	pass
@@ -71,8 +72,9 @@ def Connect(document):
 		NetworkMainServer.getInstance().sendMessage(msg)
 		
 def createNewAccount(document):
-	document.context.LoadDocument('windows/newaccount.rml').Show()
+	#~ document.context.LoadDocument('windows/newaccount.rml').Show()
 	document.Hide()
+	GameState().setState(C_MENUCREATEACCOUNT)
 	</script>
 	
 	</head>

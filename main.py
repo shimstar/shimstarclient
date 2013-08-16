@@ -11,6 +11,7 @@ from direct.task.Task import Task
 
 from shimstar.game.gamestate import *
 from shimstar.gui.system.menuconnectrocket import *
+from shimstar.gui.system.menucreateaccountrocket import *
 from shimstar.gui.system.menuchooseherorocket import *
 from shimstar.network.networkmainserver import *
 from shimstar.user.user import *
@@ -35,7 +36,7 @@ class ShimStarClient(DirectObject):
 	
 	def dispatch(self,task):
 		state=GameState.getInstance().getState()
-		if state==0:
+		if state==C_INIT:
 			if self.menu!=None:
 				if isinstance(self.menu,menuconnectRocket)!=True:
 					self.menu.destroy()
@@ -43,6 +44,14 @@ class ShimStarClient(DirectObject):
 					self.menu=menuconnectRocket().getInstance()
 			else:
 				self.menu=menuconnectRocket().getInstance()
+		elif state==C_MENUCREATEACCOUNT:
+			if isinstance(self.menu,MenuCreateAccountRocket)!=True:
+				self.menu.destroy()
+				self.menu=None
+				self.menu=MenuCreateAccountRocket().getInstance()
+			else:
+				self.menu=MenuCreateAccountRocket().getInstance()
+			GameState().setState(C_MENUCREATINGACCOUNT)
 		elif state==C_CHOOSE_HERO:
 			if self.menu!=None:
 				if isinstance(self.menu,menuchooseHeroRocket)!=True:
