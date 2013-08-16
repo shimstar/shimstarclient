@@ -207,9 +207,10 @@ class GameInSpace(DirectObject,threading.Thread):
 		Zone.getInstance().start()
 		while not self.stopThread:
 			ship=User.getInstance().getCurrentCharacter().getShip()
+			#~ print "gameinspace::run" + str(ship.getPos()) + " / " + str(ship.getQuat())
 			forwardVec=Quat(ship.node.getQuat()).getForward()
-			#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
-			base.camera.setPos( ship.node.getPos())
+			base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
+			#~ base.camera.setPos( ship.node.getPos())
 			base.camera.setHpr(ship.node.getHpr())
 			if globalClock.getRealTime()-self.updateInput>0.1:
 				self.updateInput=globalClock.getRealTime()
@@ -250,8 +251,8 @@ class GameInSpace(DirectObject,threading.Thread):
 				n.run()
 			
 			Bullet.lock.acquire()
-			for b in Bullet.listOfBullet:
-				Bullet.listOfBullet[b].move()
+			#~ for b in Bullet.listOfBullet:
+				#~ Bullet.listOfBullet[b].move()
 			Bullet.lock.release()
 			
 			self.runNewExplosion()

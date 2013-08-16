@@ -44,7 +44,6 @@ class Bullet(threading.Thread):
 		
 	@staticmethod			
 	def removeBullet(id):
-		print "bullet:removebullet"
 		if Bullet.listOfBullet.has_key(id)==True:
 			Bullet.listOfBullet[id].destroy()
 			del Bullet.listOfBullet[id]

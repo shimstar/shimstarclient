@@ -16,7 +16,7 @@ DEG_TO_RAD = pi / 180
 
 class Ship:
 	def __init__(self,id,xmlPart):
-		#~ print "ship init"
+		
 		self.name = "ship" + str(id)
 		self.id=int(id)
 		self.mainShip = False
@@ -53,6 +53,7 @@ class Ship:
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadXml(xmlPart)
+		print "ship init" + str(self.id)
 		
 	def setOwner(self,owner):
 		self.owner=owner
@@ -89,7 +90,7 @@ class Ship:
 					oldPosServer = self.pointerToGoOld.getPos()
 					targetPos = lastPosServer + (lastPosServer - oldPosServer) * self.renderCounter * 1 / C_SENDTICKS * dt
 					currentPos = self.node.getPos()
-					ratioPos = currentPos * 0.98 + targetPos * 0.02                               # ensure pseudo-continuous position
+					ratioPos = currentPos * 0.95 + targetPos * 0.05                               # ensure pseudo-continuous position
 					oldLinearVel = currentPos - self.oldPos
 					newLinearVel = oldLinearVel * 0.9 + (ratioPos - currentPos) * 0.1             # ensure pseudo-continuous linear velocity
 					
@@ -110,12 +111,17 @@ class Ship:
 					
 					diffQuat=Quat(lastQuatServer - oldQuatServer) 
 					self.lastDiffQuat=diffQuat
-					#~ if self.id==31:
-						#~ print "diffQuat " + str(diffQuat) + " / " + str(lastQuatServer) + "/" + str(oldQuatServer) + "/" + str(self.id) + "/" + str(oldQuatServer.getK()) + "/" + str(round(oldQuatServer.getK(),5))
+					#~ if self.id==417:
+						#~ print "########################"
+						#~ print "ship::move " + str(self.node.getPos() ) + " / " + str(self.pointerToGo.getPos())
+						#~ print "ship::move " + str(self.node.getQuat() ) + " / " + str(self.pointerToGo.getQuat())
+						#~ print "##############################"
+						#~ print "ship::move diffQuat " + str(diffQuat) + " / " + str(lastQuatServer) + "/" + str(oldQuatServer) + "/" + str(self.id) + "/" + str(oldQuatServer.getK()) + "/" + str(round(oldQuatServer.getK(),5))
+						
 					targetQuat = lastQuatServer + (lastQuatServer - oldQuatServer) * self.renderCounter * 1 / C_SENDTICKS * dt
 					targetQuat.normalize()
 					currentQuat = self.node.getQuat()
-					ratioQuat = currentQuat * 0.98 + targetQuat * 0.02                            # ensure pseudo-continuous rotation
+					ratioQuat = currentQuat * 0.9 + targetQuat * 0.1                            # ensure pseudo-continuous rotation
 					oldAngularVel = currentQuat - self.oldQuat
 					
 					newAngularVel = oldAngularVel * 0.925 + (ratioQuat - currentQuat) * 0.025         # ensure pseudo-continuous angular velocity
@@ -125,6 +131,12 @@ class Ship:
 					self.oldQuat = Quat(currentQuat)
 				
 					self.node.setQuat(finalQuat)
+					#~ if self.id==417:
+						
+						#~ print "ship::move " + self.node.getQuat()
+			
+						
+				#~ self.node.setPos(self.pointerToGo.getPos())
 			self.lastMove=globalClock.getRealTime()
 		
 	def loadXml(self,xmlPart):

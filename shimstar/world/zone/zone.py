@@ -59,6 +59,22 @@ class Zone(threading.Thread):
 		self.runNewNpc()
 		self.runUpdatePosNPC()
 		self.runDamageNpc()
+		self.runRemoveNpc()
+		
+	def runRemoveNpc(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_NPC)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				idNpc=int(netMsg[0])
+				npcToRemove=None
+				for n in self.npc:
+					if n.getId()==idNpc:
+						n.destroy()
+						npcToRemove=n
+				if npcToRemove!=None:
+					self.npc.remove(npcToRemove)
+				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runDamageNpc(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_TAKE_DAMAGE_NPC)
@@ -71,7 +87,7 @@ class Zone(threading.Thread):
 				for n in self.npc:
 					if n.getId()==idNpc:
 						n.takeDamage(damage)
-			NetworkZoneServer.getInstance().removeMessage(msg)
+				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runNewNpc(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NPC_INCOMING)
@@ -99,7 +115,7 @@ class Zone(threading.Thread):
 				charact=int(netMsg[1])
 				User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
 				User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
-			NetworkZoneUdp.getInstance().removeMessage(msg)
+				NetworkZoneUdp.getInstance().removeMessage(msg)
 			
 	def runUpdatePosNPC(self):
 		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_NPC_UPDATE_POS)
@@ -113,7 +129,7 @@ class Zone(threading.Thread):
 							#~ print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
 							n.ship.setHprToGo((netMsg[1],netMsg[2],netMsg[3],netMsg[4]))
 							n.ship.setPosToGo((netMsg[5],netMsg[6],netMsg[7]))
-			NetworkZoneUdp.getInstance().removeMessage(msg)
+				NetworkZoneUdp.getInstance().removeMessage(msg)
 			
 	def runNewShot(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NEW_SHOT)
@@ -129,7 +145,7 @@ class Zone(threading.Thread):
 				Bullet.lock.acquire()
 				user.getCurrentCharacter().addBullet(bulId,pos,quat)
 				Bullet.lock.release()
-			NetworkZoneServer.getInstance().removeMessage(msg)
+				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runUpdateShot(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_SHOT)
@@ -139,7 +155,19 @@ class Zone(threading.Thread):
 				Bullet.lock.acquire()
 				Bullet.removeBullet(netMsg[0])
 				Bullet.lock.release()
-			NetworkZoneServer.getInstance().removeMessage(msg)
+				NetworkZoneServer.getInstance().removeMessage(msg)
+				
+		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_POS_SHOT)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				Bullet.lock.acquire()
+				bulId=int(netMsg[0])
+				b=Bullet.getBullet(bulId)
+				if b!=None:
+					b.setPos((float(netMsg[1]),float(netMsg[2]),float(netMsg[3])))
+				Bullet.lock.release()
+				NetworkZoneUdp.getInstance().removeMessage(msg)
 		
 	def stop(self):
 		self.stopThread=True
