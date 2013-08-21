@@ -34,7 +34,6 @@ class menuchooseHeroRocket(DirectObject):
 	def populateCharacters(self):
 		listOfChar=User.getInstance().getCharacters()
 		content=self.doc.GetElementById("contentHero")
-		
 		listOfActualImg=content.GetElementsByTagName("div")
 		for img in listOfActualImg:
 			content.RemoveChild(img)
@@ -56,16 +55,18 @@ class menuchooseHeroRocket(DirectObject):
 	def event(self,arg):
 		temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_ADD_CHAR)
 		if(len(temp)>0):
-				msg=temp[0]
-				user.instance.addCharacterFromXml(msg.getMessage())
-				self.populateCharacters()
-				NetworkMainServer.getInstance().removeMessage(msg)
+			msg=temp[0]
+			tabMsg=msg.getMessage()
+			userXml=tabMsg[0]
+			User.getInstance().addCharacterFromXml(userXml)
+			self.populateCharacters()
+			NetworkMainServer.getInstance().removeMessage(msg)
 		temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_DELETE_CHAR)
 		if(len(temp)>0):
-				msg=temp[0]
-				user.instance.deleteCharacter(int(msg.getMessage()))
-				NetworkMainServer.getInstance().removeMessage(msg)
-				self.populateCharacters()
+			msg=temp[0]
+			user.instance.deleteCharacter(int(msg.getMessage()))
+			NetworkMainServer.getInstance().removeMessage(msg)
+			self.populateCharacters()
 		return Task.cont
 
 	def destroy(self):

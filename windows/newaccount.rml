@@ -32,8 +32,8 @@ from shimstar.network.networkmainserver import *
 from shimstar.network.netmessage import *
 
 def onClose(doc):
-	menuconnectRocket.getInstance().getWindow().Show()
-	doc.Hide()
+	MenuCreateAccountRocket.getInstance().destroy()
+	GameState.getInstance().setState(0)
 	
 def onLoad(doc):
 	titleElement=document.GetElementById('title')	

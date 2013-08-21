@@ -15,7 +15,7 @@ class NetworkMainServer(threading.Thread):
 		threading.Thread.__init__(self)
 		self.port=7777
 		self.ip="127.0.0.1"
-		#~ self.ip="10.84.82.33"
+		#~ self.ip="10.85.80.74"
 		self.stopThread=False
 		self.timeout_in_miliseconds=3000  # 3 seconds
 		self.listOfMessage=[] 
@@ -83,6 +83,10 @@ class NetworkMainServer(threading.Thread):
 				NetworkZoneUdp.getInstance().stop()
 			NetworkZoneUdp(ip,portudp)
 			GameState.getInstance().setState(C_RECEIVED_INFOZONE)
+		elif msgID==C_USER_ADD_CHAR:
+			msgTab.append(myIterator.getString())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		
 	def getListOfMessageById(self,id):
 		msgToReturn=[]

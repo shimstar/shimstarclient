@@ -7,6 +7,7 @@ from shimstar.world.zone.asteroid import *
 from shimstar.world.zone.station import *
 from shimstar.user.user import *
 from shimstar.npc.npc import *
+from shimstar.core.constantes import *
 
 C_TYPEZONE_SPACE=1
 C_TYPEZONE_STATION=2
@@ -56,6 +57,7 @@ class Zone(threading.Thread):
 		print "le thread Zone " + str(self.id) + " s'est termine proprement"
 		
 	def runNpc(self):
+		self.runNewIncoming()
 		self.runNewNpc()
 		self.runUpdatePosNPC()
 		self.runDamageNpc()
@@ -74,6 +76,23 @@ class Zone(threading.Thread):
 						npcToRemove=n
 				if npcToRemove!=None:
 					self.npc.remove(npcToRemove)
+				NetworkZoneServer.getInstance().removeMessage(msg)
+				
+	def runNewIncoming(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHAR_INCOMING)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				tabMsg=msg.getMessage()
+				userXml=tabMsg[0]
+				xmlPart = xml.dom.minidom.parseString(userXml)
+				usrId=int(xmlPart.getElementsByTagName('iduser')[0].firstChild.data)
+				charId=tabMsg[1]
+				if User.listOfUser.has_key(usrId)==False:
+					tempUsr=User(userXml,False)
+					tempUsr.chooseCharacter(charId)
+					tempUsr.getCurrentCharacter().setPos((tabMsg[2],tabMsg[3],tabMsg[4]))
+					tempUsr.getCurrentCharacter().setQuat((tabMsg[5],tabMsg[6],tabMsg[7],tabMsg[8]))
+					self.listOfUsers[usrId]=tempUsr
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runDamageNpc(self):

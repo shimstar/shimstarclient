@@ -51,6 +51,11 @@ class User:
 			if ch.getId()==id:
 				return ch
 		return None
+		
+	def addCharacterFromXml(self,xmlPart):
+		document = xml.dom.minidom.parseString(xmlPart)
+		temp=Character(document,self)
+		self.listOfCharacter.append(temp)
 	
 	def loadXmlPart(self,xmlPart):
 		document = xml.dom.minidom.parseString(xmlPart)

@@ -33,8 +33,10 @@ from shimstar.user.user import *
 from shimstar.core.constantes import *
 from shimstar.core.shimconfig import *
 
-def close(doc):
+
+def cancel(doc):
 	doc.Hide()
+	
 	
 def changeImg(doc,sens):
 	img=doc.GetElementById('facechar')
@@ -75,7 +77,7 @@ def newHero(doc):
 	msg=netMessage(C_USER_ADD_CHAR)
 	msg.addInt(User.getInstance().getId())
 	msg.addString(name)
-	msg.addString(face)
+	msg.addString(faceImg)
 	NetworkMainServer.getInstance().sendMessage(msg)
 	doc.GetElementById('name').value=""
 	doc.Hide()
@@ -107,7 +109,7 @@ def onLoad(doc):
 		<button class="topress" style="width:250px;height:30px;" onclick="newHero(document)">Creer</button>
 		</div>
 		<div style="position:absolute; top:470px; left:0px;">
-		<button class="topress" style="width:250px;height:30px;" onclick="close(document)">Annuler</button>
+		<button class="topress" style="width:250px;height:30px;" onclick="cancel(document)">Annuler</button>
 		</div>
 	</body>
 </rml>

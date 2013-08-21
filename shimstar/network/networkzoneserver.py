@@ -115,6 +115,18 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_CHAR_INCOMING:
+			msgTab=[]
+			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		
 	def getListOfMessageById(self,id):
 		msgToReturn=[]

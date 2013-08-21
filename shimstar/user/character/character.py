@@ -37,6 +37,12 @@ class Character:
 				self.ship.setOwner(self)
 				#~ self.ship.setVisible()
 				
+	def setPos(self,pos):
+		self.ship.setPos(pos)
+		
+	def setQuat(self,quat):
+		self.ship.setQuat(quat)
+				
 	def getUserId(self):
 		return self.userRef.getId()
 				
