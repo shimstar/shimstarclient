@@ -23,6 +23,7 @@ class rocketTarget():
 		self.obj=None
 		self.miningItemFitted=None
 		self.lastCalcDistance=0
+		self.lastRender=0
 		self.distance=0
 
 		
@@ -169,50 +170,53 @@ class rocketTarget():
 		
 	def render(self):
 		if self.obj!=None:
-			if globalClock.getRealTime()-self.lastCalcDistance>0.1:
-				self.lastCalcDistance=globalClock.getRealTime()
+			
 				if self.obj.getNode().isEmpty()==False and self.obj.getNode()!=None:
 					#~ print self.obj.getNode().getPos()
-					self.distance=calcDistance(self.obj.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
+					if globalClock.getRealTime()-self.lastCalcDistance>0.1:
+						self.lastCalcDistance=globalClock.getRealTime()
+						self.distance=calcDistance(self.obj.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
 					distanceEle=self.info.GetElementById("distance")
 					distanceEle.inner_rml="distance : " + str(self.distance) + " m"
 					if isInView(self.obj.getNode())==True: 
-						self.window.Show()
-						pos=self.map3dToAspect2d(render,self.obj.getNode().getPos(render))
-						x=pos.getX()
-						z=pos.getZ()
-						z+=1
-						z=C_USER_HEIGHT-(z*C_USER_HEIGHT/2)-30
-						x+=C_RATIO
-						x=(x*C_USER_WIDTH/(C_RATIO*2))-30
-								
-						distEle=self.window.GetElementById("distance")
-						distEle.inner_rml=str(self.distance)
-						
-						self.window.SetAttribute("style","body{width:300px;height:250px;top:" + str(z) + "px;left:" + str(x) + "px;}")
-						if isinstance(self.obj,Ship)==True:
-							w=User.getInstance().getCurrentCharacter().getShip().getWeapon()
-							b=self.window.GetElementById('target')
-							if w!=None:
-								if w.getRange()>=self.distance:
-									b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\targetred.png")
+						if globalClock.getRealTime()-self.lastRender>0.03:
+							self.lastRender=globalClock.getRealTime()
+							self.window.Show()
+							pos=self.map3dToAspect2d(render,self.obj.getNode().getPos(render))
+							x=pos.getX()
+							z=pos.getZ()
+							z+=1
+							z=C_USER_HEIGHT-(z*C_USER_HEIGHT/2)-30
+							x+=C_RATIO
+							x=(x*C_USER_WIDTH/(C_RATIO*2))-30
+									
+							distEle=self.window.GetElementById("distance")
+							distEle.inner_rml=str(self.distance)
+							
+							self.window.SetAttribute("style","body{width:300px;height:250px;top:" + str(z) + "px;left:" + str(x) + "px;}")
+							if isinstance(self.obj,Ship)==True:
+								w=User.getInstance().getCurrentCharacter().getShip().getWeapon()
+								b=self.window.GetElementById('target')
+								if w!=None:
+									if w.getRange()>=self.distance:
+										b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\targetred.png")
+									else:
+										b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\target.png")
 								else:
 									b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\target.png")
+								hp=self.obj.getHullPoints()
+								hpmax=self.obj.getMaxHullPoints()
+								
+								prcent=int(100*round(float(hp)/float(hpmax),1))
+								img=self.window.GetElementById("pg")
+								img.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "\\images\\gui\\pgb" + str(prcent) + ".png")
+								
+								nameEle=self.window.GetElementById("name")
+								nameEle.inner_rml=str(self.obj.getOwner().getName())
+								
 							else:
-								b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\gui\\target.png")
-							hp=self.obj.getHullPoints()
-							hpmax=self.obj.getMaxHullPoints()
-							
-							prcent=int(100*round(float(hp)/float(hpmax),1))
-							img=self.window.GetElementById("pg")
-							img.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "\\images\\gui\\pgb" + str(prcent) + ".png")
-							
-							nameEle=self.window.GetElementById("name")
-							nameEle.inner_rml=str(self.obj.getOwner().getName())
-							
-						else:
-							nameEle=self.window.GetElementById("name")
-							nameEle.inner_rml=str(self.obj.getName())
+								nameEle=self.window.GetElementById("name")
+								nameEle.inner_rml=str(self.obj.getName())
 						
 						
 						if isinstance(self.obj,Asteroid):
