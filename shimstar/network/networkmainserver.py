@@ -15,6 +15,7 @@ class NetworkMainServer(threading.Thread):
 		threading.Thread.__init__(self)
 		self.port=7777
 		self.ip="127.0.0.1"
+		#~ self.ip="62.147.217.96"
 		#~ self.ip="10.85.80.74"
 		self.stopThread=False
 		self.timeout_in_miliseconds=3000  # 3 seconds
@@ -78,6 +79,7 @@ class NetworkMainServer(threading.Thread):
 			portudp=myIterator.getUint32()
 			if NetworkZoneServer.getInstance()!=None:
 				NetworkZoneServer.getInstance().stop()
+			print "############# " + str(ip) + '/' + str(port)
 			NetworkZoneServer(ip,port)
 			if NetworkZoneUdp.getInstance()!=None:
 				NetworkZoneUdp.getInstance().stop()

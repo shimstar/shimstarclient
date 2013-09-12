@@ -22,7 +22,6 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		self.updateChar={}
 		self.lastRun=globalClock.getRealTime()
 		NetworkZoneUdp.instance=self
-
 		self.port_address=port# same for client and server
 		self.cManager = QueuedConnectionManager()
 		self.cReader = QueuedConnectionReader(self.cManager, 0)
@@ -79,9 +78,6 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		return myPyDatagram
 		
 	def sendMessage(self,msg):
-		#~ print "MESSAGE OUT UDP : ##############" + str(id )
-		#~ print self.serverAddr.getPort()
-		#~ print msg.getMsg()
 		self.cWriter.send(msg.getMsg(),self.myConnection,self.serverAddr)
 						
 	def myProcessDataFunction(self,netDatagram):

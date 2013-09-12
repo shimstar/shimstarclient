@@ -1,10 +1,13 @@
 import xml.dom.minidom
 from shimstar.user.character.character import *
+from direct.stdpy import threading
 
-class User:
+class User(threading.Thread):
 	listOfUser={}
 	instance=None
+	lock=threading.Lock()
 	def __init__(self,xmlPart,currentPlayer=False):
+		threading.Thread.__init__(self)
 		self.listOfCharacter=[]
 		self.login=""
 		self.password=""
@@ -33,7 +36,9 @@ class User:
 		return None
 		
 	def chooseCharacter(self,id):
+		print "usr::choosecharacter " + str(id)
 		for ch in self.listOfCharacter:
+			print "usr::choosecharacter ch = " + str(ch.getId())
 			if ch.getId()==id:
 				ch.setCurrent(True)
 			else:

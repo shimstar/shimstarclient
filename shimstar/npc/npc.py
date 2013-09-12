@@ -1,14 +1,26 @@
 from shimstar.core.decorators import *
 from shimstar.items.ship import *
+from direct.stdpy import threading
 
-class NPC:
+class NPC(threading.Thread):
+	lock=threading.Lock()
+	listOfNpc=[]
 	def __init__(self,xmlPart):
+		threading.Thread.__init__(self)
 		self.id=id
 		self.idZone=0
 		self.name=""
 		self.faction=0
 		self.loadFromXml(xmlPart)
+		NPC.listOfNpc.append(self)
 		print "NPC::__init__"  + str(self.id)
+	
+	@staticmethod
+	def getNPCById(id):
+		for n in NPC.listOfNpc:
+			if n.getId()==id:
+				return n
+		return None
 		
 	def getName(self):
 		return self.name
@@ -16,7 +28,11 @@ class NPC:
 	def getId(self):
 		return self.id
 		
+	def addBullet(self,bulId,pos,quat):
+		self.ship.addBullet(bulId,pos,quat)
+		
 	def destroy(self):
+		NPC.listOfNpc.delete(self)
 		self.ship.destroy()
 		
 	def getShip(self):

@@ -25,7 +25,7 @@ class Character:
 	def loadXmlPart(self,xmlPart):
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		self.face=str(xmlPart.getElementsByTagName('face')[0].firstChild.data)
-		self.coin=int(xmlPart.getElementsByTagName('coin')[0].firstChild.data)
+		#~ self.coin=int(xmlPart.getElementsByTagName('coin')[0].firstChild.data)
 		self.idZone=int(xmlPart.getElementsByTagName('zone')[0].firstChild.data)
 		self.lastStation=int(xmlPart.getElementsByTagName('laststation')[0].firstChild.data)
 		self.id=int(xmlPart.getElementsByTagName('idchar')[0].firstChild.data)

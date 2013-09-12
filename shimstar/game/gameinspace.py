@@ -245,14 +245,21 @@ class GameInSpace(DirectObject,threading.Thread):
 						self.seekNearestTarget("NPC")
 						self.keysDown['t']=0
 			
-			User.getInstance().getCurrentCharacter().run()
+			#~ User.getInstance().getCurrentCharacter().run()
+			User.lock.acquire()
+			for usr in User.listOfUser:
+				User.listOfUser[usr].getCurrentCharacter().run()
+			User.lock.release()
+			
+			NPC.lock.acquire()
 			listOfNpc=self.currentZone.getListOfNPC()
 			for n in listOfNpc:
 				n.run()
+			NPC.lock.release()
 			
 			Bullet.lock.acquire()
-			#~ for b in Bullet.listOfBullet:
-				#~ Bullet.listOfBullet[b].move()
+			for b in Bullet.listOfBullet:
+				Bullet.listOfBullet[b].move()
 			Bullet.lock.release()
 			
 			self.runNewExplosion()

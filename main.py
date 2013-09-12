@@ -28,6 +28,7 @@ class ShimStarClient(DirectObject):
 		self.menu=None
 		base.disableMouse()
 		base.setFrameRateMeter(True)
+		render.setAntialias(AntialiasAttrib.MAuto)
 		self.preLoad()
 		taskMgr.add(self.dispatch,"dispatch Main",-40)  
 		
