@@ -15,6 +15,7 @@ class NetworkMainServer(threading.Thread):
 		threading.Thread.__init__(self)
 		self.port=7777
 		self.ip="127.0.0.1"
+		#~ self.ip="82.66.133.219"
 		#~ self.ip="62.147.217.96"
 		#~ self.ip="10.85.80.74"
 		self.stopThread=False
@@ -62,11 +63,21 @@ class NetworkMainServer(threading.Thread):
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
 		msgTab=[]
+		print msgID
 		if msgID==C_NETWORK_CONNECT:
 			state=myIterator.getUint32()
 			msgTab.append(state)
 			if state==0:
+				#~ msgTab.append(myIterator.getString())
+				msgTab.append(myIterator.getUint32())
 				msgTab.append(myIterator.getString())
+				nbChar=myIterator.getUint32()
+				msgTab.append(nbChar)
+				for i in range (nbChar):
+					msgTab.append(myIterator.getUint32())
+					msgTab.append(myIterator.getString())
+					msgTab.append(myIterator.getString())
+					msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_CREATE_USER:
@@ -79,7 +90,7 @@ class NetworkMainServer(threading.Thread):
 			portudp=myIterator.getUint32()
 			if NetworkZoneServer.getInstance()!=None:
 				NetworkZoneServer.getInstance().stop()
-			print "############# " + str(ip) + '/' + str(port)
+			#~ print "############# " + str(ip) + '/' + str(port)
 			NetworkZoneServer(ip,port)
 			if NetworkZoneUdp.getInstance()!=None:
 				NetworkZoneUdp.getInstance().stop()

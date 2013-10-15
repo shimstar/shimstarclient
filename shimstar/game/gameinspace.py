@@ -204,7 +204,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			return Task.done
 		
 	def run(self):
-		Zone.getInstance().start()
+		#~ Zone.getInstance().start()
 		while not self.stopThread:
 			ship=User.getInstance().getCurrentCharacter().getShip()
 			#~ print "gameinspace::run" + str(ship.getPos()) + " / " + str(ship.getQuat())

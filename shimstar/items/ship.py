@@ -11,14 +11,17 @@ from shimstar.items.item import *
 from shimstar.items.itemfactory import *
 from shimstar.user.user import *
 from shimstar.core.shimconfig import *
+from shimstar.items.templates.shiptemplate import *
 
 DEG_TO_RAD = pi / 180
 
 class Ship:
-	def __init__(self,id,xmlPart):
-		
-		self.name = "ship" + str(id)
-		self.id=int(id)
+	#~ def __init__(self,id,xmlPart):
+	def __init__(self,id,idTemplate):
+		self.name = ""
+		self.id=id
+		self.template=idTemplate
+		self.shipTemplate=None
 		self.mainShip = False
 		self.weapons=None
 		self.engine = None
@@ -52,7 +55,7 @@ class Ship:
 		self.slots=[]
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
-		self.loadXml(xmlPart)
+		self.loadTemplate()
 		print "ship init" + str(self.id)
 		
 	def setOwner(self,owner):
@@ -139,17 +142,10 @@ class Ship:
 				#~ self.node.setPos(self.pointerToGo.getPos())
 			self.lastMove=globalClock.getRealTime()
 		
-	def loadXml(self,xmlPart):
-		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
-		self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
-		self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
-		self.maxhull=int(xmlPart.getElementsByTagName('maxhullpoints')[0].firstChild.data)
-		self.egg=str(xmlPart.getElementsByTagName('egg')[0].firstChild.data)
-		self.img=str(xmlPart.getElementsByTagName('img')[0].firstChild.data)
-		slotss=xmlPart.getElementsByTagName('slot')
-		for s in slotss:
-			tempSlot=Slot(s)
-			self.slots.append(tempSlot)
+	def loadTemplate(self):
+		self.shipTemplate=ShipTemplate.getTemplate(self.template)
+		self.name,self.maxhull,self.egg,self.img,self.slots=self.shipTemplate.getInfos()
+		for tempSlot in self.slots:
 			if tempSlot.getItem()!=None:
 				it=tempSlot.getItem()
 				if it.getTypeItem()==C_ITEM_WEAPON:
@@ -157,14 +153,31 @@ class Ship:
 					it.setShip(self)
 				if it.getTypeItem()==C_ITEM_ENGINE:
 					self.engine=it
-		inventory=xmlPart.getElementsByTagName('inventory')
-		for inv in inventory:
-			items=inv.getElementsByTagName('item')
-			for itXml in items:
-				typeItem=int(itXml.getElementsByTagName('typeitem')[0].firstChild.data)
-				idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
-				item=itemFactory.getItemFromXml(itXml,typeItem)
-				self.itemInInventory.append(item)
+		#~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
+		#~ self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
+		#~ self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
+		#~ self.maxhull=int(xmlPart.getElementsByTagName('maxhullpoints')[0].firstChild.data)
+		#~ self.egg=str(xmlPart.getElementsByTagName('egg')[0].firstChild.data)
+		#~ self.img=str(xmlPart.getElementsByTagName('img')[0].firstChild.data)
+		#~ slotss=xmlPart.getElementsByTagName('slot')
+		#~ for s in slotss:
+			#~ tempSlot=Slot(s)
+			#~ self.slots.append(tempSlot)
+			#~ if tempSlot.getItem()!=None:
+				#~ it=tempSlot.getItem()
+				#~ if it.getTypeItem()==C_ITEM_WEAPON:
+					#~ self.weapons=it
+					#~ it.setShip(self)
+				#~ if it.getTypeItem()==C_ITEM_ENGINE:
+					#~ self.engine=it
+		#~ inventory=xmlPart.getElementsByTagName('inventory')
+		#~ for inv in inventory:
+			#~ items=inv.getElementsByTagName('item')
+			#~ for itXml in items:
+				#~ typeItem=int(itXml.getElementsByTagName('typeitem')[0].firstChild.data)
+				#~ idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
+				#~ item=itemFactory.getItemFromXml(itXml,typeItem)
+				#~ self.itemInInventory.append(item)
 		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
 					
 		

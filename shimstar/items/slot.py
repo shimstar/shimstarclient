@@ -20,17 +20,18 @@ class Slot:
 		for t in tabTypes:
 			self.types.append(int(t))
 		self.numero=	int(xmlPart.getElementsByTagName('numero')[0].firstChild.data)
-		itemXml=xmlPart.getElementsByTagName('item')
+		itemXml=xmlPart.getElementsByTagName('slotitem')
 		for itXml in itemXml:
 			typeItem=int(itXml.getElementsByTagName('typeitem')[0].firstChild.data)
+			itTemplate=int(itXml.getElementsByTagName('template')[0].firstChild.data)
 			if typeItem==C_ITEM_ENGINE:
-				self.item=Engine(0,itXml)
+				self.item=Engine(itTemplate)
 			elif typeItem==C_ITEM_WEAPON:
-					self.item=Weapon(0,itXml)
+					self.item=Weapon(itTemplate)
 			#~ elif typeItem==C_ITEM_MINING:
 				#~ self.item=mining(0,itXml)
-			else:
-				self.item=ShimstarItem(0,itXml)
+			#~ else:
+				#~ self.item=ShimstarItem(itTemplate)
 			
 	def getTypes(self):
 		return self.types

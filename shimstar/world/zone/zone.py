@@ -118,15 +118,16 @@ class Zone(threading.Thread):
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
-				npcPart=netMsg[0]
-				xmlPart = xml.dom.minidom.parseString(npcPart)
-				id=int(xmlPart.getElementsByTagName('idnpc')[0].firstChild.data)
+				#~ npcPart=netMsg[0]
+				#~ xmlPart = xml.dom.minidom.parseString(npcPart)
+				#~ id=int(xmlPart.getElementsByTagName('idnpc')[0].firstChild.data)
+				id=netMsg[0]
 				existingNpc=self.getNpcById(id)
 				NPC.lock.acquire()
 				if existingNpc==None:
-					temp=NPC(npcPart)
-					temp.setPos((float(netMsg[1]),float(netMsg[2]),float(netMsg[3])))
-					temp.setQuat((float(netMsg[4]),float(netMsg[5]),float(netMsg[6]),float(netMsg[7])))
+					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3])
+					#~ temp.setPos((float(netMsg[1]),float(netMsg[2]),float(netMsg[3])))
+					#~ temp.setQuat((float(netMsg[4]),float(netMsg[5]),float(netMsg[6]),float(netMsg[7])))
 					self.npc.append(temp)
 				NPC.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
@@ -141,15 +142,17 @@ class Zone(threading.Thread):
 				charact=int(netMsg[1])
 				#~ print "zone::runUpdatePosChar " + str(usr) + "/" + str(User.getInstance().getId())
 				if usr==User.getInstance().getId():
-					User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
-					User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
+					if  User.getInstance().getCurrentCharacter().getShip()!=None:
+						User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
+						User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
 				else:
 					tempUser=User.getUserById(usr)
 					if tempUser!=None:
 						ch=tempUser.getCharacterById(charact)
 						if ch!=None:
-							ch.getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
-							ch.getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
+							if  ch.getShip()!=None:
+								ch.getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
+								ch.getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
 				NetworkZoneUdp.getInstance().removeMessage(msg)
 			
 	def runUpdatePosNPC(self):
@@ -192,9 +195,10 @@ class Zone(threading.Thread):
 				pos=(netMsg[2],netMsg[3],netMsg[4])
 				quat=(netMsg[5],netMsg[6],netMsg[7],netMsg[8])
 				n=NPC.getNPCById(npcId)
-				Bullet.lock.acquire()
-				n.addBullet(bulId,pos,quat)
-				Bullet.lock.release()
+				if n!=None:
+					Bullet.lock.acquire()
+					n.addBullet(bulId,pos,quat)
+					Bullet.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runUpdateShot(self):

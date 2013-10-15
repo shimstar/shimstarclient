@@ -1,13 +1,17 @@
 from shimstar.core.decorators import *
 import xml.dom.minidom
 from shimstar.items.templates.itemtemplate import *
+from shimstar.items.templates.weapontemplate import *
+from shimstar.items.templates.enginetemplate import *
+from shimstar.core.constantes import *
 
 class ShimstarItem(object):
-	def __init__(self,id=None,xmlPart=None):
+	def __init__(self,id=None,typeItem=0,xmlPart=None):
 		self.container=0
 		self.owner=0
-		self.typeItem=0
+		self.typeItem=typeItem
 		self.name=""
+		self.template=None
 		self.idTemplate=0
 		self.energy=0
 		self.owner=0
@@ -24,8 +28,20 @@ class ShimstarItem(object):
 		if xmlPart!=None:
 			self.loadXml(xmlPart)
 		else:
-			self.template=ItemTemplate.getTemplate(id)
-			self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
+			print "///// " + str(self.template)
+			if self.typeItem!=C_ITEM_WEAPON and self.typeItem!=C_ITEM_ENGINE:
+			#~ if isinstance(self,Weapon)==False and isinstance(self,Engine)==False:
+			#~ if True:
+				self.template=ItemTemplate.getTemplate(id,self.typeItem)
+				print "/////@@@ " + str(self.template)
+				print self
+				self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
+			#~ print t
+			#~ if isinstance(self.template,WeaponTemplate) or isinstance(self.template,EngineTemplate):
+				#~ self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
+			#~ else:
+				#~ self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
+				
 		
 	def loadXml(self,xmlPart):
 		self.id=int(xmlPart.getElementsByTagName('iditem')[0].firstChild.data)

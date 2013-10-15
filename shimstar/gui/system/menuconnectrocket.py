@@ -51,6 +51,7 @@ class menuconnectRocket(DirectObject):
 		#~ print temp
 		if(len(temp)>0):
 			for msg in temp:
+				print msg
 				netMsg=msg.getMessage()
 				state=int(netMsg[0])
 				diag=self.doc.GetElementById("error")
@@ -58,10 +59,15 @@ class menuconnectRocket(DirectObject):
 				### Connexion accepted
 				if state==0:
 					diag.inner_rml="<span style='color:#00ff00;'>Connexion OK.</span>"
-					fileHandle = open ("test.xml", 'w' ) 
-					fileHandle.write(netMsg[1])
-					fileHandle.close()
-					User(netMsg[1],True)
+					#~ fileHandle = open ("test.xml", 'w' ) 
+					#~ fileHandle.write(netMsg[1])
+					#~ fileHandle.close()
+					#~ User(netMsg[1],True)
+					User(netMsg[1],netMsg[2],True)
+					for i in range (netMsg[3]):
+						User.getInstance().addCharacter(netMsg[4+(4*i)],netMsg[5+(4*i)],netMsg[6+(4*i)],netMsg[7+(4*i)]);
+					
+					
 					GameState.getInstance().setState(C_CHOOSE_HERO)
 					usr=self.doc.GetElementById('name').value
 					pwd=self.doc.GetElementById('pwd').value
@@ -71,6 +77,8 @@ class menuconnectRocket(DirectObject):
 					return Task.done
 				### Connexion refused
 				else:
+					connect=self.doc.GetElementById('connect')
+					connect.disabled=0
 					if state==1:
 						diag.inner_rml="<span style='color:#ff0000;'>Ce compte n'existe pas</span>"
 					elif state==2:

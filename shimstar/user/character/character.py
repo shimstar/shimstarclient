@@ -9,17 +9,18 @@ from shimstar.items.ship import *
 
 
 class Character:
-	def __init__(self,xmlPart,userRef):
-		self.id=0
-		self.name=0
-		self.face=""
+	#~ def __init__(self,xmlPart,userRef):
+	def __init__(self,id,name,egg,idZone,userRef):
+		self.id=id
+		self.name=name
+		self.face=egg
 		self.coin=0
 		self.current=False
 		self.ship=None
-		self.idZone=0
+		self.idZone=idZone
 		self.lastStation=0
 		self.visible=False
-		self.loadXmlPart(xmlPart)
+		#~ self.loadXmlPart(xmlPart)
 		self.userRef=userRef #user obj
 		
 	def loadXmlPart(self,xmlPart):
@@ -36,6 +37,10 @@ class Character:
 				self.ship=Ship(0,s)
 				self.ship.setOwner(self)
 				#~ self.ship.setVisible()
+				
+	def setShip(self,idTemplate):
+		self.ship=Ship(0,idTemplate)
+		self.ship.setOwner(self)
 				
 	def setPos(self,pos):
 		self.ship.setPos(pos)
@@ -82,7 +87,8 @@ class Character:
 		msg.addInt(self.id)
 		msg.addInt(self.idZone)
 		NetworkMainServer.getInstance().sendMessage(msg)
-		self.ship.changeZone()
+		if self.ship!=None:
+			self.ship.changeZone()
 		GameState.getInstance().setState(C_CHANGEZONE)
 		return 
 

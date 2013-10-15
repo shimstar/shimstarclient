@@ -8,6 +8,8 @@ class ItemTemplate(object):
 	
 	def __init__(self,xmlPart):
 		self.skillItems={}
+		print "Item::Template __init__"
+		print xmlPart.toxml()
 		self.templateId=int(xmlPart.getElementsByTagName('templateid')[0].firstChild.data)
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		self.cost=int(xmlPart.getElementsByTagName('cost')[0].firstChild.data)
@@ -17,19 +19,19 @@ class ItemTemplate(object):
 		self.img=str(xmlPart.getElementsByTagName('img')[0].firstChild.data)
 		self.typeItem=int(xmlPart.getElementsByTagName('typeitem')[0].firstChild.data)
 		self.location=int(xmlPart.getElementsByTagName('location')[0].firstChild.data)
-		ItemTemplate.listOfTemplate[self.templateId]=self
 		skillItems=xmlPart.getElementsByTagName('skillitem')
 		for s in skillItems:
 			sk=int(xmlPart.getElementsByTagName('skillid')[0].firstChild.data)
 			lvl=int(xmlPart.getElementsByTagName('skilllevel')[0].firstChild.data)
 			self.skillItems[sk]=lvl
-		ItemTemplate.listOfTemplate[self.templateId]=self
+		ItemTemplate.listOfTemplate[str(self.typeItem) + "-" + str(self.templateId)]=self
 		print "ItemTemplate::init " + str(self.templateId) + "/" + str(self.typeItem)
 		
 	def getTypeItem(self):
 		return self.typeItem
 		
 	def getInfos(self):
+		print "ItemTemplate::getInfos"
 		return self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem
 		
 	def getName(self):
@@ -62,8 +64,9 @@ class ItemTemplate(object):
 		dom = xml.dom.minidom.parse(shimConfig.getInstance().getRessourceDirectory() +"config\\itemtemplates.xml")
 		it=dom.getElementsByTagName('item')
 		for i in it:
-			typeitem=int(i.getElementsByTagName('typeitem')[0].firstChild.data)
-			ItemTemplate(i)
+			typeItem=int(i.getElementsByTagName('typeitem')[0].firstChild.data)
+			if typeItem!=7:
+				ItemTemplate(i)
 		
 	@staticmethod
 	def getListOfTemplate():
@@ -72,14 +75,15 @@ class ItemTemplate(object):
 		return itemTemplate.listOfTemplate
 		
 	@staticmethod
-	def getTemplate(idTemplate):
+	def getTemplate(idTemplate,typeItem):
+		#~ print "Item::gettemplate "  + str(idTempalte) + "/" + str(typeItem)
 		if len(ItemTemplate.listOfTemplate)==0:
 			ItemTemplate.loadXml()
 		
-		if ItemTemplate.listOfTemplate.has_key(idTemplate)==False:
+		if ItemTemplate.listOfTemplate.has_key(str(typeItem) + "-" + str(idTemplate))==False:
 			ItemTemplate.loadXml()
-		if ItemTemplate.listOfTemplate.has_key(idTemplate)==True:
-			return ItemTemplate.listOfTemplate[idTemplate]
+		if ItemTemplate.listOfTemplate.has_key(str(typeItem) + "-" + str(idTemplate))==True:
+			return ItemTemplate.listOfTemplate[str(typeItem) + "-" + str(idTemplate)]
 		
 		return None
 		

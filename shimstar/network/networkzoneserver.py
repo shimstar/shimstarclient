@@ -1,3 +1,4 @@
+import os,sys
 from pandac.PandaModules import * 
 from direct.distributed.PyDatagram import PyDatagram 
 from direct.distributed.PyDatagramIterator import PyDatagramIterator 
@@ -5,6 +6,7 @@ from direct.stdpy import threading
 
 from shimstar.core.constantes import *
 from shimstar.network.message import *
+from shimstar.game.gamestate import *
 
 class NetworkZoneServer(threading.Thread):
 	instance=None
@@ -21,12 +23,11 @@ class NetworkZoneServer(threading.Thread):
 		self.cManager = QueuedConnectionManager()
 		self.cReader = QueuedConnectionReader(self.cManager, 0)
 		self.cWriter = ConnectionWriter(self.cManager,0)
-		print self.cWriter
 		self.myConnection=self.cManager.openTCPClientConnection(self.ip,self.port,self.timeout_in_miliseconds)
 		if self.myConnection:
 			self.cReader.addConnection(self.myConnection)  # receive messages from server
 			self.myConnection.setNoDelay(True)
-		
+		print "NetWorkZoneServer::init connection " + str(self.myConnection)
 		
 	@staticmethod
 	def getInstance():
@@ -41,11 +42,13 @@ class NetworkZoneServer(threading.Thread):
 	def run(self):
 		while not self.stopThread:
 			#~ print "pwet"
-			while self.cReader.dataAvailable():
-				datagram=NetDatagram()  # catch the incoming data in this instance
-				if self.cReader.getData(datagram):
-					self.myProcessDataFunction(datagram)
-					
+			try:
+				while self.cReader.dataAvailable():
+					datagram=NetDatagram()  # catch the incoming data in this instance
+					if self.cReader.getData(datagram):
+						self.myProcessDataFunction(datagram)
+			except:
+				print "pb thread networkzoneServer" + str(sys.exc_info()[0])
 		print "le thread NetworkMainServer s'est termine proprement"
 		
 	def stop(self):
@@ -68,15 +71,10 @@ class NetworkZoneServer(threading.Thread):
 			ip=myIterator.getString()
 			port=myIterator.getUint32()
 		elif msgID==C_NETWORK_NPC_INCOMING:
-			xml=myIterator.getString()
-			msgTab.append(xml)
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())		
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NEW_CHAR_SHOT:
@@ -105,6 +103,11 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_CURRENT_CHAR_INFO:
+			msgTab.append(myIterator.getUint32())		
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+			
 		elif msgID==C_NETWORK_REMOVE_SHOT:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
@@ -117,6 +120,11 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+			
+		elif msgID==C_NETWORK_NPC_SENT:
+			GameState.getInstance().setState(C_NETWORK_NPC_SENT)
+		elif msgID==C_NETWORK_CHAR_SENT:
+			GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
 		elif msgID==C_NETWORK_TAKE_DAMAGE_NPC:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
@@ -141,7 +149,8 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
-		
+		elif msgID==C_NETWORK_REMOVE_NPC:
+			GameState.getInstance().setState(C_WAITING_ASKING_INFO_NPC)
 	def getListOfMessageById(self,id):
 		msgToReturn=[]
 		for msg in self.listOfMessage:

@@ -7,7 +7,11 @@ from shimstar.items.bullet import *
 
 class Weapon(ShimstarItem):
 	def __init__(self,templateId=None,xmlPart=None):
-		super(Weapon,self).__init__(id,xmlPart)	
+		#~ print "Weapon::init " + str(xmlPart.toxml())
+		print "##########" + str(templateId)
+		self.typeItem=C_ITEM_WEAPON
+		super(Weapon,self).__init__(templateId,C_ITEM_WEAPON,xmlPart)	
+		
 		self.range=0
 		self.damage=0
 		self.bullets=[]
@@ -18,7 +22,7 @@ class Weapon(ShimstarItem):
 		self.bulletSound=""
 		self.lastShot=0
 		self.idTemplate=templateId
-		self.typeItem=C_ITEM_WEAPON
+		
 
 		if xmlPart!=None:
 			self.loadXml(xmlPart)

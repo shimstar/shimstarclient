@@ -16,6 +16,7 @@ class EngineTemplate(ItemTemplate):
 		
 		
 	def getInfos(self):
+		print "EngineTemplate::getInfo"
 		return self.name,self.speedMax,self.acceleration,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.sound,self.skillItems
 	
 	@staticmethod

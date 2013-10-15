@@ -6,13 +6,15 @@ class User(threading.Thread):
 	listOfUser={}
 	instance=None
 	lock=threading.Lock()
-	def __init__(self,xmlPart,currentPlayer=False):
+	#~ def __init__(self,xmlPart,currentPlayer=False):
+	def __init__(self,id,name,currentPlayer=False):
 		threading.Thread.__init__(self)
 		self.listOfCharacter=[]
-		self.login=""
+		self.login=name
 		self.password=""
-		self.id=0
-		self.loadXmlPart(xmlPart)
+		self.id=id
+		#~ self.name=name
+		#~ self.loadXmlPart(xmlPart)
 		User.listOfUser[self.id]=self
 		if currentPlayer==True:
 			User.instance=self
@@ -50,6 +52,11 @@ class User(threading.Thread):
 				return ch
 				
 		return None
+	
+	def addCharacter(self,id,name,egg,idZone):
+		print "user:addCharacter" + str(id) + "/" + str(name) + "/" + str(egg) + "/" + str(idZone)
+		temp=Character(id,name,egg,idZone,self)
+		self.listOfCharacter.append(temp)
 	
 	def getCharacterById(self,id):
 		for ch in self.listOfCharacter:

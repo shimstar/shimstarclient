@@ -1,0 +1,48 @@
+<rml>
+	<head>
+	<link type="text/rcss" href="rkt.rcss"/>
+	<link type="text/rcss" href="shimstar.rcss"/>
+		<style>
+			body
+			{
+				width: 100%;
+				height: 100%;
+				z-index: bottom;
+				z-index: -1;
+			}
+
+		</style>
+		<script>
+from shimstar.gui.core.configuration import *
+from shimstar.core.shimconfig import *
+from shimstar.game.gamestate import *
+def config(doc):
+	b=doc.GetElementById('background')
+	b.SetAttribute("width",str(C_USER_WIDTH))
+	b.SetAttribute("height",str(C_USER_HEIGHT))
+	b.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "images\\background\\space.jpg")
+
+	
+def jouer(doc):
+	GameState.getInstance().setState(C_GOPLAY)
+	print "here"
+	
+		</script>
+	</head>
+	<body onLoad="config(document);">
+			<img src="" id="background" width="100%" height="100%"/>
+			<div style="position:absolute; top:130px; left:250px;width:250px;tab-index:none;">
+					<button class="roundleft" style="width:250px;height:30px;tab-index:none;" id="btnzone"><span style='color:#0000ff;'>Chargement de la zone</span></button>
+			</div>
+			<div style="position:absolute; top:130px; left:750px;width:250px;tab-index:none;Display:None;" id="npc">
+					<button class="roundleft" style="width:250px;height:30px;tab-index:none;" id="btnnpc"><span style='color:#0000ff;'>Chargement des ennemis</span></button>
+			</div>
+			<div style="position:absolute; top:350px; left:250px;width:250px;tab-index:none;Display:None;" id="joueur">
+					<button class="roundleft" style="width:250px;height:30px;tab-index:none;" id="btnjoueur"><span style='color:#0000ff;'>Chargement des joueurs</span></button>
+			</div>
+			
+			<div style="position:absolute; top:550px; left:100px;tab-index:none;Display:None;" id="play">
+					<button class="topress" style="width:250px;height:30px;tab-index:none;" id="play" onclick="jouer(document)">Jouer</button>
+				</div>
+	</body>
+</rml>

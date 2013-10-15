@@ -13,6 +13,7 @@ from shimstar.game.gamestate import *
 from shimstar.gui.system.menuconnectrocket import *
 from shimstar.gui.system.menucreateaccountrocket import *
 from shimstar.gui.system.menuchooseherorocket import *
+from shimstar.gui.system.menuloadzone import *
 from shimstar.network.networkmainserver import *
 from shimstar.user.user import *
 from shimstar.world.zone.zone import *
@@ -64,12 +65,26 @@ class ShimStarClient(DirectObject):
 		elif state==C_CHANGEZONE:
 			idZone=User.getInstance().getCurrentCharacter().getIdZone()
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
-			print str(idZone) + "/" + str(name) + str(typeZone)
+			#~ print str(idZone) + "/" + str(name) + str(typeZone)
 			if typeZone==C_TYPEZONE_SPACE:
 				msg=netMessage(C_NETWORK_INFO_ZONE)
 				msg.addInt(idZone)
 				NetworkMainServer.getInstance().sendMessage(msg)
 				GameState.getInstance().setState(C_WAITING_INFOZONE)
+				if isinstance(self.menu,menuLoadZoneRocket)!=True:
+					self.menu.destroy()
+					self.menu=None
+					self.menu=menuLoadZoneRocket()
+				else:
+					self.menu=menuLoadZoneRocket()
+		elif state==C_GOPLAY:
+			if isinstance(self.menu,GameInSpace)!=True:
+				self.menu.destroy()
+				self.menu=None
+				self.menu=GameInSpace()
+			else:
+				self.menu=GameInSpace()
+			self.menu.start()
 		elif state==C_RECEIVED_INFOZONE:
 			msg=netMessage(C_NETWORK_CONNECT)
 			msg.addInt(User.getInstance().getId())
@@ -79,14 +94,23 @@ class ShimStarClient(DirectObject):
 			NetworkZoneUdp.getInstance().start()
 			idZone=User.getInstance().getCurrentCharacter().getIdZone()
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
-			if typeZone==C_TYPEZONE_SPACE:
-				if isinstance(self.menu,GameInSpace)!=True:
-					self.menu.destroy()
-					self.menu=None
-					self.menu=GameInSpace()
-				else:
-					self.menu=GameInSpace()
-				self.menu.start()
+			GameState.getInstance().setState(C_WAITING_LOADINGZONE)
+			#~ if typeZone==C_TYPEZONE_SPACE:
+				#~ if isinstance(self.menu,GameInSpace)!=True:
+					#~ self.menu.destroy()
+					#~ self.menu=None
+					#~ self.menu=GameInSpace()
+				#~ else:
+					#~ self.menu=GameInSpace()
+				#~ self.menu.start()
+		elif state==C_WAITING_ASKING_INFO_CHARACTER:
+			tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CURRENT_CHAR_INFO)
+			if len(tempMsg)>0:
+				for msg in tempMsg:
+					netMsg=msg.getMessage()
+					User.getInstance().getCurrentCharacter().setShip(netMsg[0])
+					GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
+					NetworkZoneServer.getInstance().removeMessage(msg)
 		elif state==C_QUIT:
 			sys.exit()
 		return Task.cont

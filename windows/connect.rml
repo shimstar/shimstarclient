@@ -70,6 +70,12 @@ def Connect(document):
 		msg.addString(user)
 		msg.addString(pwd)
 		NetworkMainServer.getInstance().sendMessage(msg)
+		connect=document.GetElementById('connect')
+		connect.disabled=1
+		msg=document.GetElementById('error')
+		msg.inner_rml="<span style='color:#0000ff;'>En attente de Connexion.</span>"
+		msg.SetAttribute("style","display:Block;")
+		
 		
 def createNewAccount(document):
 	#~ document.context.LoadDocument('windows/newaccount.rml').Show()
