@@ -1,7 +1,7 @@
 from pandac.PandaModules import loadPrcFileData 
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
-
+#~ loadPrcFileData('', 'state-cache 0')
 import sys,os
 from array import array
 import direct.directbase.DirectStart

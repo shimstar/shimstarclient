@@ -5,7 +5,6 @@ from direct.stdpy import threading
 class NPC(threading.Thread):
 	lock=threading.Lock()
 	listOfNpc=[]
-	#~ def __init__(self,xmlPart):
 	def __init__(self,id,name,template,idTemplateShip):
 		threading.Thread.__init__(self)
 		self.id=id
@@ -16,7 +15,10 @@ class NPC(threading.Thread):
 		self.ship.setVisible()
 		self.ship.setOwner(self)
 		NPC.listOfNpc.append(self)
-		print "NPC::__init__"  + str(self.id)
+	
+	@staticmethod
+	def getListOfNpc():
+		return NPC.listOfNpc
 	
 	@staticmethod
 	def getNPCById(id):
@@ -35,7 +37,7 @@ class NPC(threading.Thread):
 		self.ship.addBullet(bulId,pos,quat)
 		
 	def destroy(self):
-		NPC.listOfNpc.delete(self)
+		NPC.listOfNpc.remove(self)
 		self.ship.destroy()
 		
 	def getShip(self):

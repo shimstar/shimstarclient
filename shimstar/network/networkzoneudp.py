@@ -30,11 +30,12 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		self.cWriter.setRawMode(0)
 		self.ip=ip
 		self.port=port
-	
+		print "NetworkZoneUdp " +str(ip) + "/" + str(port)
 	# how long until we give up trying to reach the server?
 		timeout_in_miliseconds=3000  # 3 seconds
 	
 		self.myConnection=self.cManager.openUDPConnection(self.port+1)
+		print "NetworkZoneUdp" + str(self.myConnection)
 		if self.myConnection:
 			self.cReader.addConnection(self.myConnection)  # receive messages from server
 			self.serverAddr = NetAddress() 
@@ -50,6 +51,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 	def run(self):
 		i = 0
 		while not self.stopThread:
+			#~ print "UDP :: run : " + str(self.cReader.dataAvailable())
 			while self.cReader.dataAvailable()!=False:
 				dt=globalClock.getRealTime()-self.lastRun
 				self.lastRun=globalClock.getRealTime()
@@ -78,13 +80,18 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		return myPyDatagram
 		
 	def sendMessage(self,msg):
-		self.cWriter.send(msg.getMsg(),self.myConnection,self.serverAddr)
+		try:
+			print "UDP : : sendMessage " + str(self.serverAddr)
+			self.cWriter.send(msg.getMsg(),self.myConnection,self.serverAddr)
+		except:
+			print "Unexpected error:", sys.exc_info()[0]
+			
 						
 	def myProcessDataFunction(self,netDatagram):
 		myIterator=PyDatagramIterator(netDatagram)
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
-		#~ print "zoneudp" + str(msgID)
+		print "zoneudp" + str(msgID)
 		if msgID==C_NETWORK_CHARACTER_UPDATE_POS:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
@@ -100,14 +107,17 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_UPDATE_POS:
 			msgTab=[]
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
-			msgTab.append(myIterator.getStdfloat())
+			nbNpc=myIterator.getUint32()
+			msgTab.append(nbNpc)
+			for itNpc in range(nbNpc):
+				msgTab.append(myIterator.getUint32())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_POS_SHOT:

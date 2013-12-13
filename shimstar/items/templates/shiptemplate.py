@@ -9,8 +9,7 @@ class ShipTemplate(ItemTemplate):
 	listOfTemplate={}
 	
 	def __init__(self,xmlPart):
-		#~ super(ShipTemplate,self).__init__(xmlPart)
-		#~ print xmlPart.toxml()
+
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		self.maxHullPoints=int(xmlPart.getElementsByTagName('maxhullpoints')[0].firstChild.data)
 		self.egg=str(xmlPart.getElementsByTagName('egg')[0].firstChild.data)
@@ -48,10 +47,7 @@ class ShipTemplate(ItemTemplate):
 			ShipTemplate.loadXml()
 		if ShipTemplate.listOfTemplate.has_key(idTemplate)==False:
 			ShipTemplate.loadXml()
-			
-		print ShipTemplate.listOfTemplate
-		print "shiptemplate::getTempalte " + str(idTemplate)
-		print ShipTemplate.listOfTemplate[idTemplate]
+
 		if ShipTemplate.listOfTemplate.has_key(idTemplate)==True:
 			return ShipTemplate.listOfTemplate[idTemplate]
 			

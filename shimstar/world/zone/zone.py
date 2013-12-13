@@ -161,12 +161,15 @@ class Zone(threading.Thread):
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
-				npcId=int(netMsg[0])
-				for n in self.npc:
-						if npcId==n.getId():
-							#~ print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
-							n.ship.setHprToGo((netMsg[1],netMsg[2],netMsg[3],netMsg[4]))
-							n.ship.setPosToGo((netMsg[5],netMsg[6],netMsg[7]))
+				nbNpc=int(netMsg[0])
+				for itNbNpc in range (nbNpc):
+					npcId=int(netMsg[1+itNbNpc*8])
+					for n in self.npc:
+							if npcId==n.getId():
+								#~ print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
+								n.ship.setHprToGo((netMsg[2+itNbNpc*8],netMsg[3+itNbNpc*8],netMsg[4+itNbNpc*8],netMsg[5+itNbNpc*8]))
+								n.ship.setPosToGo((netMsg[6+itNbNpc*8],netMsg[7+itNbNpc*8],netMsg[8+itNbNpc*8]))
+								#~ print "zone::runUpdatePosNPC pos Npc " + str(npcId) + "  :: " + str((netMsg[6+itNbNpc*8],netMsg[7+itNbNpc*8],netMsg[8+itNbNpc*8]))
 				NetworkZoneUdp.getInstance().removeMessage(msg)
 			
 	def runNewShot(self):

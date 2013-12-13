@@ -252,7 +252,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			User.lock.release()
 			
 			NPC.lock.acquire()
-			listOfNpc=self.currentZone.getListOfNPC()
+			listOfNpc=NPC.getListOfNpc()
 			for n in listOfNpc:
 				n.run()
 			NPC.lock.release()

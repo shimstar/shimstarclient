@@ -8,7 +8,6 @@ class WeaponTemplate(ItemTemplate):
 	listOfTemplate={}
 	
 	def __init__(self,xmlPart):
-		print "weapontemplate::init"
 		super(WeaponTemplate,self).__init__(xmlPart)
 		self.damage=int(xmlPart.getElementsByTagName('damage')[0].firstChild.data)
 		self.range=int(xmlPart.getElementsByTagName('range')[0].firstChild.data)
@@ -34,7 +33,6 @@ class WeaponTemplate(ItemTemplate):
 		return self.damage
 		
 	def getInfos(self):
-		print "WeaponTemplate::getInfos"
 		return self.name,self.egg,self.damage,self.range,self.cadence,self.speed,self.sell,self.energyCost,self.space,self.img,self.cost,self.bulletSound,self.skillItems
 	
 	@staticmethod
