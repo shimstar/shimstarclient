@@ -83,8 +83,10 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.CEGUI.enable() 
 		
 	def quitGame(self):
-		self.stopThread=True
-		GameState.getInstance().setState(C_QUIT)
+		#~ self.stopThread=True
+		#~ GameState.getInstance().setState(C_QUIT)
+		self.InQuitAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("root/Quit").moveToFront()
 		
 	def setMouseBtn(self, btn, value):
 		self.mousebtn[btn]=value
@@ -155,27 +157,24 @@ class GameInSpace(DirectObject,threading.Thread):
 		if self.target!=None:
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
 			if pos!=None:
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setProperty("UnifiedAreaRect", "{{0," + str(10 + 70*i) + "},{0," + str(10 + 70*j) + "},{0," + str(10+64+70*i) +"},{0," + str(10+64+70*j) +"}}")
+				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==False:
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(True)
 				pos2= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").getPosition()
-				#~ print pos2
 				x2=pos2.d_x.d_offset
 				z2=pos2.d_y.d_offset
-				print str(x2) + "/" + str(z2)
 				x=pos.getX()
 				z=pos.getZ()
-				#~ z+=1
-				print pos
-				print "~~~~##############"
 				z=C_USER_HEIGHT/2*z*-1
-				x=x*C_USER_WIDTH/2
-				#~ z=C_USER_HEIGHT-(z*C_USER_HEIGHT/2)-30
-				#~ x+=C_RATIO
-				#~ x=(x*C_USER_WIDTH/(C_RATIO*2))-30
+				x=(x*C_USER_WIDTH/(C_RATIO*2))
 				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
 				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setPosition(vec)
-				
-		
-			#~ print "renderTarget " + str(z) + " / " + str(x)
+			else:
+				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+		else:
+			#~ print 
+			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
 				
 	def setupUI(self):
 		self.CEGUI.SchemeManager.create("TaharezLook.scheme") 
@@ -189,15 +188,15 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").subscribeEvent( PyCEGUI.Window.EventMouseButtonUp , self, 'evtMouseRootReleased')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Chat/NewMessage").subscribeEvent(PyCEGUI.Window.EventActivated,self,'ignoreKey')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Chat/NewMessage").subscribeEvent(PyCEGUI.Window.EventDeactivated,self,'enableKey')
-		#~ self.CEGUI.WindowManager.getWindow("root/Quit/CancelQuit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onCancelQuitGame')
-		#~ self.CEGUI.WindowManager.getWindow("root/Quit/Quit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onQuiGameConfirmed')
+		self.CEGUI.WindowManager.getWindow("root/Quit/CancelQuit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onCancelQuitGame')
+		self.CEGUI.WindowManager.getWindow("root/Quit/Quit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onQuiGameConfirmed')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Missions").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuMissions')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Quitter").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuQuitter')
-		#~ self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-		#~ self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-		#~ self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
-		#~ self.InQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
+		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
+		self.InQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setFont("Brassiere-s")
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").show()
 		self.CEGUI.WindowManager.getWindow("Station").hide()
@@ -217,6 +216,22 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.background = self.context.LoadDocument('windows/backgroundgame.rml')
 		#~ self.background.Show()
 		#~ rocketShipInfo.getInstance().showWindow()
+		
+	def quitGame(self,):
+		#~ self.CEGUI.WindowManager.getWindow("root/Quit").show()
+
+		self.InQuitAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("root/Quit").moveToFront()
+		#~ print "###########################"
+		
+	def onCancelQuitGame(self,args):
+		#~ self.CEGUI.WindowManager.getWindow("root/Quit").hide()
+		self.OutQuitAnimationInstance.start()
+		
+	def onQuiGameConfirmed(self,args):
+		self.stopThread=True
+		GameState.getInstance().setState(C_QUIT)
+	
 	def evtMouseRootClicked(self,args):
 		if args.button==PyCEGUI.MouseButton.LeftButton:
 			self.setMouseBtn(0, 1)
