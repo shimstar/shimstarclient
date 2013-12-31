@@ -170,7 +170,6 @@ class rocketTarget():
 		
 	def render(self):
 		if self.obj!=None:
-			
 				if self.obj.getNode().isEmpty()==False and self.obj.getNode()!=None:
 					#~ print self.obj.getNode().getPos()
 					if globalClock.getRealTime()-self.lastCalcDistance>0.1:
@@ -208,6 +207,8 @@ class rocketTarget():
 								hpmax=self.obj.getMaxHullPoints()
 								
 								prcent=int(100*round(float(hp)/float(hpmax),1))
+								if prcent<0:
+									prcent=0
 								img=self.window.GetElementById("pg")
 								img.SetAttribute("src",shimConfig.getInstance().getRessourceDirectory() + "\\images\\gui\\pgb" + str(prcent) + ".png")
 								

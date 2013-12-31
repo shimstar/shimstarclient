@@ -179,7 +179,8 @@ class Ship:
 				#~ item=itemFactory.getItemFromXml(itXml,typeItem)
 				#~ self.itemInInventory.append(item)
 		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
-					
+		self.node.reparentTo(render)
+		self.node.setName(self.name)
 		
 	def getId(self):
 		return self.id
@@ -314,8 +315,13 @@ class Ship:
 		return self.img
 		
 	def setVisible(self):
-		self.node.reparentTo(render)
-		self.node.setName(self.name)
+		self.node.show()
+		
+	def setInvisible(self):
+		self.node.hide()
+		
+	def isHidden(self):
+		return self.node.isHidden()
 				
 	def getSpeed(self):
 		return self.actualSpeed

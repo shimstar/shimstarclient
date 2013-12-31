@@ -19,12 +19,18 @@ from shimstar.user.user import *
 from shimstar.world.zone.zone import *
 from shimstar.game.gameinspace import *
 from shimstar.game.explosion import *
+from shimstar.gui.system.menuconnectcegui import *
+from shimstar.gui.system.menuchooseherocegui import *
+from shimstar.gui.system.menuloadzonecegui import *
+
 
 base.win.setCloseRequestEvent("CLOSEF4")
 
 class ShimStarClient(DirectObject):
 	def __init__(self):
 		GameState().setState(0)
+		
+		
 		NetworkMainServer.getInstance().start()
 		self.menu=None
 		base.disableMouse()
@@ -40,12 +46,15 @@ class ShimStarClient(DirectObject):
 		state=GameState.getInstance().getState()
 		if state==C_INIT:
 			if self.menu!=None:
-				if isinstance(self.menu,menuconnectRocket)!=True:
+				if isinstance(self.menu,MenuConnectCegui)!=True:
+				#~ if isinstance(self.menu,menuconnectRocket)!=True:
 					self.menu.destroy()
 					self.menu=None
-					self.menu=menuconnectRocket().getInstance()
+					#~ self.menu=menuconnectRocket().getInstance()
+					self.menu=MenuConnectCegui()
 			else:
-				self.menu=menuconnectRocket().getInstance()
+				self.menu=MenuConnectCegui()
+				#~ self.menu=menuconnectRocket().getInstance()
 		elif state==C_MENUCREATEACCOUNT:
 			if isinstance(self.menu,MenuCreateAccountRocket)!=True:
 				self.menu.destroy()
@@ -53,15 +62,18 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuCreateAccountRocket().getInstance()
 			else:
 				self.menu=MenuCreateAccountRocket().getInstance()
-			GameState().setState(C_MENUCREATINGACCOUNT)
+			GameState.getInstance().setState(C_MENUCREATINGACCOUNT)
 		elif state==C_CHOOSE_HERO:
 			if self.menu!=None:
-				if isinstance(self.menu,menuchooseHeroRocket)!=True:
+				#~ if isinstance(self.menu,menuchooseHeroRocket)!=True:
+				if isinstance(self.menu,MenuChooseHeroCegui)!=True:
 					self.menu.destroy()
 					self.menu=None
-					self.menu=menuchooseHeroRocket()				
+					#~ self.menu=menuchooseHeroRocket()				
+					self.menu=MenuChooseHeroCegui()				
 			else:
-				self.menu=menuchooseHeroRocket()				
+				self.menu=MenuChooseHeroCegui()				
+				#~ self.menu=menuchooseHeroRocket()				
 		elif state==C_CHANGEZONE:
 			idZone=User.getInstance().getCurrentCharacter().getIdZone()
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
@@ -71,12 +83,15 @@ class ShimStarClient(DirectObject):
 				msg.addInt(idZone)
 				NetworkMainServer.getInstance().sendMessage(msg)
 				GameState.getInstance().setState(C_WAITING_INFOZONE)
-				if isinstance(self.menu,menuLoadZoneRocket)!=True:
+				#~ if isinstance(self.menu,menuLoadZoneRocket)!=True:
+				if isinstance(self.menu,MenuLoadZoneCegui)!=True:
 					self.menu.destroy()
 					self.menu=None
-					self.menu=menuLoadZoneRocket()
+					#~ self.menu=menuLoadZoneRocket()
+					self.menu=MenuLoadZoneCegui()
 				else:
-					self.menu=menuLoadZoneRocket()
+					#~ self.menu=menuLoadZoneRocket()
+					self.menu=MenuLoadZoneCegui()
 		elif state==C_GOPLAY:
 			if isinstance(self.menu,GameInSpace)!=True:
 				self.menu.destroy()

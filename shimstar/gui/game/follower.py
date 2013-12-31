@@ -16,7 +16,6 @@ class Follower(object):
 			self.pointer.setColor(1, 0, 0, 1) 
 			self.pointer.reparentTo(base.aspect2d) 
 			self.pointer.hide() 
-			
 			self.task = taskMgr.add(self.track, "onscreen follower") 
 			self.active = False
 	
@@ -29,9 +28,12 @@ class Follower(object):
 	def setTarget(self,target):
 		self.target=target
 		self.active=True
+		
+	def getTarget(self):
+		return self.target
 			
 	def track(self, task): 
-		if not self.target.isEmpty():
+		if self.target!=None and not self.target.isEmpty():
 			if isInView(self.target): 
 				self.pointer.hide() 
 

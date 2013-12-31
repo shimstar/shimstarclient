@@ -44,7 +44,7 @@ class Character:
 				
 	def setPos(self,pos):
 		self.ship.setPos(pos)
-		
+	
 	def setQuat(self,quat):
 		self.ship.setQuat(quat)
 				

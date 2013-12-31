@@ -81,7 +81,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		
 	def sendMessage(self,msg):
 		try:
-			print "UDP : : sendMessage " + str(self.serverAddr)
+			#~ print "UDP : : sendMessage " + str(self.serverAddr)
 			self.cWriter.send(msg.getMsg(),self.myConnection,self.serverAddr)
 		except:
 			print "Unexpected error:", sys.exc_info()[0]
@@ -91,7 +91,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		myIterator=PyDatagramIterator(netDatagram)
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
-		print "zoneudp" + str(msgID)
+		#~ print "zoneudp" + str(msgID)
 		if msgID==C_NETWORK_CHARACTER_UPDATE_POS:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())

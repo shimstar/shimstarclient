@@ -14,8 +14,8 @@ class NetworkMainServer(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 		self.port=7777
-		#~ self.ip="127.0.0.1"
-		self.ip="82.66.133.219"
+		self.ip="127.0.0.1"
+		#~ self.ip="82.66.133.219"
 		#~ self.ip="62.147.217.96"
 		#~ self.ip="10.85.80.74"
 		self.stopThread=False
