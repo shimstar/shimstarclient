@@ -56,7 +56,7 @@ class Ship:
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
-		print "ship init" + str(self.id)
+		#~ print "ship init" + str(self.id)
 		
 	def setOwner(self,owner):
 		self.owner=owner
@@ -154,7 +154,7 @@ class Ship:
 					it.setShip(self)
 				if it.getTypeItem()==C_ITEM_ENGINE:
 					self.engine=it
-				print "ship::loadTemplate slot " + str(it)
+				#~ print "ship::loadTemplate slot " + str(it)
 		#~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		#~ self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
 		#~ self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)

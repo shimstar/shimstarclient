@@ -59,7 +59,7 @@ class NetworkZoneServer(threading.Thread):
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
 		msgTab=[]
-		#~ print msgID
+		print msgID
 		if msgID==C_NETWORK_CONNECT:
 			state=myIterator.getUint32()
 			msgTab.append(state)
@@ -71,6 +71,17 @@ class NetworkZoneServer(threading.Thread):
 			ip=myIterator.getString()
 			port=myIterator.getUint32()
 			port2=myIterator.getUint32()
+		elif msgID==C_NETWORK_CHAR_INCOMING:
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())		
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_INCOMING:
 			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getString())

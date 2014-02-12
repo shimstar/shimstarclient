@@ -89,17 +89,11 @@ class Zone(threading.Thread):
 			for msg in tempMsg:
 				tabMsg=msg.getMessage()
 				print "zone::runNewIncoming"
-				userXml=tabMsg[0]
-				xmlPart = xml.dom.minidom.parseString(userXml)
-				usrId=int(xmlPart.getElementsByTagName('iduser')[0].firstChild.data)
-				charId=tabMsg[1]
 				User.lock.acquire()
-				if User.listOfUser.has_key(usrId)==False:
-					tempUsr=User(userXml,False)
-					tempUsr.chooseCharacter(charId)
-					tempUsr.getCurrentCharacter().setPos((tabMsg[2],tabMsg[3],tabMsg[4]))
-					tempUsr.getCurrentCharacter().setQuat((tabMsg[5],tabMsg[6],tabMsg[7],tabMsg[8]))
-					self.listOfUsers[usrId]=tempUsr
+				tempUser=User(tabMsg[0],tabMsg[1])
+				tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
+				tempUser.chooseCharacter(tabMsg[2])
+				tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7])
 				User.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
@@ -213,9 +207,14 @@ class Zone(threading.Thread):
 				pos=(netMsg[2],netMsg[3],netMsg[4])
 				quat=(netMsg[5],netMsg[6],netMsg[7],netMsg[8])
 				user=User.getUserById(usrID)
-				Bullet.lock.acquire()
-				user.getCurrentCharacter().addBullet(bulId,pos,quat)
-				Bullet.lock.release()
+				
+				if user!=None:
+					Bullet.lock.acquire()
+					user.getCurrentCharacter().addBullet(bulId,pos,quat)
+					Bullet.lock.release()
+				else:
+					print "zone::runNewShot Bullet not affected to user " + str(usrID)
+					print "zone::runNewShot User.listOfUser" + str(User.listOfUser)
 				NetworkZoneServer.getInstance().removeMessage(msg)
 				
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NEW_NPC_SHOT)
