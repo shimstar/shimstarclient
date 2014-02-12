@@ -43,7 +43,7 @@ class User(threading.Thread):
 	def destroy(self):
 		for c in self.listOfCharacter:
 			c.destroy()
-		User.listOfUser.remove(self)
+		del User.listOfUser[self.id]
 		
 	@staticmethod
 	def getUserById(id):

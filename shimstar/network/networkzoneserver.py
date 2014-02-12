@@ -121,7 +121,6 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
-			
 		elif msgID==C_NETWORK_REMOVE_SHOT:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
@@ -134,7 +133,11 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
-			
+		elif msgID==C_NETWORK_USER_OUTGOING:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_SENT:
 			GameState.getInstance().setState(C_NETWORK_NPC_SENT)
 		elif msgID==C_NETWORK_CHAR_SENT:

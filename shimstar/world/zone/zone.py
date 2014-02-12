@@ -64,7 +64,19 @@ class Zone(threading.Thread):
 		self.runRemoveNpc()
 		self.runDamageChar()
 		self.runRemoveChar()
+		self.runCharOutgoing()
 		
+	def runCharOutgoing(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_USER_OUTGOING)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				tabMsg=msg.getMessage()
+				User.lock.acquire()
+				if User.listOfUser.has_key(tabMsg[0]):
+					User.listOfUser[tabMsg[0]].destroy()
+				User.lock.release()
+				NetworkZoneServer.getInstance().removeMessage(msg)
+	
 	def runRemoveNpc(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_NPC)
 		if len(tempMsg)>0:
@@ -83,7 +95,6 @@ class Zone(threading.Thread):
 				NetworkZoneServer.getInstance().removeMessage(msg)
 				
 	def runNewIncoming(self):
-		
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHAR_INCOMING)
 		if len(tempMsg)>0:
 			for msg in tempMsg:
