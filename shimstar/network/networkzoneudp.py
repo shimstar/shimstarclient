@@ -14,7 +14,7 @@ from direct.stdpy import threading
 
 class NetworkZoneUdp(DirectObject,threading.Thread):
 	instance=None
-	def __init__(self,ip,port,nom='threadUDP'):
+	def __init__(self,ip,port,port2,nom='threadUDP'):
 		threading.Thread.__init__(self)
 		self.nom = nom
 		self.Terminated = False
@@ -30,6 +30,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 		self.cWriter.setRawMode(0)
 		self.ip=ip
 		self.port=port
+		self.port2=port2
 		print "NetworkZoneUdp " +str(ip) + "/" + str(port)
 	# how long until we give up trying to reach the server?
 		timeout_in_miliseconds=3000  # 3 seconds
@@ -40,6 +41,13 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 			self.cReader.addConnection(self.myConnection)  # receive messages from server
 			self.serverAddr = NetAddress() 
 			self.serverAddr.setHost(self.ip, self.port) 
+		else:
+			self.myConnection=self.cManager.openUDPConnection(self.port2+1)
+			if self.myConnection:
+				self.port=port2
+				self.cReader.addConnection(self.myConnection)  # receive messages from server
+				self.serverAddr = NetAddress() 
+				self.serverAddr.setHost(self.ip, self.port) 
 		
 		self.listOfMessage=[] 
 	
@@ -84,7 +92,7 @@ class NetworkZoneUdp(DirectObject,threading.Thread):
 			#~ print "UDP : : sendMessage " + str(self.serverAddr)
 			self.cWriter.send(msg.getMsg(),self.myConnection,self.serverAddr)
 		except:
-			print "Unexpected error:", sys.exc_info()[0]
+			print "UDP sendMessage :: Unexpected error:", sys.exc_info()[0]
 			
 						
 	def myProcessDataFunction(self,netDatagram):

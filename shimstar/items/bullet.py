@@ -18,7 +18,10 @@ class Bullet(threading.Thread):
 		self.lastMove=globalClock.getRealTime()
 		self.fileToSound=sound
 		self.bulletSound=None
-		self.node=loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +"models/" + egg)
+		try:
+			self.node=loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +"models/" + egg)
+		except:
+			print "Bullet:__init__ loadModel failed on " + str(shimConfig.getInstance().getConvRessourceDirectory() +"models/" + egg) + " #### egg=" + str(egg)
 		self.node.setPos(pos)
 		self.initPos=self.node.getPos()
 		self.node.setQuat(Quat(quat))

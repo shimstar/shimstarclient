@@ -104,6 +104,7 @@ class ShimStarClient(DirectObject):
 			msg=netMessage(C_NETWORK_CONNECT)
 			msg.addInt(User.getInstance().getId())
 			msg.addInt(User.getInstance().getCurrentCharacter().getId())
+			msg.addInt(NetworkZoneUdp.getInstance().port)
 			NetworkZoneServer.getInstance().sendMessage(msg)
 			NetworkZoneServer.getInstance().start()
 			NetworkZoneUdp.getInstance().start()
@@ -123,7 +124,7 @@ class ShimStarClient(DirectObject):
 			if len(tempMsg)>0:
 				for msg in tempMsg:
 					netMsg=msg.getMessage()
-					User.getInstance().getCurrentCharacter().setShip(netMsg[0])
+					User.getInstance().getCurrentCharacter().setShip(netMsg[0],netMsg[1])
 					GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
 					NetworkZoneServer.getInstance().removeMessage(msg)
 		elif state==C_QUIT:

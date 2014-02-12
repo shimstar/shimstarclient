@@ -149,8 +149,6 @@ class MenuConnectCegui(ShowBase):
 					User(netMsg[1],netMsg[2],True)
 					for i in range (netMsg[3]):
 						User.getInstance().addCharacter(netMsg[4+(4*i)],netMsg[5+(4*i)],netMsg[6+(4*i)],netMsg[7+(4*i)]);
-					
-					
 					GameState.getInstance().setState(C_CHOOSE_HERO)
 					usr=self.userEdit.getText()
 					pwd=self.pwdEdit.getText()
@@ -172,37 +170,61 @@ class MenuConnectCegui(ShowBase):
 						errorMsg="Compte deja en utilisation"
 					self.CEGUI.WindowManager.getWindow("MenuConnect/LoginReport/LabelReport").setText(errorMsg)
 		elif(self.stateConnexion==C_MENUCREATINGACCOUNT):
-			temp=network.reference.getListOfMessageById(C_CREATE_USER)
+			temp=NetworkMainServer.getInstance().getListOfMessageById(C_CREATE_USER)
 			if(len(temp)>0):
-				msg=temp[0]
-				network.reference.removeMessage(msg)
-				if msg.getMessage().find("#")!=-1:
-					tab=msg.getMessage().split('#')
-					if tab[0]=="ok":
+				for msg in temp:
+					netMsg=msg.getMessage()
+					state=int(netMsg[0])
+					#~ diag=self.doc.GetElementById("errorcreate")
+					#~ diag.SetAttribute("style","display:Block;")
+
+					if state==1:
+						#~ diag.inner_rml="<span style='color:#ff0000;'>Compte cree</span>"
 						self.OutNewAccountAnimationInstance.start();
 						self.InNewAccountReportAnimationInstance.start();
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText("Votre compte a bien ete cree")
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'connectNewAccount')
+						#~ GameState().setState(C_INIT)
 						return Task.done
-					elif tab[0]=="ko":
+					else:
 						self.OutNewAccountAnimationInstance.start();
 						self.InNewAccountReportAnimationInstance.start();
-						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText(tab[1])
+						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText("Ce compte existe deja")
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'ButtonClicked')
+					NetworkMainServer.getInstance().removeMessage(msg)
+				#~ msg=temp[0]
+				#~ network.reference.removeMessage(msg)
+				#~ if msg.getMessage().find("#")!=-1:
+					#~ tab=msg.getMessage().split('#')
+					#~ if tab[0]=="ok":
+						#~ self.OutNewAccountAnimationInstance.start();
+						#~ self.InNewAccountReportAnimationInstance.start();
+						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText("Votre compte a bien ete cree")
+						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'connectNewAccount')
+						#~ return Task.done
+					#~ elif tab[0]=="ko":
+						#~ self.OutNewAccountAnimationInstance.start();
+						#~ self.InNewAccountReportAnimationInstance.start();
+						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText(tab[1])
+						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'ButtonClicked')
 		return Task.cont
 		
 	def createAccount(self,windowEventArgs):
 		user=self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxLogin").getText()
 		pwd=self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxPass").getText()
-		network.reference.sendMessage(C_CREATE_USER,user+"/"+pwd)
 		self.stateConnexion=C_MENUCREATINGACCOUNT
-		
+		msg=netMessage(C_CREATE_USER)
+		msg.addString(user)
+		msg.addString(pwd)
+		NetworkMainServer.getInstance().sendMessage(msg)
 		
 	def connectNewAccount(self,windowEventArgs):
-		user=self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxLogin").getText()
-		pwd=self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxPass").getText()
-		network.reference.sendMessage(C_CONNECT,user+"/"+pwd)
-		self.stateConnexion=C_MENUCONNECT_WAITING
+		self.user=self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxLogin").getText()
+		self.userEdit.setText(self.user)
+		self.pwd=self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxPass").getText()
+		self.pwdEdit.setText(self.pwd)
+		self.OutNewAccountReportAnimationInstance.start();
+		self.InLoginAnimationInstance.start()
 		
 	def connect(self,windowEventArgs):
 		if NetworkMainServer.getInstance().isConnected()!=False:

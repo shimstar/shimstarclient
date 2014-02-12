@@ -10,6 +10,7 @@ from shimstar.world.zone.zone import *
 from shimstar.game.gamestate import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
+from shimstar.core.shimconfig import *
 
 class MenuChooseHeroCegui(DirectObject):
 	def __init__(self):
@@ -127,15 +128,21 @@ class MenuChooseHeroCegui(DirectObject):
 		temp=temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_ADD_CHAR)
 		if(len(temp)>0):
 			msg=temp[0]
+			netMsg=msg.getMessage()
+			id=int(netMsg[0])
+			name=netMsg[1]
+			face=netMsg[2]
+			idZone=int(netMsg[3])
+			User.getInstance().addCharacter(id,name,face,idZone)
 			NetworkMainServer.getInstance().removeMessage(msg)
-			#~ tab=msg.getMessage()
-			#~ user.instance.loadXml(tab)
+			self.CEGUI.WindowManager.getWindow("ConnexionBg/Group1").hide()
 			self.loadCharacters()
 		
-			temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_DELETE_CHAR)
+		temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_DELETE_CHAR)
 		if(len(temp)>0):
 			msg=temp[0]
-			user.instance.deleteCharacter(int(msg.getMessage()))
+			netMsg=msg.getMessage()
+			User.getInstance().deleteCharacter(int(netMsg[0]))
 			NetworkMainServer.getInstance().removeMessage(msg)
 			self.loadCharacters()
 		return task.cont
@@ -180,7 +187,7 @@ class MenuChooseHeroCegui(DirectObject):
 		
 	def newhero(self,arg):
 		self.CEGUI.WindowManager.getWindow("ConnexionBg/Group1").show()
-		directory='datafiles/images/faces'
+		directory=shimConfig.getInstance().getRessourceDirectory() +'datafiles/images/faces'
 		for files in os.listdir(directory):
 			if files[0]!='.':
 				self.faces.append(files)
@@ -215,9 +222,15 @@ class MenuChooseHeroCegui(DirectObject):
 	def onCreateNewHero(self,arg):
 		face=self.CEGUI.WindowManager.getWindow("ConnexionBg/Face").getUserString('file').split('.')
 		name=self.CEGUI.WindowManager.getWindow("ConnexionBg/NameEdit").getText()
-		user.instance.addCharacter(name,face[0])
-
-		menuState.instance.setState(C_CHOOSING_HERO)
+		#~ user.instance.addCharacter(name,face[0])
+		
+		msg=netMessage(C_USER_ADD_CHAR)
+		msg.addInt(User.getInstance().getId())
+		msg.addString(name)
+		msg.addString(face[0])
+		#~ print "name" + name + "/" + str(face) + "/" + str(face[0])
+		NetworkMainServer.getInstance().sendMessage(msg)
+		GameState.getInstance().setState(C_CHOOSE_HERO)
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/Group1").hide()
 		self.OutChooseHeroAnimationInstance.start()
 		
@@ -231,9 +244,13 @@ class MenuChooseHeroCegui(DirectObject):
 		self.OutDeleteAnimationInstance.start()
 		
 	def onDeleteConfirmed(self,winArgs):
-		usrId=user.instance.getId()
+		usrId=User.getInstance().getId()
 		heroId=self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Name").getUserString("id")
-		network.reference.sendMessage(C_USER_DELETE_CHAR,str(usrId)+"/"+heroId)
+		msg=netMessage(C_USER_DELETE_CHAR)
+		msg.addInt(User.getInstance().getId())
+		msg.addInt(int(heroId))
+		NetworkMainServer.getInstance().sendMessage(msg)
+		#~ network.reference.sendMessage(C_USER_DELETE_CHAR,str(usrId)+"/"+heroId)
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Confirm").hide()
 		self.OutDeleteAnimationInstance.start()
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero").hide()

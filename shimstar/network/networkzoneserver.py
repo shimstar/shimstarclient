@@ -70,9 +70,11 @@ class NetworkZoneServer(threading.Thread):
 		elif msgID==C_NETWORK_INFO_ZONE:
 			ip=myIterator.getString()
 			port=myIterator.getUint32()
+			port2=myIterator.getUint32()
 		elif msgID==C_NETWORK_NPC_INCOMING:
 			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getUint32())		
 			temp=message(msgID,msgTab)
@@ -105,6 +107,7 @@ class NetworkZoneServer(threading.Thread):
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_CURRENT_CHAR_INFO:
 			msgTab.append(myIterator.getUint32())		
+			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 			
@@ -131,7 +134,18 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_TAKE_DAMAGE_CHAR:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_REMOVE_NPC:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_REMOVE_CHAR:
 			msgTab=[]
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)

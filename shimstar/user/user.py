@@ -30,6 +30,21 @@ class User(threading.Thread):
 	def getId(self):
 		return self.id
 		
+	def deleteCharacter(self,idChar):
+		chToDelete=None
+		for c in self.listOfCharacter:
+			if c.getId()==idChar:
+				chToDelete=c
+				break
+		if chToDelete!=None:
+			chToDelete.destroy()
+			self.listOfCharacter.remove(chToDelete)
+			
+	def destroy(self):
+		for c in self.listOfCharacter:
+			c.destroy()
+		User.listOfUser.remove(self)
+		
 	@staticmethod
 	def getUserById(id):
 		for usr in User.listOfUser:

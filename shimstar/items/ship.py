@@ -141,6 +141,7 @@ class Ship:
 						
 				#~ self.node.setPos(self.pointerToGo.getPos())
 			self.lastMove=globalClock.getRealTime()
+			#~ print "ship::move " + str(self.id) + "/" + str(self.getPos())
 		
 	def loadTemplate(self):
 		self.shipTemplate=ShipTemplate.getTemplate(self.template)
@@ -153,6 +154,7 @@ class Ship:
 					it.setShip(self)
 				if it.getTypeItem()==C_ITEM_ENGINE:
 					self.engine=it
+				print "ship::loadTemplate slot " + str(it)
 		#~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		#~ self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
 		#~ self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)

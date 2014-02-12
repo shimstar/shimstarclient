@@ -62,6 +62,8 @@ class Zone(threading.Thread):
 		self.runUpdatePosNPC()
 		self.runDamageNpc()
 		self.runRemoveNpc()
+		self.runDamageChar()
+		self.runRemoveChar()
 		
 	def runRemoveNpc(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_NPC)
@@ -81,11 +83,12 @@ class Zone(threading.Thread):
 				NetworkZoneServer.getInstance().removeMessage(msg)
 				
 	def runNewIncoming(self):
+		
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHAR_INCOMING)
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				tabMsg=msg.getMessage()
-				print tabMsg
+				print "zone::runNewIncoming"
 				userXml=tabMsg[0]
 				xmlPart = xml.dom.minidom.parseString(userXml)
 				usrId=int(xmlPart.getElementsByTagName('iduser')[0].firstChild.data)
@@ -112,17 +115,48 @@ class Zone(threading.Thread):
 					if n.getId()==idNpc:
 						n.takeDamage(damage)
 				NetworkZoneServer.getInstance().removeMessage(msg)
+				
+	def runDamageChar(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_TAKE_DAMAGE_CHAR)
+		
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				idChar=int(netMsg[0])
+				damage=int(netMsg[1])
+				for u in User.listOfUser:
+					if User.listOfUser[u].getCurrentCharacter().getId()==idChar:
+						User.listOfUser[u].getCurrentCharacter().takeDamage(damage)
+				NetworkZoneServer.getInstance().removeMessage(msg)
+				
+	def runRemoveChar(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_CHAR)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				idChar=int(netMsg[0])
+				userToRemove=None
+				User.lock.acquire()
+				for u in User.listOfUser:
+					if User.listOfUser[u].getCurrentCharacter().getId()==idChar:
+						userToRemove=User.listOfUser[u]
+				if userToRemove.getId()!=User.getInstance().getId():
+					userToRemove.destroy()
+				User.lock.release()
+				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runNewNpc(self):
+		
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NPC_INCOMING)
 		if len(tempMsg)>0:
+			print "zone::runNewNpc"
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
 				id=netMsg[0]
 				existingNpc=self.getNpcById(id)
 				NPC.lock.acquire()
 				if existingNpc==None:
-					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3])
+					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3],netMsg[4])
 					self.npc.append(temp)
 				NPC.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)

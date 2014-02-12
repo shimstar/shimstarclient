@@ -37,6 +37,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.ticksRenderUI=0
 		self.updateInput=0
 		self.listOfExplosion=[]
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		ship.setInvisible()
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -154,7 +156,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		
 	def renderTarget(self):
 		#~ print self.target
-		if self.target!=None:
+		if self.target!=None and self.target.getNode().isEmpty()!=True:
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
 			if pos!=None:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==False:
@@ -171,8 +173,9 @@ class GameInSpace(DirectObject,threading.Thread):
 			else:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+		elif self.target!=None and self.target.getNode().isEmpty()==True:
+				self.target=None
 		else:
-			#~ print 
 			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
 				
@@ -192,7 +195,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.CEGUI.WindowManager.getWindow("root/Quit/Quit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onQuiGameConfirmed')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Missions").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuMissions')
-		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Quitter").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuQuitter')
+		self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Quitter").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuQuitter')
 		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
@@ -217,12 +220,13 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.background.Show()
 		#~ rocketShipInfo.getInstance().showWindow()
 		
-	def quitGame(self,):
-		#~ self.CEGUI.WindowManager.getWindow("root/Quit").show()
-
+	def onMenuQuitter(self,args):
 		self.InQuitAnimationInstance.start()
 		self.CEGUI.WindowManager.getWindow("root/Quit").moveToFront()
-		#~ print "###########################"
+		
+	def quitGame(self,):
+		self.InQuitAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("root/Quit").moveToFront()
 		
 	def onCancelQuitGame(self,args):
 		#~ self.CEGUI.WindowManager.getWindow("root/Quit").hide()

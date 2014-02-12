@@ -84,20 +84,28 @@ class NetworkMainServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_USER_DELETE_CHAR:
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_INFO_ZONE:
 			ip=myIterator.getString()
 			port=myIterator.getUint32()
 			portudp=myIterator.getUint32()
+			portudp2=myIterator.getUint32()
 			if NetworkZoneServer.getInstance()!=None:
 				NetworkZoneServer.getInstance().stop()
 			#~ print "############# " + str(ip) + '/' + str(port)
 			NetworkZoneServer(ip,port)
 			if NetworkZoneUdp.getInstance()!=None:
 				NetworkZoneUdp.getInstance().stop()
-			NetworkZoneUdp(ip,portudp)
+			NetworkZoneUdp(ip,portudp,portudp2)
 			GameState.getInstance().setState(C_RECEIVED_INFOZONE)
 		elif msgID==C_USER_ADD_CHAR:
+			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getString())
+			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		
