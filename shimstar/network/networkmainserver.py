@@ -4,6 +4,7 @@ from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from direct.stdpy import threading
 
 from shimstar.core.constantes import *
+from shimstar.core.shimconfig import *
 from shimstar.network.message import *
 from shimstar.network.networkzoneserver import *
 from shimstar.network.networkzoneudp import *
@@ -14,7 +15,8 @@ class NetworkMainServer(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 		self.port=7777
-		self.ip="127.0.0.1"
+		self.ip=shimConfig.getInstance().getIp()
+		#~ self.ip="127.0.0.1"
 		#~ self.ip="82.66.133.219"
 		#~ self.ip="62.147.217.96"
 		#~ self.ip="10.85.80.74"

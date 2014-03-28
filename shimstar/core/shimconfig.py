@@ -11,6 +11,7 @@ class shimConfig:
 		self.version=""
 		self.user=""
 		self.pwd=""
+		self.ip=""
 		self.loadXml()
 		
 	def loadXml(self):
@@ -28,6 +29,10 @@ class shimConfig:
 			usr=dom.getElementsByTagName('user')
 			for u in usr:
 				self.user=str(u.firstChild.data)
+				
+			ip=dom.getElementsByTagName('ip')
+			for i in ip:
+				self.ip=str(i.firstChild.data)
 				
 			ver=dom.getElementsByTagName('version')
 			for v in ver:
@@ -58,6 +63,9 @@ class shimConfig:
 	def setPwd(self,pwd):
 		self.pwd=pwd
 		
+	def getIp(self):
+		return self.ip
+		
 	def saveConfig(self):
 		docXml = xml.dom.minidom.Document()
 		confXml=docXml.createElement("config")
@@ -65,14 +73,17 @@ class shimConfig:
 		dirXml=docXml.createElement("directory")
 		userXml=docXml.createElement("user")
 		passwordXml=docXml.createElement("password")
+		ipXml=docXml.createElement("ip")
 		versionXml.appendChild(docXml.createTextNode(str(self.version)))
 		dirXml.appendChild(docXml.createTextNode(str(self.ressourceDirectory)))
 		userXml.appendChild(docXml.createTextNode(str(self.user)))
+		ipXml.appendChild(docXml.createTextNode(str(self.ip)))
 		passwordXml.appendChild(docXml.createTextNode(str(self.pwd)))
 		confXml.appendChild(passwordXml)
 		confXml.appendChild(userXml)
 		confXml.appendChild(versionXml)
 		confXml.appendChild(dirXml)
+		confXml.appendChild(ipXml)
 		docXml.appendChild(confXml)
 		fileHandle = open ( self.getRessourceDirectory() + "/config.xml", 'w' ) 
 		fileHandle.write(docXml.toxml())
