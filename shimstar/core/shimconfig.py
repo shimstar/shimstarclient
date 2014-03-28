@@ -15,6 +15,8 @@ class shimConfig:
 		
 	def loadXml(self):
 		if os.path.isfile("config.xml")!=False:
+			fileHandle = open ( "./config.xml", 'r' )
+			fileHandle.close()
 			dom = xml.dom.minidom.parse("./config.xml")
 			direc=dom.getElementsByTagName('directory')
 			for d in direc:
@@ -72,7 +74,7 @@ class shimConfig:
 		confXml.appendChild(versionXml)
 		confXml.appendChild(dirXml)
 		docXml.appendChild(confXml)
-		fileHandle = open ( "./config.xml", 'w' ) 
+		fileHandle = open ( self.getRessourceDirectory() + "/config.xml", 'w' ) 
 		fileHandle.write(docXml.toxml())
 		fileHandle.close()
 		

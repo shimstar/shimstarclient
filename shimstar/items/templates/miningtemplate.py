@@ -1,7 +1,7 @@
 import xml.dom.minidom
 import os, sys
 from shimstar.core.shimconfig import *
-from shimstar.constantes import *
+from shimstar.core.constantes import *
 from shimstar.items.templates.itemtemplate import *
 
 class MiningTemplate(ItemTemplate):
@@ -47,7 +47,7 @@ class MiningTemplate(ItemTemplate):
 	@staticmethod
 	def getTemplate(idTemplate):
 		if len(MiningTemplate.listOfTemplate)==0:
-			¨MiningTemplate.loadXml()
+			MiningTemplate.loadXml()
 		if MiningTemplate.listOfTemplate.has_key(idTemplate)==True:
 			return MiningTemplate.listOfTemplate[idTemplate]
 			
