@@ -110,9 +110,10 @@ class Bullet(threading.Thread):
 		dt=globalClock.getRealTime()-self.lastMove
 		self.lastMove=globalClock.getRealTime()
 		if dt<1 and dt>-1:
+			Bullet.lock.acquire()
 			if self.node!=None and self.node.isEmpty()!=True:
 				self.node.setPos(self.node,Vec3(0,1*dt*self.speed,0))
-		
+			Bullet.lock.release()
 	def getName(self):
 		return self.name
 		

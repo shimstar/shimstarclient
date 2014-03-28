@@ -1,3 +1,5 @@
+##TODO send current Hull to ship
+
 import xml.dom.minidom
 from math import sin, cos, pi
 from math import sqrt
@@ -17,7 +19,8 @@ DEG_TO_RAD = pi / 180
 
 class Ship:
 	#~ def __init__(self,id,xmlPart):
-	def __init__(self,id,idTemplate):
+	def __init__(self,id,idTemplate,hullpoints=0):
+		print "ship::init " + str(id) + "/" + str(idTemplate)
 		self.name = ""
 		self.id=id
 		self.template=idTemplate
@@ -34,7 +37,7 @@ class Ship:
 		self.engineSound=None
 		self.egg = ""
 		self.lastMove=globalClock.getRealTime()
-		self.hullpoints = 0
+		self.hullpoints = hullpoints
 		self.maxhull = 0
 		self.maxTorque = 30
 		self.currentTorqueX = 0
@@ -57,6 +60,10 @@ class Ship:
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
+		
+	def getPrcentHull(self):
+		prcent = float(self.hullpoints) / float(self.maxhull) 
+		return float(prcent),self.hullpoints,self.maxhull
 		
 	def setOwner(self,owner):
 		self.owner=owner
@@ -81,62 +88,63 @@ class Ship:
 		dt=globalClock.getRealTime()-self.lastMove
 		if dt>0.01:
 			if True:
-				if self.firstMove==True:
-					self.node.setPos(self.pointerToGo.getPos())
-					self.node.setQuat(self.pointerToGo.getQuat())
-					self.pointerToGoOld.setPos(self.pointerToGo.getPos())
-					self.pointerToGoOld.setQuat(self.pointerToGo.getQuat())
-					self.firstMove=False
-				else:
-					self.renderCounter += 1
-					lastPosServer = self.pointerToGo.getPos()
-					oldPosServer = self.pointerToGoOld.getPos()
-					targetPos = lastPosServer + (lastPosServer - oldPosServer) * self.renderCounter * 1 / C_SENDTICKS * dt
-					currentPos = self.node.getPos()
-					ratioPos = currentPos * 0.95 + targetPos * 0.05                               # ensure pseudo-continuous position
-					oldLinearVel = currentPos - self.oldPos
-					newLinearVel = oldLinearVel * 0.9 + (ratioPos - currentPos) * 0.1             # ensure pseudo-continuous linear velocity
-					
-					self.node.setPos(currentPos + newLinearVel)
-					self.oldPos = Vec3(currentPos)
-					
-					lastQuatServer = self.pointerToGo.getQuat()
-					oldQuatServer = self.pointerToGoOld.getQuat()
-					diffQuat=Quat(lastQuatServer - oldQuatServer) 
+				if self.node.isEmpty()!=True:
+					if self.firstMove==True:
+						self.node.setPos(self.pointerToGo.getPos())
+						self.node.setQuat(self.pointerToGo.getQuat())
+						self.pointerToGoOld.setPos(self.pointerToGo.getPos())
+						self.pointerToGoOld.setQuat(self.pointerToGo.getQuat())
+						self.firstMove=False
+					else:
+						self.renderCounter += 1
+						lastPosServer = self.pointerToGo.getPos()
+						oldPosServer = self.pointerToGoOld.getPos()
+						targetPos = lastPosServer + (lastPosServer - oldPosServer) * self.renderCounter * 1 / C_SENDTICKS * dt
+						currentPos = self.node.getPos()
+						ratioPos = currentPos * 0.95 + targetPos * 0.05                               # ensure pseudo-continuous position
+						oldLinearVel = currentPos - self.oldPos
+						newLinearVel = oldLinearVel * 0.9 + (ratioPos - currentPos) * 0.1             # ensure pseudo-continuous linear velocity
+						
+						self.node.setPos(currentPos + newLinearVel)
+						self.oldPos = Vec3(currentPos)
+						
+						lastQuatServer = self.pointerToGo.getQuat()
+						oldQuatServer = self.pointerToGoOld.getQuat()
+						diffQuat=Quat(lastQuatServer - oldQuatServer) 
 
-					if diffQuat.getR()>0.6 or diffQuat.getR()<-0.6 or diffQuat.getI()>0.6 or diffQuat.getI()<-0.6 or diffQuat.getJ()>0.6 or diffQuat.getJ()<-0.6 or diffQuat.getK()>0.6 or diffQuat.getK()<-0.6:
-						lastQuatServer.setR(-lastQuatServer.getR())
-						lastQuatServer.setI(-lastQuatServer.getI())
-						lastQuatServer.setJ(-lastQuatServer.getJ())
-						lastQuatServer.setK(-lastQuatServer.getK())
+						if diffQuat.getR()>0.6 or diffQuat.getR()<-0.6 or diffQuat.getI()>0.6 or diffQuat.getI()<-0.6 or diffQuat.getJ()>0.6 or diffQuat.getJ()<-0.6 or diffQuat.getK()>0.6 or diffQuat.getK()<-0.6:
+							lastQuatServer.setR(-lastQuatServer.getR())
+							lastQuatServer.setI(-lastQuatServer.getI())
+							lastQuatServer.setJ(-lastQuatServer.getJ())
+							lastQuatServer.setK(-lastQuatServer.getK())
+							
+							self.pointerToGo.setQuat(lastQuatServer)
 						
-						self.pointerToGo.setQuat(lastQuatServer)
-					
-					diffQuat=Quat(lastQuatServer - oldQuatServer) 
-					self.lastDiffQuat=diffQuat
-					#~ if self.id==417:
-						#~ print "########################"
-						#~ print "ship::move " + str(self.node.getPos() ) + " / " + str(self.pointerToGo.getPos())
-						#~ print "ship::move " + str(self.node.getQuat() ) + " / " + str(self.pointerToGo.getQuat())
-						#~ print "##############################"
-						#~ print "ship::move diffQuat " + str(diffQuat) + " / " + str(lastQuatServer) + "/" + str(oldQuatServer) + "/" + str(self.id) + "/" + str(oldQuatServer.getK()) + "/" + str(round(oldQuatServer.getK(),5))
+						diffQuat=Quat(lastQuatServer - oldQuatServer) 
+						self.lastDiffQuat=diffQuat
+						#~ if self.id==417:
+							#~ print "########################"
+							#~ print "ship::move " + str(self.node.getPos() ) + " / " + str(self.pointerToGo.getPos())
+							#~ print "ship::move " + str(self.node.getQuat() ) + " / " + str(self.pointerToGo.getQuat())
+							#~ print "##############################"
+							#~ print "ship::move diffQuat " + str(diffQuat) + " / " + str(lastQuatServer) + "/" + str(oldQuatServer) + "/" + str(self.id) + "/" + str(oldQuatServer.getK()) + "/" + str(round(oldQuatServer.getK(),5))
+							
+						targetQuat = lastQuatServer + (lastQuatServer - oldQuatServer) * self.renderCounter * 1 / C_SENDTICKS * dt
+						targetQuat.normalize()
+						currentQuat = self.node.getQuat()
+						ratioQuat = currentQuat * 0.9 + targetQuat * 0.1                            # ensure pseudo-continuous rotation
+						oldAngularVel = currentQuat - self.oldQuat
 						
-					targetQuat = lastQuatServer + (lastQuatServer - oldQuatServer) * self.renderCounter * 1 / C_SENDTICKS * dt
-					targetQuat.normalize()
-					currentQuat = self.node.getQuat()
-					ratioQuat = currentQuat * 0.9 + targetQuat * 0.1                            # ensure pseudo-continuous rotation
-					oldAngularVel = currentQuat - self.oldQuat
-					
-					newAngularVel = oldAngularVel * 0.925 + (ratioQuat - currentQuat) * 0.025         # ensure pseudo-continuous angular velocity
-					
-					finalQuat = currentQuat + newAngularVel
-					finalQuat.normalize()
-					self.oldQuat = Quat(currentQuat)
-				
-					self.node.setQuat(finalQuat)
-					#~ if self.id==417:
+						newAngularVel = oldAngularVel * 0.925 + (ratioQuat - currentQuat) * 0.025         # ensure pseudo-continuous angular velocity
 						
-						#~ print "ship::move " + self.node.getQuat()
+						finalQuat = currentQuat + newAngularVel
+						finalQuat.normalize()
+						self.oldQuat = Quat(currentQuat)
+					
+						self.node.setQuat(finalQuat)
+						#~ if self.id==417:
+							
+							#~ print "ship::move " + self.node.getQuat()
 			
 						
 				#~ self.node.setPos(self.pointerToGo.getPos())
@@ -145,6 +153,7 @@ class Ship:
 		
 	def loadTemplate(self):
 		self.shipTemplate=ShipTemplate.getTemplate(self.template)
+		print "ship::loadTemplate " + str(self.template)
 		self.name,self.maxhull,self.egg,self.img,self.slots=self.shipTemplate.getInfos()
 		for tempSlot in self.slots:
 			if tempSlot.getItem()!=None:
@@ -353,15 +362,7 @@ class Ship:
 	## Return True if ship has hull>0
 	## Return False if shup has hull<=0
 	def takeDamage(self, hitpoints):
-		#~ audio3d = shimConfig.getInstance().getAudio3DManager()
-		#~ exploSound= audio3d.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/enemy_explosion1.ogg")
-		#~ audio3d.setSoundVelocityAuto( exploSound) 
-		#~ audio3d.setListenerVelocityAuto() 
-		#~ audio3d.attachSoundToObject(exploSound, self.node)
-		#~ exploSound.setLoop(False)
-		#~ exploSound.play()
-		#~ audio3d.setDropOffFactor(0.1) 
-		#~ self.explodeSound.append(exploSound)
+		print "ship::takedamage " + str(hitpoints) + "/" + str(self.hullpoints)
 		self.hullpoints -= hitpoints
 		if self.hullpoints <= 0:
 			#~ self.setVisible(False)

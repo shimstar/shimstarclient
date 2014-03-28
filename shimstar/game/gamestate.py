@@ -34,6 +34,9 @@ class GameState:
 		
 	def getNewZone(self):
 		return self.idZone
+		
+	def setNewZone(self,id):
+		self.idZone=id
 
 	def getState(self):
 		return self.state

@@ -9,7 +9,6 @@ from shimstar.items.ship import *
 
 
 class Character:
-	#~ def __init__(self,xmlPart,userRef):
 	def __init__(self,id,name,egg,idZone,userRef):
 		self.id=id
 		self.name=name
@@ -20,28 +19,16 @@ class Character:
 		self.idZone=idZone
 		self.lastStation=0
 		self.visible=False
-		#~ self.loadXmlPart(xmlPart)
 		self.userRef=userRef #user obj
 		print "character::init" + str(self.id)
 		
-	#~ def loadXmlPart(self,xmlPart):
-		#~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
-		#~ self.face=str(xmlPart.getElementsByTagName('face')[0].firstChild.data)
-		#~ self.coin=int(xmlPart.getElementsByTagName('coin')[0].firstChild.data)
-		#~ self.idZone=int(xmlPart.getElementsByTagName('zone')[0].firstChild.data)
-		#~ self.lastStation=int(xmlPart.getElementsByTagName('laststation')[0].firstChild.data)
-		#~ self.id=int(xmlPart.getElementsByTagName('idchar')[0].firstChild.data)
-		
-		#~ sh=xmlPart.getElementsByTagName('ship')
-		#~ if sh!=None:
-			#~ for s in sh:
-				#~ self.ship=Ship(0,s)
-				#~ self.ship.setOwner(self)
-				#~ self.ship.setVisible()
-		
+	def manageDeath(self):
+		if self.ship!=None:
+			self.ship.destroy()
+			self.ship=None
 				
-	def setShip(self,idShip,idTemplate):
-		self.ship=Ship(idShip,idTemplate)
+	def setShip(self,idShip,idTemplate,hullpoints):
+		self.ship=Ship(idShip,idTemplate,hullpoints)
 		self.ship.setOwner(self)
 		print "character:setShip" + str(self.ship)
 	
@@ -51,6 +38,7 @@ class Character:
 			self.ship=None
 			
 	def takeDamage(self,damage):
+		print "character::takedamage " + str(damage)
 		return self.ship.takeDamage(damage)
 				
 	def setPos(self,pos):
@@ -90,7 +78,7 @@ class Character:
 	def isCurrent(self):
 		return self.current
 		
-	def changeZone(self):
+	def changeZone(self,death=False):
 		if GameState.getInstance().getNewZone()!=0:			
 			self.idZone=GameState.getInstance().getNewZone()
 		msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
@@ -100,7 +88,10 @@ class Character:
 		NetworkMainServer.getInstance().sendMessage(msg)
 		if self.ship!=None:
 			self.ship.changeZone()
-		GameState.getInstance().setState(C_CHANGEZONE)
+		if death:
+			GameState.getInstance().setState(C_DEATH)
+		else:
+			GameState.getInstance().setState(C_CHANGEZONE)
 		return 
 
 		

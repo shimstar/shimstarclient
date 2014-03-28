@@ -18,11 +18,21 @@ class User(threading.Thread):
 		User.listOfUser[self.id]=self
 		if currentPlayer==True:
 			User.instance=self
+	
+	@staticmethod
+	def getListOfCharacters(withoutCurrent=False):
+		listOfChar=[]
+		for uid in User.listOfUser:
+			if withoutCurrent==True:
+				if uid!=User.getInstance().getId():
+					listOfChar.append(User.listOfUser[uid].getCurrentCharacter())
+			else:
+				listOfChar.append(User.listOfUser[uid].getCurrentCharacter())
+		return listOfChar
 		
 	@staticmethod
 	def getInstance():
 		return User.instance
-		
 	
 	def getCharacters(self):
 		return self.listOfCharacter

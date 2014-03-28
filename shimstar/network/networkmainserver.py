@@ -108,6 +108,14 @@ class NetworkMainServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_DEATH_CHAR_STEP2:
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			#~ print "networkmainserver::msg " + str(msgTab)
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		
 	def getListOfMessageById(self,id):
 		msgToReturn=[]

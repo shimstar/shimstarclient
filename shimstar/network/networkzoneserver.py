@@ -28,7 +28,8 @@ class NetworkZoneServer(threading.Thread):
 			self.cReader.addConnection(self.myConnection)  # receive messages from server
 			self.myConnection.setNoDelay(True)
 		print "NetWorkZoneServer::init connection " + str(self.myConnection)
-		
+
+	 
 	@staticmethod
 	def getInstance():
 		return NetworkZoneServer.instance
@@ -59,7 +60,7 @@ class NetworkZoneServer(threading.Thread):
 		connexion=netDatagram.getConnection()
 		msgID=myIterator.getUint32()
 		msgTab=[]
-		print msgID
+		#~ print msgID
 		if msgID==C_NETWORK_CONNECT:
 			state=myIterator.getUint32()
 			msgTab.append(state)
@@ -119,6 +120,7 @@ class NetworkZoneServer(threading.Thread):
 		elif msgID==C_NETWORK_CURRENT_CHAR_INFO:
 			msgTab.append(myIterator.getUint32())		
 			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_REMOVE_SHOT:
@@ -164,6 +166,11 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_DEATH_CHAR:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_CHAR_INCOMING:
 			msgTab=[]
 			msgTab.append(myIterator.getString())
@@ -179,6 +186,44 @@ class NetworkZoneServer(threading.Thread):
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_REMOVE_NPC:
 			GameState.getInstance().setState(C_WAITING_ASKING_INFO_NPC)
+# UDP STUFFFFFF
+		elif msgID==C_NETWORK_CHARACTER_UPDATE_POS:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_NPC_UPDATE_POS:
+			msgTab=[]
+			nbNpc=myIterator.getUint32()
+			msgTab.append(nbNpc)
+			for itNpc in range(nbNpc):
+				msgTab.append(myIterator.getUint32())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+				msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_POS_SHOT:
+			msgTab=[]
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getStdfloat())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+			
 	def getListOfMessageById(self,id):
 		msgToReturn=[]
 		for msg in self.listOfMessage:
@@ -189,7 +234,8 @@ class NetworkZoneServer(threading.Thread):
 		return msgToReturn
 		
 	def removeMessage(self,msg):
-		self.listOfMessage.remove(msg)
+		if self.listOfMessage.count(msg)>0:
+			self.listOfMessage.remove(msg)
 		
 	def sendMessage(self,msg):
 		self.cWriter.send(msg.getMsg(),self.myConnection)

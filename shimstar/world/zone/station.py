@@ -1,6 +1,5 @@
 import xml.dom.minidom
 import os, sys
-from panda3d.bullet import *
 from shimstar.core.shimconfig import *
 
 class Station:

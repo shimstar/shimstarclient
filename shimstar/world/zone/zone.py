@@ -24,7 +24,9 @@ class Zone(threading.Thread):
 		self.listOfWormHole=[]
 		self.listOfUsers={}
 		self.typeZone=0
+		self.exitZone=0
 		self.boxEgg=""
+		self.egg=""
 		self.boxScale=0
 		self.file=""
 		self.id=id
@@ -45,6 +47,9 @@ class Zone(threading.Thread):
 		
 	def getListOfNPC(self):
 		return self.npc
+		
+	def stop(self):
+		self.stopThread=True
 		
 	def run(self):
 		while not self.stopThread:
@@ -104,7 +109,7 @@ class Zone(threading.Thread):
 				tempUser=User(tabMsg[0],tabMsg[1])
 				tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
 				tempUser.chooseCharacter(tabMsg[2])
-				tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7])
+				tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[7])
 				User.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
@@ -145,9 +150,32 @@ class Zone(threading.Thread):
 				for u in User.listOfUser:
 					if User.listOfUser[u].getCurrentCharacter().getId()==idChar:
 						userToRemove=User.listOfUser[u]
-				if userToRemove.getId()!=User.getInstance().getId():
+				print "zone::removeChar :: " +str(idChar) + "/" + str(userToRemove.getId()) + " vs " + str(User.getInstance().getId())
+				print "zone::removeChar :: " + str(User.listOfUser)
+				if userToRemove!=None and userToRemove.getId()!=User.getInstance().getId():
 					userToRemove.destroy()
+				#~ else:
+				  #~ GameState.getInstance().setState(C_DEATH)
 				User.lock.release()
+				
+				
+				NetworkZoneServer.getInstance().removeMessage(msg)
+		
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_DEATH_CHAR)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				netMsg=msg.getMessage()
+				idZone=int(netMsg[0])
+				print "zone::removeChar " + str(idZone)
+				GameState.getInstance().setNewZone(idZone)
+				User.getInstance().getCurrentCharacter().manageDeath()
+				User.getInstance().getCurrentCharacter().changeZone(True)
+				msg=netMessage(C_NETWORK_DEATH_CHAR)
+				msg.addInt(User.getInstance().getId())
+				NetworkMainServer.getInstance().sendMessage(msg)
+				msg=netMessage(C_NETWORK_DEATH_CHAR)
+				msg.addInt(User.getInstance().getId())
+				NetworkZoneServer.getInstance().sendMessage(msg)
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runNewNpc(self):
@@ -167,13 +195,15 @@ class Zone(threading.Thread):
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runUpdatePosChar(self):
-		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_UPDATE_POS)
-		
+		#~ tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_UPDATE_POS)
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_UPDATE_POS)
+		#~ print "zone::runUpdatePosChar "
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
 				usr=int(netMsg[0])
 				charact=int(netMsg[1])
+				#~ print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
 				if usr==User.getInstance().getId():
 					if  User.getInstance().getCurrentCharacter().getShip()!=None:
 						User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
@@ -186,10 +216,12 @@ class Zone(threading.Thread):
 							if  ch.getShip()!=None:
 								ch.getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
 								ch.getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
-				NetworkZoneUdp.getInstance().removeMessage(msg)
+				#~ NetworkZoneUdp.getInstance().removeMessage(msg)
+				NetworkZoneServer.getInstance().removeMessage(msg)
 			
 	def runUpdatePosNPC(self):
-		tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_NPC_UPDATE_POS)
+		#~ tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_NPC_UPDATE_POS)
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NPC_UPDATE_POS)
 		
 		if len(tempMsg)>0:
 			for msg in tempMsg:
@@ -205,7 +237,8 @@ class Zone(threading.Thread):
 								n.ship.setPosToGo((netMsg[6+itNbNpc*8],netMsg[7+itNbNpc*8],netMsg[8+itNbNpc*8]))
 								#~ print "zone::runUpdatePosNPC pos Npc " + str(npcId) + "  :: " + str((netMsg[6+itNbNpc*8],netMsg[7+itNbNpc*8],netMsg[8+itNbNpc*8]))
 								#~ NPC.lock.release()
-				NetworkZoneUdp.getInstance().removeMessage(msg)
+				#~ NetworkZoneUdp.getInstance().removeMessage(msg)
+				NetworkZoneServer.getInstance().removeMessage(msg)
 			
 	def runNewShot(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_NEW_CHAR_SHOT)
@@ -254,7 +287,9 @@ class Zone(threading.Thread):
 				Bullet.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 
-		
+	def getEgg(self):
+		return self.egg
+	
 	def stop(self):
 		self.stopThread=True
 
@@ -270,24 +305,30 @@ class Zone(threading.Thread):
 				self.scale=float(z.getElementsByTagName('scale')[0].firstChild.data)
 				self.music=str(z.getElementsByTagName('music')[0].firstChild.data)
 				#~ if self.visible==True:
-				self.box = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +self.egg)
-				self.box.setScale(self.scale)
-				self.box.reparentTo(render)
-				self.box.setLightOff()
-				self.box.clearFog()
-				asts=z.getElementsByTagName('asteroid')
-				for a in asts:
-					self.listOfAsteroid.append(Asteroid(a))
+				if self.typeZone==C_TYPEZONE_SPACE:
+					self.box = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +self.egg)
+					self.box.setScale(self.scale)
+					self.box.reparentTo(render)
+					self.box.setLightOff()
+					self.box.clearFog()
+					asts=z.getElementsByTagName('asteroid')
+					for a in asts:
+						self.listOfAsteroid.append(Asteroid(a))
+						
+					stations=z.getElementsByTagName('station')
+					for s in stations:
+						stationLoaded=Station(0,s)
+						self.listOfStation.append(stationLoaded)
+						
+					#~ wormHole=z.getElementsByTagName('wormhole')
+					#~ for w in wormHole:
+						#~ wormHoleLoaded=wormhole(w)
+						#~ self.listOfWormHole.append(wormHoleLoaded)
+				else:
+					self.exitZone=int(z.getElementsByTagName('exitzone')[0].firstChild.data)
 					
-				stations=z.getElementsByTagName('station')
-				for s in stations:
-					stationLoaded=Station(0,s)
-					self.listOfStation.append(stationLoaded)
-					
-				#~ wormHole=z.getElementsByTagName('wormhole')
-				#~ for w in wormHole:
-					#~ wormHoleLoaded=wormhole(w)
-					#~ self.listOfWormHole.append(wormHoleLoaded)
+	def getExitZone(self):
+		return self.exitZone
 					
 	def getMusic(self):
 		return self.music

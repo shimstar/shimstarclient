@@ -39,6 +39,10 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.listOfExplosion=[]
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		ship.setInvisible()
+		alight = AmbientLight('alight')
+		alight.setColor(VBase4(0.7, 0.7, 0.7, 1))
+		alnp = render.attachNewNode(alight)
+		render.setLight(alnp)
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -83,6 +87,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.setupRocketUI()
 		self.setupUI()
 		self.CEGUI.enable() 
+		
 		
 	def quitGame(self):
 		#~ self.stopThread=True
@@ -176,7 +181,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		elif self.target!=None and self.target.getNode().isEmpty()==True:
 				self.target=None
 		else:
-			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
+			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget")!=None and self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
 				
 	def setupUI(self):
@@ -272,6 +277,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		
 	def destroy(self):
 		GameInstance=None
+		for expl in self.listOfExplosion:
+			expl.delete()
 		self.ignoreKey(None)
 		if self.ceGuiRootWindow!=None:
 			self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
@@ -288,6 +295,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		
 	def getNextTarget(self):
 		listOfObj=self.currentZone.getListOfNPC()
+		listOfObj+=self.currentZone.getListOfPlayer()
 		actualTarget=Follower.getInstance().getTarget()
 		
 		found=False
@@ -311,8 +319,8 @@ class GameInSpace(DirectObject,threading.Thread):
 			self.target=target.getShip()
 		
 	def seekNearestTarget(self,typeTarget):
-		if typeTarget=="NPC":
-			listOfObj=self.currentZone.getListOfNPC()
+		#~ if typeTarget=="NPC":
+		listOfObj=self.currentZone.getListOfNPC() + User.getListOfCharacters(True)
 		distanceMax=10000000
 		newTarget=None
 		
@@ -345,86 +353,93 @@ class GameInSpace(DirectObject,threading.Thread):
 	def runUpdateExplosion(self, task):		
 		if GameState.getInstance().getState()==C_PLAYING:
 			currentFrame = int(task.time * task.fps)
-			
-			task.obj.setTexture(task.textures[currentFrame % len(task.textures)], 1)
-		
-			if currentFrame>task.timeFps:
-				tempToDelete=None
-				for expl in self.listOfExplosion:
-					if expl.getName()==task.obj.getName():
-						tempToDelete=expl
-					
-				if tempToDelete!=None:
-					self.listOfExplosion.remove(tempToDelete)
-					tempToDelete.delete()
-					
-				self.expTask.remove(task)
+			try:
+				task.obj.setTexture(task.textures[currentFrame % len(task.textures)], 1)
+				if currentFrame>task.timeFps:
+					tempToDelete=None
+					for expl in self.listOfExplosion:
+						if expl.getName()==task.obj.getName():
+							tempToDelete=expl
 						
-				return Task.done
-			else:
-				return Task.cont          #Continue the task indefinitely
+					if tempToDelete!=None:
+						self.listOfExplosion.remove(tempToDelete)
+						tempToDelete.delete()
+						
+					self.expTask.remove(task)
+							
+					return Task.done
+				else:
+					return Task.cont          #Continue the task indefinitely
+			except:
+				print "Game::runUpdateExplosion something's wrong here"
+				Task.done
 		else:
+			self.expTask.remove(task)
 			return Task.done
 		
 	def run(self):
-		while not self.stopThread:
+		while not self.stopThread and GameState.getInstance().getState()==C_PLAYING:
 			ship=User.getInstance().getCurrentCharacter().getShip()
-			forwardVec=Quat(ship.node.getQuat()).getForward()
-			if ship.isHidden()==True:
-				base.camera.setPos((forwardVec*(1.0))+ ship.node.getPos())
-				base.camera.setHpr(ship.node.getHpr())
-			else:
-				#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
-				mvtCam = (((forwardVec*(-200.0)) + ship.node.getPos()) * 0.20) + (base.camera.getPos() * 0.80)
-				hprCam = ship.node.getHpr()*0.2 + base.camera.getHpr()*0.8
-				base.camera.setPos(mvtCam)
-				base.camera.setHpr(hprCam)
-			
-			if globalClock.getRealTime()-self.updateInput>0.1:
-				self.updateInput=globalClock.getRealTime()
-				if len(self.historyKey)>0:
-					nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-					nm.addInt(User.getInstance().getId())
-					nm.addInt(len(self.historyKey))
-					for key in self.historyKey.keys():
-						if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
-							nm.addString(key)
-							nm.addInt(self.historyKey[key])
-					NetworkZoneUdp.getInstance().sendMessage(nm)
-				
-				self.historyKey.clear()
-				
-				if self.mousebtn[0]==1:
-					if ship.shot()==True:
-						nm=netMessage(C_NETWORK_CHAR_SHOT)
-						nm.addInt(ship.getOwner().getUserId())
-						nm.addInt(ship.getOwner().getId())
-						nm.addFloat(ship.getPos().getX())
-						nm.addFloat(ship.getPos().getY())
-						nm.addFloat(ship.getPos().getZ())
-						nm.addFloat(ship.getQuat().getR())
-						nm.addFloat(ship.getQuat().getI())
-						nm.addFloat(ship.getQuat().getJ())
-						nm.addFloat(ship.getQuat().getK())
-						NetworkZoneUdp.getInstance().sendMessage(nm)
-				
-				if self.keysDown.has_key('t'):
-					if (self.keysDown['t']!=0):
-						self.seekNearestTarget("NPC")
-						self.keysDown['t']=0
-						
-				if self.keysDown.has_key('v'):
-					if (self.keysDown['v']!=0):
-						self.getNextTarget()
-						self.keysDown['v']=0
-						
-				if self.keysDown.has_key('f12'):
-					del self.keysDown['f12']
+			if ship!=None:
+				if ship.node.isEmpty()==False:
+					forwardVec=Quat(ship.node.getQuat()).getForward()
 					if ship.isHidden()==True:
-						ship.setVisible()
+						base.camera.setPos((forwardVec*(1.0))+ ship.node.getPos())
+						base.camera.setHpr(ship.node.getHpr())
 					else:
-						ship.setInvisible()
-			
+						#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
+						mvtCam = (((forwardVec*(-200.0)) + ship.node.getPos()) * 0.20) + (base.camera.getPos() * 0.80)
+						hprCam = ship.node.getHpr()*0.2 + base.camera.getHpr()*0.8
+						base.camera.setPos(mvtCam)
+						base.camera.setHpr(hprCam)
+					
+					if globalClock.getRealTime()-self.updateInput>0.1:
+						self.updateInput=globalClock.getRealTime()
+						if len(self.historyKey)>0:
+							nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+							nm.addInt(User.getInstance().getId())
+							nm.addInt(len(self.historyKey))
+							for key in self.historyKey.keys():
+								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+									nm.addString(key)
+									nm.addInt(self.historyKey[key])
+							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
+							NetworkZoneServer.getInstance().sendMessage(nm)
+						
+						self.historyKey.clear()
+						
+						if self.mousebtn[0]==1:
+							if ship.shot()==True:
+								nm=netMessage(C_NETWORK_CHAR_SHOT)
+								nm.addInt(ship.getOwner().getUserId())
+								nm.addInt(ship.getOwner().getId())
+								nm.addFloat(ship.getPos().getX())
+								nm.addFloat(ship.getPos().getY())
+								nm.addFloat(ship.getPos().getZ())
+								nm.addFloat(ship.getQuat().getR())
+								nm.addFloat(ship.getQuat().getI())
+								nm.addFloat(ship.getQuat().getJ())
+								nm.addFloat(ship.getQuat().getK())
+								#~ NetworkZoneUdp.getInstance().sendMessage(nm)
+								NetworkZoneServer.getInstance().sendMessage(nm)
+						
+						if self.keysDown.has_key('t'):
+							if (self.keysDown['t']!=0):
+								self.seekNearestTarget("NPC")
+								self.keysDown['t']=0
+								
+						if self.keysDown.has_key('v'):
+							if (self.keysDown['v']!=0):
+								self.getNextTarget()
+								self.keysDown['v']=0
+								
+						if self.keysDown.has_key('f12'):
+							del self.keysDown['f12']
+							if ship.isHidden()==True:
+								ship.setVisible()
+							else:
+								ship.setInvisible()
+					
 			User.lock.acquire()
 			for usr in User.listOfUser:
 				User.listOfUser[usr].getCurrentCharacter().run()
@@ -445,8 +460,12 @@ class GameInSpace(DirectObject,threading.Thread):
 			
 			self.renderTarget()
 			
-			#~ dt=globalClock.getRealTime()-self.ticksRenderUI
-			#~ if dt>0.1:
-				#~ rocketShipInfo.getInstance().render()
-				#~ rocketTarget.getInstance().render()
+			dt=globalClock.getRealTime()-self.ticksRenderUI
+			if dt>0.1:
+				if ship!=None:
+					prctHull,currentHull,maxHull=ship.getPrcentHull()
+				#~ print str(prctHull ) + "/" + str(currentHull)
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setProgress(prctHull)
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setTooltipText(str(currentHull) + "/" + str(maxHull))
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setText("Coque : " + str(prctHull*100) + "%")
 			

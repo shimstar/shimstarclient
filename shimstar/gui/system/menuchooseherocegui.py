@@ -125,7 +125,7 @@ class MenuChooseHeroCegui(DirectObject):
 	#~ @todo
 	### Ajouter la gestion d'un nouveau perso
 	def event(self,task):
-		temp=temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_ADD_CHAR)
+		temp=NetworkMainServer.getInstance().getListOfMessageById(C_USER_ADD_CHAR)
 		if(len(temp)>0):
 			msg=temp[0]
 			netMsg=msg.getMessage()
