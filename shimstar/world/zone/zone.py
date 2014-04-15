@@ -106,10 +106,18 @@ class Zone(threading.Thread):
 				tabMsg=msg.getMessage()
 				print "zone::runNewIncoming"
 				User.lock.acquire()
-				tempUser=User(tabMsg[0],tabMsg[1])
-				tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
-				tempUser.chooseCharacter(tabMsg[2])
-				tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[7])
+				userId=tabMsg[0]
+				userFound=User.getUserById(userId)
+				if userFound!=None:
+					if userFound.getCharacterById(tabMsg[2])==None:
+						tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
+						tempUser.chooseCharacter(tabMsg[2])
+						tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[7])						
+				else:
+					tempUser=User(tabMsg[0],tabMsg[1])
+					tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
+					tempUser.chooseCharacter(tabMsg[2])
+					tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[7])
 				User.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		

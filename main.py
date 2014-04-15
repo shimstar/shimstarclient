@@ -107,7 +107,7 @@ class ShimStarClient(DirectObject):
 			msg=netMessage(C_NETWORK_CONNECT)
 			msg.addInt(User.getInstance().getId())
 			msg.addInt(User.getInstance().getCurrentCharacter().getId())
-			msg.addInt(NetworkZoneUdp.getInstance().port)
+			#~ msg.addInt(NetworkZoneUdp.getInstance().port)
 			NetworkZoneServer.getInstance().sendMessage(msg)
 			NetworkZoneServer.getInstance().start()
 			#~ NetworkZoneUdp.getInstance().start()
@@ -134,5 +134,11 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuDeath()
 		return Task.cont
 		
+print 'Number of arguments:', len(sys.argv), 'arguments.'
+print 'Argument List:', str(sys.argv)
+#~ dir="."
+#~ if len(sys.argv):
+	#~ dir=str(sys.argv)
+
 app=ShimStarClient()
 run()

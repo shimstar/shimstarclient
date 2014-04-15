@@ -384,14 +384,16 @@ class GameInSpace(DirectObject,threading.Thread):
 				if ship.node.isEmpty()==False:
 					forwardVec=Quat(ship.node.getQuat()).getForward()
 					if ship.isHidden()==True:
-						base.camera.setPos((forwardVec*(1.0))+ ship.node.getPos())
-						base.camera.setHpr(ship.node.getHpr())
+						if ship.node.isEmpty()==False:
+							base.camera.setPos((forwardVec*(1.0))+ ship.node.getPos())
+							base.camera.setHpr(ship.node.getHpr())
 					else:
+						if ship.node.isEmpty()==False:
 						#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
-						mvtCam = (((forwardVec*(-200.0)) + ship.node.getPos()) * 0.20) + (base.camera.getPos() * 0.80)
-						hprCam = ship.node.getHpr()*0.2 + base.camera.getHpr()*0.8
-						base.camera.setPos(mvtCam)
-						base.camera.setHpr(hprCam)
+							mvtCam = (((forwardVec*(-200.0)) + ship.node.getPos()) * 0.20) + (base.camera.getPos() * 0.80)
+							hprCam = ship.node.getHpr()*0.2 + base.camera.getHpr()*0.8
+							base.camera.setPos(mvtCam)
+							base.camera.setHpr(hprCam)
 					
 					if globalClock.getRealTime()-self.updateInput>0.1:
 						self.updateInput=globalClock.getRealTime()

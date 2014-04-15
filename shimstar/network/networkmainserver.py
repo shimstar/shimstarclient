@@ -7,7 +7,6 @@ from shimstar.core.constantes import *
 from shimstar.core.shimconfig import *
 from shimstar.network.message import *
 from shimstar.network.networkzoneserver import *
-from shimstar.network.networkzoneudp import *
 from shimstar.game.gamestate import *
 
 class NetworkMainServer(threading.Thread):
@@ -99,9 +98,6 @@ class NetworkMainServer(threading.Thread):
 				NetworkZoneServer.getInstance().stop()
 			#~ print "############# " + str(ip) + '/' + str(port)
 			NetworkZoneServer(ip,port)
-			if NetworkZoneUdp.getInstance()!=None:
-				NetworkZoneUdp.getInstance().stop()
-			NetworkZoneUdp(ip,portudp,portudp2)
 			GameState.getInstance().setState(C_RECEIVED_INFOZONE)
 		elif msgID==C_USER_ADD_CHAR:
 			msgTab.append(myIterator.getUint32())
