@@ -18,21 +18,24 @@ class Bullet(threading.Thread):
 		self.lastMove=globalClock.getRealTime()
 		self.fileToSound=sound
 		self.bulletSound=None
+		self.node=None
 		try:
 			self.node=loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +"models/" + egg)
 		except:
 			print "Bullet:__init__ loadModel failed on " + str(shimConfig.getInstance().getConvRessourceDirectory() +"models/" + egg) + " #### egg=" + str(egg)
-		self.node.setPos(pos)
-		self.initPos=self.node.getPos()
-		self.node.setQuat(Quat(quat))
-		forward=self.node.getQuat().getForward()
-		forward.normalize()
-		self.node.reparentTo(render)
-		self.range=range
-		self.lastMove=globalClock.getRealTime()
-		self.speed=speed
-		Bullet.listOfBullet[self.id]=self
+		if self.node!=None:
+			self.node.setPos(pos)
+			self.initPos=self.node.getPos()
+			self.node.setQuat(Quat(quat))
+			forward=self.node.getQuat().getForward()
+			forward.normalize()
+			self.node.reparentTo(render)
+			self.range=range
+			self.lastMove=globalClock.getRealTime()
+			self.speed=speed
+			Bullet.listOfBullet[self.id]=self
 		#~ self.initAudio()
+		self.lock=threading.Lock()
 
 	@staticmethod
 	def getBullet(id):
@@ -110,14 +113,15 @@ class Bullet(threading.Thread):
 		dt=globalClock.getRealTime()-self.lastMove
 		self.lastMove=globalClock.getRealTime()
 		if dt<1 and dt>-1:
-			Bullet.lock.acquire()
+			self.lock.acquire()
 			if self.node!=None and self.node.isEmpty()!=True:
 				self.node.setPos(self.node,Vec3(0,1*dt*self.speed,0))
-			Bullet.lock.release()
+			self.lock.release()
 	def getName(self):
 		return self.name
 		
 		
 	def getName(self):
 		return self.name
-		
+	
+	

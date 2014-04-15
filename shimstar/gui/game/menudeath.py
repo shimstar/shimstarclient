@@ -3,6 +3,7 @@ from string import *
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import * 
+from direct.task import Task
 from direct.distributed.PyDatagram import PyDatagram 
 from direct.distributed.PyDatagramIterator import PyDatagramIterator 
 from direct.gui.DirectFrame import DirectFrame

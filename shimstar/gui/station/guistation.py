@@ -4,6 +4,7 @@ import sys,os
 import PyCEGUI
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
+from direct.task import Task
 from pandac.PandaModules import * 
 from shimstar.gui.shimcegui import * 
 from shimstar.core.shimconfig import *

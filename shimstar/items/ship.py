@@ -21,6 +21,7 @@ class Ship:
 	#~ def __init__(self,id,xmlPart):
 	def __init__(self,id,idTemplate,hullpoints=0):
 		print "ship::init " + str(id) + "/" + str(idTemplate)
+		self.lock=threading.Lock()
 		self.name = ""
 		self.id=id
 		self.template=idTemplate
@@ -88,6 +89,7 @@ class Ship:
 		dt=globalClock.getRealTime()-self.lastMove
 		if dt>0.01:
 			if True:
+				self.lock.acquire()
 				if self.node.isEmpty()!=True:
 					if self.firstMove==True:
 						self.node.setPos(self.pointerToGo.getPos())
@@ -146,7 +148,7 @@ class Ship:
 							
 							#~ print "ship::move " + self.node.getQuat()
 			
-						
+				self.lock.release()
 				#~ self.node.setPos(self.pointerToGo.getPos())
 			self.lastMove=globalClock.getRealTime()
 			#~ print "ship::move " + str(self.id) + "/" + str(self.getPos())
@@ -189,7 +191,9 @@ class Ship:
 				#~ idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
 				#~ item=itemFactory.getItemFromXml(itXml,typeItem)
 				#~ self.itemInInventory.append(item)
+		
 		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+		print "ship::loadTemplate " + str(self.node)
 		self.node.reparentTo(render)
 		self.node.setName(self.name)
 		
@@ -311,10 +315,14 @@ class Ship:
 		return self.node.getPos()
 		
 	def setPos(self,pos):
+		self.lock.acquire()
 		self.node.setPos(pos)
+		self.lock.release()
 		
 	def setQuat(self,quat):
+		self.lock.acquire()
 		self.node.setQuat(quat)
+		self.lock.release()
 		
 	def getNode(self):
 		return self.node
@@ -349,8 +357,10 @@ class Ship:
 		return None
 
 	def destroy(self):
+		self.lock.acquire()
 		self.node.detachNode()
 		self.node.removeNode()		
+		self.lock.release()
 				
 	def getPrcentHull(self):
 		prcent = float(self.hullpoints) / float(self.maxhull) 
