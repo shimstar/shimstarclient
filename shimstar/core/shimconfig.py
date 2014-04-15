@@ -16,9 +16,12 @@ class shimConfig:
 		
 	def loadXml(self):
 		if os.path.isfile("config.xml")!=False:
+			print "shimconfig::getcurrentPath " + str(os.getcwd())
 			fileHandle = open ( "./config.xml", 'r' )
 			fileHandle.close()
 			dom = xml.dom.minidom.parse("./config.xml")
+			print "shimconfig::loadXml " + str(dom.toxml())
+			#~ print "shimconfig::loadXml" + str(inspect.getfile(
 			direc=dom.getElementsByTagName('directory')
 			for d in direc:
 				self.ressourceDirectory=str(d.firstChild.data)
@@ -28,19 +31,23 @@ class shimConfig:
 			
 			usr=dom.getElementsByTagName('user')
 			for u in usr:
-				self.user=str(u.firstChild.data)
+				if u.firstChild!=None:
+					self.user=str(u.firstChild.data)
 				
 			ip=dom.getElementsByTagName('ip')
 			for i in ip:
-				self.ip=str(i.firstChild.data)
+				if i.firstChild!=None:
+					self.ip=str(i.firstChild.data)
 				
 			ver=dom.getElementsByTagName('version')
 			for v in ver:
-				self.version=str(v.firstChild.data)
+				if v.firstChild!=None:
+					self.version=str(v.firstChild.data)
 			
 			pwd=dom.getElementsByTagName('password')
 			for p in pwd:
-				self.pwd=str(p.firstChild.data)
+				if p.firstChild!=None:
+					self.pwd=str(p.firstChild.data)
 				
 	def getConvRessourceDirectory(self):
 		return self.convDirectory
