@@ -175,38 +175,19 @@ class MenuConnectCegui(ShowBase):
 				for msg in temp:
 					netMsg=msg.getMessage()
 					state=int(netMsg[0])
-					#~ diag=self.doc.GetElementById("errorcreate")
-					#~ diag.SetAttribute("style","display:Block;")
-
-					if state==1:
-						#~ diag.inner_rml="<span style='color:#ff0000;'>Compte cree</span>"
+					if state==1:					
 						self.OutNewAccountAnimationInstance.start();
 						self.InNewAccountReportAnimationInstance.start();
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText("Votre compte a bien ete cree")
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'connectNewAccount')
-						#~ GameState().setState(C_INIT)
-						return Task.done
+						#~ return Task.done
 					else:
 						self.OutNewAccountAnimationInstance.start();
 						self.InNewAccountReportAnimationInstance.start();
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText("Ce compte existe deja")
 						self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'ButtonClicked')
 					NetworkMainServer.getInstance().removeMessage(msg)
-				#~ msg=temp[0]
-				#~ network.reference.removeMessage(msg)
-				#~ if msg.getMessage().find("#")!=-1:
-					#~ tab=msg.getMessage().split('#')
-					#~ if tab[0]=="ok":
-						#~ self.OutNewAccountAnimationInstance.start();
-						#~ self.InNewAccountReportAnimationInstance.start();
-						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText("Votre compte a bien ete cree")
-						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'connectNewAccount')
-						#~ return Task.done
-					#~ elif tab[0]=="ko":
-						#~ self.OutNewAccountAnimationInstance.start();
-						#~ self.InNewAccountReportAnimationInstance.start();
-						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/LabelReport").setText(tab[1])
-						#~ self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccountReport/ButtonOK").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'ButtonClicked')
+				
 		return Task.cont
 		
 	def createAccount(self,windowEventArgs):
