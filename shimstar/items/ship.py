@@ -5,6 +5,7 @@ from math import sin, cos, pi
 from math import sqrt
 
 from pandac.PandaModules import *
+from direct.gui.OnscreenText import OnscreenText
 
 from shimstar.items.slot import *
 from shimstar.items.engine import *
@@ -19,8 +20,13 @@ DEG_TO_RAD = pi / 180
 
 class Ship:
 	#~ def __init__(self,id,xmlPart):
+	listOfShip={}
+	lock=threading.Lock()
 	def __init__(self,id,idTemplate,hullpoints=0):
 		print "ship::init " + str(id) + "/" + str(idTemplate)
+		Ship.lock.acquire()
+		Ship.listOfShip[id]=self
+		Ship.lock.release()
 		self.lock=threading.Lock()
 		self.name = ""
 		self.id=id
@@ -61,6 +67,13 @@ class Ship:
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
+		self.textObject=None
+		
+	def getTextObject(self):
+		return self.textObject
+		
+	def setTextObject(self,t):
+		self.textObject=t
 		
 	def getPrcentHull(self):
 		prcent = float(self.hullpoints) / float(self.maxhull) 
@@ -68,6 +81,7 @@ class Ship:
 		
 	def setOwner(self,owner):
 		self.owner=owner
+		
 		
 	def getOwner(self):
 		return self.owner
@@ -195,7 +209,8 @@ class Ship:
 		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
 		print "ship::loadTemplate " + str(self.node)
 		self.node.reparentTo(render)
-		self.node.setName(self.name)
+		self.node.setName(str(self.id))
+		textObject = OnscreenText(text = 'my text string',parent=self.node)
 		
 	def getId(self):
 		return self.id
@@ -361,6 +376,12 @@ class Ship:
 		self.node.detachNode()
 		self.node.removeNode()		
 		self.lock.release()
+		Ship.lock.acquire()
+		if Ship.listOfShip.has_key(self.id):
+			del Ship.listOfShip[self.id]
+		Ship.lock.release()
+		self.textObject.detachNode()
+		self.textObject.removeNode()
 				
 	def getPrcentHull(self):
 		prcent = float(self.hullpoints) / float(self.maxhull) 

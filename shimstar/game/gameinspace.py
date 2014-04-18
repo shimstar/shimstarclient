@@ -1,5 +1,6 @@
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
+from direct.interval.LerpInterval import LerpPosInterval
 
 from shimstar.core.shimconfig import *
 from shimstar.core.functions import *
@@ -43,6 +44,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		alight.setColor(VBase4(0.7, 0.7, 0.7, 1))
 		alnp = render.attachNewNode(alight)
 		render.setLight(alnp)
+		#~ self.textObject = OnscreenText(text = "this is my ship", pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
+		#~ print self.textObject
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -183,7 +186,38 @@ class GameInSpace(DirectObject,threading.Thread):
 		else:
 			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget")!=None and self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
-				
+	
+
+	def showShipName(self):
+		Ship.lock.acquire()
+		for s in Ship.listOfShip:
+			ship=Ship.listOfShip[s]
+			nShip=ship.node
+			textObject=ship.getTextObject()
+			distance=0
+			if ship!=User.getInstance().getCurrentCharacter().ship:
+				distance=self.calcDistance(ship.node)
+			if textObject==None:
+				textObject = OnscreenText(text = ship.owner.name, pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
+				ship.setTextObject(textObject)
+			if isInView(nShip)!=True: 
+				textObject.hide() 
+			else: 
+				textObject.show() 
+				pos=self.map3dToAspect2d(render,nShip.getPos(render))
+				if pos!=None:
+					x=pos.getX()
+					z=pos.getZ()
+					distFactor=float(float(distance)/float(300))
+					if distFactor>0:
+						z+=float(float(0.1)/float(distFactor))
+					else:
+						z+=0.1
+
+				textObject.setPos(x, z) 
+		Ship.lock.release()
+		
+		
 	def setupUI(self):
 		self.CEGUI.SchemeManager.create("TaharezLook.scheme") 
 		self.CEGUI.SchemeManager.create("shimstar.scheme") 
@@ -466,6 +500,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			if dt>0.1:
 				if ship!=None:
 					prctHull,currentHull,maxHull=ship.getPrcentHull()
+				self.showShipName()
 				#~ print str(prctHull ) + "/" + str(currentHull)
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setProgress(prctHull)
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setTooltipText(str(currentHull) + "/" + str(maxHull))
