@@ -112,12 +112,12 @@ class Zone(threading.Thread):
 					if userFound.getCharacterById(tabMsg[2])==None:
 						tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
 						tempUser.chooseCharacter(tabMsg[2])
-						tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[7])						
+						tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[8])						
 				else:
 					tempUser=User(tabMsg[0],tabMsg[1])
 					tempUser.addCharacter(tabMsg[2],tabMsg[3],tabMsg[4],tabMsg[5])
 					tempUser.chooseCharacter(tabMsg[2])
-					tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[7])
+					tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[8])
 				User.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		

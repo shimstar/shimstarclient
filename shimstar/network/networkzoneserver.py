@@ -73,14 +73,15 @@ class NetworkZoneServer(threading.Thread):
 			port=myIterator.getUint32()
 			port2=myIterator.getUint32()
 		elif msgID==C_NETWORK_CHAR_INCOMING:
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())		
+			msgTab.append(myIterator.getUint32())  # iduser
+			msgTab.append(myIterator.getString())  # name user
+			msgTab.append(myIterator.getUint32())		# id char
+			msgTab.append(myIterator.getString())		# namechar
+			msgTab.append(myIterator.getString())		# facechar
+			msgTab.append(myIterator.getUint32())		# idzone
+			msgTab.append(myIterator.getUint32())		# idship
+			msgTab.append(myIterator.getUint32())		# templateship
+			msgTab.append(myIterator.getUint32())		# hullpoints
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_INCOMING:

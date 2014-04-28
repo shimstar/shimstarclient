@@ -10,6 +10,7 @@ from shimstar.user.user import *
 from shimstar.game.gamestate import *
 from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
+from shimstar.gui.core.menututo import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
 #~ from shimstar.gui.game.rocketshipinfo import *
@@ -178,6 +179,11 @@ class GameInSpace(DirectObject,threading.Thread):
 				x=(x*C_USER_WIDTH/(C_RATIO*2))
 				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
 				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setPosition(vec)
+				prctHull=0
+				if self.target!=None:
+					prctHull,currentHull,maxHull=self.target.getPrcentHull()
+				#~ print "gameinspace::rendertarget " + str(prctHull)
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
 			else:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
@@ -200,21 +206,25 @@ class GameInSpace(DirectObject,threading.Thread):
 			if textObject==None:
 				textObject = OnscreenText(text = ship.owner.name, pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
 				ship.setTextObject(textObject)
-			if isInView(nShip)!=True: 
-				textObject.hide() 
-			else: 
-				textObject.show() 
-				pos=self.map3dToAspect2d(render,nShip.getPos(render))
-				if pos!=None:
-					x=pos.getX()
-					z=pos.getZ()
-					distFactor=float(float(distance)/float(300))
-					if distFactor>0:
-						z+=float(float(0.1)/float(distFactor))
-					else:
-						z+=0.1
+			if abs(distance)<2000:
+				if isInView(nShip)!=True: 
+					textObject.hide() 
+				else: 
+					textObject.show() 
+					pos=self.map3dToAspect2d(render,nShip.getPos(render))
+					if pos!=None:
+						x=pos.getX()
+						z=pos.getZ()
+						distFactor=float(float(distance)/float(300))
+						if distFactor>0:
+							z+=float(float(0.1)/float(distFactor))
+						else:
+							z+=0.1
+						textObject.setPos(x, z) 
+			else:
+				textObject.hide()
 
-				textObject.setPos(x, z) 
+					
 		Ship.lock.release()
 		
 		
@@ -412,6 +422,9 @@ class GameInSpace(DirectObject,threading.Thread):
 			return Task.done
 		
 	def run(self):
+		mt=MenuTuto.getInstance()
+		mt.setCeguiManager(self.CEGUI)
+		mt.displayTuto(C_MENU_TUTO_SPACE)
 		while not self.stopThread and GameState.getInstance().getState()==C_PLAYING:
 			ship=User.getInstance().getCurrentCharacter().getShip()
 			if ship!=None:
@@ -431,51 +444,54 @@ class GameInSpace(DirectObject,threading.Thread):
 					
 					if globalClock.getRealTime()-self.updateInput>0.1:
 						self.updateInput=globalClock.getRealTime()
-						if len(self.historyKey)>0:
-							nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-							nm.addInt(User.getInstance().getId())
-							nm.addInt(len(self.historyKey))
-							for key in self.historyKey.keys():
-								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
-									nm.addString(key)
-									nm.addInt(self.historyKey[key])
-							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
-							NetworkZoneServer.getInstance().sendMessage(nm)
-						
-						self.historyKey.clear()
-						
-						if self.mousebtn[0]==1:
-							if ship.shot()==True:
-								nm=netMessage(C_NETWORK_CHAR_SHOT)
-								nm.addInt(ship.getOwner().getUserId())
-								nm.addInt(ship.getOwner().getId())
-								nm.addFloat(ship.getPos().getX())
-								nm.addFloat(ship.getPos().getY())
-								nm.addFloat(ship.getPos().getZ())
-								nm.addFloat(ship.getQuat().getR())
-								nm.addFloat(ship.getQuat().getI())
-								nm.addFloat(ship.getQuat().getJ())
-								nm.addFloat(ship.getQuat().getK())
+						if MenuTuto.getInstance().isActiv()==False:
+							
+							if len(self.historyKey)>0:
+								nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+								nm.addInt(User.getInstance().getId())
+								nm.addInt(len(self.historyKey))
+								for key in self.historyKey.keys():
+									if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+										nm.addString(key)
+										nm.addInt(self.historyKey[key])
 								#~ NetworkZoneUdp.getInstance().sendMessage(nm)
 								NetworkZoneServer.getInstance().sendMessage(nm)
+							
+							self.historyKey.clear()
+							
+							if self.mousebtn[0]==1:
+								print "shot"
+								if ship.shot()==True:
+									nm=netMessage(C_NETWORK_CHAR_SHOT)
+									nm.addInt(ship.getOwner().getUserId())
+									nm.addInt(ship.getOwner().getId())
+									nm.addFloat(ship.getPos().getX())
+									nm.addFloat(ship.getPos().getY())
+									nm.addFloat(ship.getPos().getZ())
+									nm.addFloat(ship.getQuat().getR())
+									nm.addFloat(ship.getQuat().getI())
+									nm.addFloat(ship.getQuat().getJ())
+									nm.addFloat(ship.getQuat().getK())
+									#~ NetworkZoneUdp.getInstance().sendMessage(nm)
+									NetworkZoneServer.getInstance().sendMessage(nm)
+							
+							if self.keysDown.has_key('t'):
+								if (self.keysDown['t']!=0):
+									self.seekNearestTarget("NPC")
+									self.keysDown['t']=0
+									
+							if self.keysDown.has_key('v'):
+								if (self.keysDown['v']!=0):
+									self.getNextTarget()
+									self.keysDown['v']=0
+									
+							if self.keysDown.has_key('f12'):
+								del self.keysDown['f12']
+								if ship.isHidden()==True:
+									ship.setVisible()
+								else:
+									ship.setInvisible()
 						
-						if self.keysDown.has_key('t'):
-							if (self.keysDown['t']!=0):
-								self.seekNearestTarget("NPC")
-								self.keysDown['t']=0
-								
-						if self.keysDown.has_key('v'):
-							if (self.keysDown['v']!=0):
-								self.getNextTarget()
-								self.keysDown['v']=0
-								
-						if self.keysDown.has_key('f12'):
-							del self.keysDown['f12']
-							if ship.isHidden()==True:
-								ship.setVisible()
-							else:
-								ship.setInvisible()
-					
 			User.lock.acquire()
 			for usr in User.listOfUser:
 				User.listOfUser[usr].getCurrentCharacter().run()

@@ -28,6 +28,7 @@ class Character:
 			self.ship=None
 				
 	def setShip(self,idShip,idTemplate,hullpoints):
+		#~ print "character :: setsHip " + str(hullpoints)
 		self.ship=Ship(idShip,idTemplate,hullpoints)
 		self.ship.setOwner(self)
 		print "character:setShip" + str(self.ship)
@@ -38,7 +39,7 @@ class Character:
 			self.ship=None
 			
 	def takeDamage(self,damage):
-		print "character::takedamage " + str(damage)
+		#~ print "character::takedamage " + str(damage)
 		return self.ship.takeDamage(damage)
 				
 	def setPos(self,pos):
