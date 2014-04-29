@@ -166,6 +166,7 @@ class GameInSpace(DirectObject,threading.Thread):
 	def renderTarget(self):
 		#~ print self.target
 		if self.target!=None and self.target.getNode().isEmpty()!=True:
+			self.target.getLock().acquire()
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
 			if pos!=None:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==False:
@@ -187,6 +188,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			else:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+			self.target.getLock().release()
 		elif self.target!=None and self.target.getNode().isEmpty()==True:
 				self.target=None
 		else:
@@ -328,13 +330,15 @@ class GameInSpace(DirectObject,threading.Thread):
 			self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
 		
 	def calcDistance(self,targetNode):
+		currentDistance=0
 		ship=User.getInstance().getCurrentCharacter().getShip()
-		posShip=ship.getNode().getPos()
-		posItem=targetNode.getPos()
-		dx=posShip.getX()-posItem.getX()
-		dy=posShip.getY()-posItem.getY()
-		dz=posShip.getZ()-posItem.getZ()
-		currentDistance=int(round(sqrt(dx*dx+dy*dy+dz*dz),0))
+		if ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
+			posShip=ship.getNode().getPos()
+			posItem=targetNode.getPos()
+			dx=posShip.getX()-posItem.getX()
+			dy=posShip.getY()-posItem.getY()
+			dz=posShip.getZ()-posItem.getZ()
+			currentDistance=int(round(sqrt(dx*dx+dy*dy+dz*dz),0))
 		return currentDistance
 		
 	def getNextTarget(self):

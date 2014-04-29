@@ -69,6 +69,9 @@ class Ship:
 		#~ print "ship init" + str(self.id)
 		self.textObject=None
 		
+	def getLock(self):
+		return self.lock
+	
 	def getTextObject(self):
 		return self.textObject
 		
@@ -375,13 +378,15 @@ class Ship:
 		self.lock.acquire()
 		self.node.detachNode()
 		self.node.removeNode()		
+		self.textObject.detachNode()
+		self.textObject.removeNode()
 		self.lock.release()
+		
 		Ship.lock.acquire()
 		if Ship.listOfShip.has_key(self.id):
 			del Ship.listOfShip[self.id]
 		Ship.lock.release()
-		self.textObject.detachNode()
-		self.textObject.removeNode()
+		
 				
 	def getPrcentHull(self):
 		prcent = float(self.hullpoints) / float(self.maxhull) 
