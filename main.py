@@ -58,29 +58,21 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuChooseHeroCegui()				
 		elif state==C_CHANGEZONE:
 			idZone=GameState.getInstance().getNewZone()
-			print "main::dispatch CHANGEZONE1 " + str(idZone)
+		
 			if idZone==0 or idZone==User.getInstance().getCurrentCharacter().getIdZone():
 				idZone=User.getInstance().getCurrentCharacter().getIdZone()
-			#~ else:
-				#~ msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
-				#~ msg.addInt(User.getInstance().getId())
-				#~ msg.addInt(idZone)
-				#~ NetworkMainServer.getInstance().sendMessage(msg)
-			#~ idZone=User.getInstance().getCurrentCharacter().getIdZone()
-			#~ User.getInstance().getCurrentCharacter().setIdZone(idZone)
-			print "main::dispatch CHANGEZONE2 " + str(idZone)
+			
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
 			if typeZone==C_TYPEZONE_SPACE:
 				msg=netMessage(C_NETWORK_INFO_ZONE)
-				msg.addInt(idZone)
+				msg.addUInt(idZone)
 				NetworkMainServer.getInstance().sendMessage(msg)
 				GameState.getInstance().setState(C_WAITING_INFOZONE)
 				if isinstance(self.menu,MenuLoadZoneCegui)!=True:
 					self.menu.destroy()
 					self.menu=None
 					self.menu=MenuLoadZoneCegui()
-				#~ else:
-					#~ self.menu=MenuLoadZoneCegui()
+				
 			else:
 				GameState.getInstance().setState(C_GOPLAY)
 
@@ -93,8 +85,7 @@ class ShimStarClient(DirectObject):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=GameInSpace()
-				#~ else:
-					#~ self.menu=GameInSpace()
+				
 				self.menu.start()
 			else:
 				if isinstance(self.menu,GuiStation)!=True:
@@ -105,9 +96,9 @@ class ShimStarClient(DirectObject):
 					#~ self.menu=GuiStation()
 		elif state==C_RECEIVED_INFOZONE:
 			msg=netMessage(C_NETWORK_CONNECT)
-			msg.addInt(User.getInstance().getId())
-			msg.addInt(User.getInstance().getCurrentCharacter().getId())
-			#~ msg.addInt(NetworkZoneUdp.getInstance().port)
+			msg.addUInt(User.getInstance().getId())
+			msg.addUInt(User.getInstance().getCurrentCharacter().getId())
+			#~ msg.addUInt(NetworkZoneUdp.getInstance().port)
 			NetworkZoneServer.getInstance().sendMessage(msg)
 			NetworkZoneServer.getInstance().start()
 			#~ NetworkZoneUdp.getInstance().start()
@@ -134,8 +125,8 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuDeath()
 		return Task.cont
 		
-print 'Number of arguments:', len(sys.argv), 'arguments.'
-print 'Argument List:', str(sys.argv)
+#~ print 'Number of arguments:', len(sys.argv), 'arguments.'
+#~ print 'Argument List:', str(sys.argv)
 #~ dir="."
 #~ if len(sys.argv):
 	#~ dir=str(sys.argv)

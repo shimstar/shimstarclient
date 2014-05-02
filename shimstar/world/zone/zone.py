@@ -179,10 +179,10 @@ class Zone(threading.Thread):
 				User.getInstance().getCurrentCharacter().manageDeath()
 				User.getInstance().getCurrentCharacter().changeZone(True)
 				msg=netMessage(C_NETWORK_DEATH_CHAR)
-				msg.addInt(User.getInstance().getId())
+				msg.addUInt(User.getInstance().getId())
 				NetworkMainServer.getInstance().sendMessage(msg)
 				msg=netMessage(C_NETWORK_DEATH_CHAR)
-				msg.addInt(User.getInstance().getId())
+				msg.addUInt(User.getInstance().getId())
 				NetworkZoneServer.getInstance().sendMessage(msg)
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
@@ -216,6 +216,7 @@ class Zone(threading.Thread):
 					if  User.getInstance().getCurrentCharacter().getShip()!=None:
 						User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
 						User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
+						User.getInstance().getCurrentCharacter().getShip().setPoussee(netMsg[9])
 				else:
 					tempUser=User.getUserById(usr)
 					if tempUser!=None:

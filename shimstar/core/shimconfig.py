@@ -20,7 +20,7 @@ class shimConfig:
 			fileHandle = open ( "./config.xml", 'r' )
 			fileHandle.close()
 			dom = xml.dom.minidom.parse("./config.xml")
-			print "shimconfig::loadXml " + str(dom.toxml())
+			#~ print "shimconfig::loadXml " + str(dom.toxml())
 			#~ print "shimconfig::loadXml" + str(inspect.getfile(
 			direc=dom.getElementsByTagName('directory')
 			for d in direc:

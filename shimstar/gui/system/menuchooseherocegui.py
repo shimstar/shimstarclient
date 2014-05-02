@@ -180,8 +180,8 @@ class MenuChooseHeroCegui(DirectObject):
 	def onPlay(self,winArgs):
 		User.getInstance().chooseCharacter(int(winArgs.window.getUserString("id")))
 		msg=netMessage(C_NETWORK_USER_CHOOSE_HERO)
-		msg.addInt(User.getInstance().getId())
-		msg.addInt(int(winArgs.window.getUserString("id")))
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(winArgs.window.getUserString("id")))
 		NetworkMainServer.getInstance().sendMessage(msg)
 		User.getInstance().getCurrentCharacter().changeZone()
 		
@@ -225,7 +225,7 @@ class MenuChooseHeroCegui(DirectObject):
 		#~ user.instance.addCharacter(name,face[0])
 		
 		msg=netMessage(C_USER_ADD_CHAR)
-		msg.addInt(User.getInstance().getId())
+		msg.addUInt(User.getInstance().getId())
 		msg.addString(name)
 		msg.addString(face[0])
 		#~ print "name" + name + "/" + str(face) + "/" + str(face[0])
@@ -247,8 +247,8 @@ class MenuChooseHeroCegui(DirectObject):
 		usrId=User.getInstance().getId()
 		heroId=self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Name").getUserString("id")
 		msg=netMessage(C_USER_DELETE_CHAR)
-		msg.addInt(User.getInstance().getId())
-		msg.addInt(int(heroId))
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(heroId))
 		NetworkMainServer.getInstance().sendMessage(msg)
 		#~ network.reference.sendMessage(C_USER_DELETE_CHAR,str(usrId)+"/"+heroId)
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Confirm").hide()

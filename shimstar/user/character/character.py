@@ -83,9 +83,9 @@ class Character:
 		if GameState.getInstance().getNewZone()!=0:			
 			self.idZone=GameState.getInstance().getNewZone()
 		msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
-		msg.addInt(self.userRef.getId())
-		msg.addInt(self.id)
-		msg.addInt(self.idZone)
+		msg.addUInt(self.userRef.getId())
+		msg.addUInt(self.id)
+		msg.addUInt(self.idZone)
 		NetworkMainServer.getInstance().sendMessage(msg)
 		if self.ship!=None:
 			self.ship.changeZone()

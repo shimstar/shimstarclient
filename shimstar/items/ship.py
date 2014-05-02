@@ -63,11 +63,18 @@ class Ship:
 		self.firstMove=False
 		self.renderCounter = 0
 		self.slots=[]
+		self.pousse=0
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
 		self.textObject=None
+		
+	def getPoussee(self):
+		return self.poussee
+		
+	def setPoussee(self,p):
+		self.poussee=p
 		
 	def getLock(self):
 		return self.lock
@@ -78,9 +85,13 @@ class Ship:
 	def setTextObject(self,t):
 		self.textObject=t
 		
-	def getPrcentHull(self):
-		prcent = float(self.hullpoints) / float(self.maxhull) 
-		return float(prcent),self.hullpoints,self.maxhull
+	#~ def getPrcentHull(self):
+		#~ prcent = float(self.hullpoints) / float(self.maxhull) 
+		#~ return float(prcent),self.hullpoints,self.maxhull
+		
+	def getPrcentSpeed(self):
+		prcent = float(self.poussee)/float(self.engine.getSpeedMax())
+		return float(prcent),self.poussee,self.engine.getSpeedMax()
 		
 	def setOwner(self,owner):
 		self.owner=owner
