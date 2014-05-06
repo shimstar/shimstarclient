@@ -85,11 +85,12 @@ class NetworkZoneServer(threading.Thread):
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_INCOMING:
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())		
+			msgTab.append(myIterator.getUint32()) #idnpc
+			msgTab.append(myIterator.getString()) #name
+			msgTab.append(myIterator.getUint32()) #templatenpc
+			msgTab.append(myIterator.getUint32()) #idship
+			msgTab.append(myIterator.getUint32())	#idtemplateship
+			msgTab.append(myIterator.getUint32())	#hullpoints
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NEW_CHAR_SHOT:

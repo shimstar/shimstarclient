@@ -197,7 +197,7 @@ class Zone(threading.Thread):
 				existingNpc=self.getNpcById(id)
 				NPC.lock.acquire()
 				if existingNpc==None:
-					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3],netMsg[4])
+					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3],netMsg[4],netMsg[5])
 					self.npc.append(temp)
 				NPC.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
