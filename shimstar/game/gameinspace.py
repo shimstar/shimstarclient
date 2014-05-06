@@ -13,6 +13,7 @@ from shimstar.gui.game.follower import *
 from shimstar.gui.core.menututo import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
+from shimstar.game.particleEngine import *
 #~ from shimstar.gui.game.rocketshipinfo import *
 #~ from shimstar.gui.game.rockettarget import *
 
@@ -32,6 +33,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.historyKey={}
 		self.expTask=[]
 		self.target=None
+		self.customIm={}
 		self.mousebtn = [0,0,0]
 		self.enableKey(None)
 		base.camera.setPos(0,-600,50)
@@ -176,10 +178,22 @@ class GameInSpace(DirectObject,threading.Thread):
 
 		return a2d
 		
-	def renderTarget(self):
-		#~ print self.target
+	def renderTarget(self,dt):
+		
 		if self.target!=None and self.target.getNode().isEmpty()!=True:
 			self.target.getLock().acquire()
+
+			###Ecran Info
+			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
+			if dt>0.1:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("NormalImage", "set:TempImageset" + self.target.name + " image:full_image")
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:TempImageset" + self.target.name + " image:full_image")
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("PushedImage", "set:TempImageset" + self.target.name + " image:full_image")
+			
+			###Reticule de suivi de la cible ou point rouge sur le bord
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
 			if pos!=None:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==False:
@@ -201,12 +215,17 @@ class GameInSpace(DirectObject,threading.Thread):
 			else:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+					
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:TempImageset image:full_image")
+					
 			self.target.getLock().release()
 		elif self.target!=None and self.target.getNode().isEmpty()==True:
 				self.target=None
 		else:
 			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget")!=None and self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()==True:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
 	
 
 	def showShipName(self):
@@ -273,7 +292,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
-		
+		#~ customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset", "background/backmenuconnect.jpg", "images")
+		#~ self.customIm = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesettgt", "/ships/ship1.png", "images")
 		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
@@ -282,6 +302,15 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").show()
 		self.CEGUI.WindowManager.getWindow("Station").hide()
 		self.CEGUI.System.setGUISheet(self.ceGuiRootWindow)
+		
+		customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesetship1", "/ships/ship1.png" , "images")
+		customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+		customImageset.setAutoScalingEnabled(False)
+		self.customIm['ship1']=customImageset 
+		customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesetspiderdrone", "/ships/spiderdrone.png" , "images")
+		customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+		customImageset.setAutoScalingEnabled(False)
+		self.customIm['spiderdrone']=customImageset 
 		#~ self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		#~ self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		#~ self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
@@ -291,12 +320,6 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ menuInventory.getInstance('inventaire').setObj(user.instance.getCurrentCharacter().getShip())
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("InfoItem"))
-				
-	#~ def setupRocketUI(self):
-		#~ self.context = shimRocketRocket.getInstance().getContext()
-		#~ self.background = self.context.LoadDocument('windows/backgroundgame.rml')
-		#~ self.background.Show()
-		#~ rocketShipInfo.getInstance().showWindow()
 		
 	def onMenuQuitter(self,args):
 		self.InQuitAnimationInstance.start()
@@ -359,6 +382,7 @@ class GameInSpace(DirectObject,threading.Thread):
 	def calcDistance(self,targetNode):
 		currentDistance=0
 		ship=User.getInstance().getCurrentCharacter().getShip()
+		#~ print "gameinSpace::calcDistance " + str(ship.getNode()) + "/" + str(targetNode)
 		if ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
 			posShip=ship.getNode().getPos()
 			posItem=targetNode.getPos()
@@ -400,7 +424,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		newTarget=None
 		
 		for n in listOfObj:
-			distance=self.calcDistance(n.getShip())
+			distance=self.calcDistance(n.getShip().node)
 			if distance<distanceMax:
 				distanceMax=distance
 				newTarget=n
@@ -408,6 +432,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			Follower.getInstance().setTarget(newTarget.getShip().getNode())
 			#~ rocketTarget.getInstance().showWindow(newTarget.getShip())
 			self.target=newTarget.getShip()
+		#~ print "gameinspace :: seekNearestTArget " + str(self.target)
 		
 	def runNewExplosion(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_EXPLOSION)
@@ -453,9 +478,17 @@ class GameInSpace(DirectObject,threading.Thread):
 			return Task.done
 		
 	def run(self):
+		#~ self.setupUI()
+		#~ self.CEGUI.enable() 
 		mt=MenuTuto.getInstance()
 		mt.setCeguiManager(self.CEGUI)
+		
 		mt.displayTuto(C_MENU_TUTO_SPACE)
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		#~ self.PE = ParticleEngine(ship.node, nb=40, ray=30, move = True)
+		#~ self.PE.start()
+		#~ self.PE.stop()
+		#~ self.PE.speed=100
 		while not self.stopThread and GameState.getInstance().getState()==C_PLAYING:
 			
 			ship=User.getInstance().getCurrentCharacter().getShip()
@@ -595,10 +628,12 @@ class GameInSpace(DirectObject,threading.Thread):
 			
 			self.runNewExplosion()
 			
-			self.renderTarget()
-			
 			dt=globalClock.getRealTime()-self.ticksRenderUI
+			self.renderTarget(dt)
+			
+			
 			if dt>0.1:
+				self.ticksRenderUI=globalClock.getRealTime()
 				if ship!=None:
 					ship.lock.acquire()
 					prctHull,currentHull,maxHull=ship.getPrcentHull()
@@ -611,4 +646,6 @@ class GameInSpace(DirectObject,threading.Thread):
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setProgress(prctSpeed)
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setTooltipText(str(currentPoussee) + "/" + str(maxSpeed))
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LabelSpeed").setText("Vitesse : " + str(prctSpeed*100) + "%")
+					#~ print prctSpeed
+					#~ self.PE.speed=prctSpeed*100*5
 					ship.lock.release()
