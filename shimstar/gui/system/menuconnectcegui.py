@@ -43,6 +43,9 @@ class MenuConnectCegui(ShowBase):
 		taskMgr.add(self.event,"event reader menu connect",-40)  
 		self.stateConnexion=0
 		
+		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
+		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
+		
 		self.accept("tab",self.tab)
 		self.accept("escape",self.quitGame)
 		self.accept("enter",self.connect, [0])
@@ -105,6 +108,7 @@ class MenuConnectCegui(ShowBase):
 		self.CEGUI.WindowManager.getWindow("MenuConnect/Login/ButtonEnter").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'connect')
 	
 	def ButtonClicked(self,windowEventArgs):
+		self.buttonSound.play()
 		if (windowEventArgs.window.getName() == "MenuConnect/LoginReport/ButtonOK"):
 			self.OutLoginReportAnimationInstance.start()
 			self.InLoginAnimationInstance.start()
@@ -208,6 +212,7 @@ class MenuConnectCegui(ShowBase):
 		self.InLoginAnimationInstance.start()
 		
 	def connect(self,windowEventArgs):
+		self.buttonSound2.play()
 		if NetworkMainServer.getInstance().isConnected()!=False:
 		#~ if network.reference.isConnected()!=False:
 			#~ actual=globalClock.getRealTime()
