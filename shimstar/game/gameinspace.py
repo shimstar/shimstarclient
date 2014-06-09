@@ -1,6 +1,8 @@
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.interval.LerpInterval import LerpPosInterval
+from pandac.PandaModules import CollisionTraverser,CollisionNode
+from pandac.PandaModules import CollisionHandlerQueue,CollisionRay
 
 from shimstar.core.shimconfig import *
 from shimstar.core.functions import *
@@ -14,8 +16,6 @@ from shimstar.gui.core.menututo import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
 from shimstar.game.particleEngine import *
-#~ from shimstar.gui.game.rocketshipinfo import *
-#~ from shimstar.gui.game.rockettarget import *
 
 
 class GameInSpace(DirectObject,threading.Thread):
@@ -40,6 +40,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		GameState.getInstance().setState(C_PLAYING)
 		self.ticksRenderUI=0
 		self.updateInput=0
+		self.isShooting=False
 		self.listOfExplosion=[]
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		ship.setInvisible()
@@ -50,8 +51,23 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.shooting=False
 		self.mouseToUpdate=False
 		self.speedup=0
-		#~ self.textObject = OnscreenText(text = "this is my ship", pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
-		#~ print self.textObject
+		self.pointerLookingAt = loader.loadModelCopy(shimConfig.getInstance().getConvRessourceDirectory() +  "models/arrow")
+		self.pointerLookingAt.reparentTo(render)
+		self.pointerLookingAt.hide()
+		self.picker = CollisionTraverser()            #Make a traverser
+		base.cTrav  = CollisionTraverser()
+		self.hdlCollider=CollisionHandlerEvent()
+		self.hdlCollider.addInPattern('into-%in')
+		self.hdlCollider.addOutPattern('outof-%in')
+		self.pickerNode=CollisionNode('mouseRay')
+		self.pickerNP=base.camera.attachNewNode(self.pickerNode)
+		self.pickerNode.setFromCollideMask(GeomNode.getDefaultCollideMask())
+		self.pickerRay=CollisionRay()
+		self.pq     = CollisionHandlerQueue()         #Make a handler
+		self.pickerNode.addSolid(self.pickerRay)
+		self.picker.addCollider(self.pickerNP, self.pq)
+		taskMgr.add(self.pickmouse,"pickmouse")
+		self.pointToLookAt=Vec3(0,0,0)
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -227,6 +243,37 @@ class GameInSpace(DirectObject,threading.Thread):
 			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()==True:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
 	
+	def pickmouse(self,task):
+		if base.mouseWatcherNode.hasMouse():
+			mpos=base.mouseWatcherNode.getMouse()
+			self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
+
+			self.picker.traverse(render)
+			self.pointToLookAt=None
+			if self.pq.getNumEntries() > 0:
+				self.pq.sortEntries() #this is so we get the closest object
+				for p in self.pq.getEntries():
+					nn=p.getIntoNodePath()
+					tabNode=str(nn).split("/")
+					objFromRender=render.find(tabNode[1]).node()
+					className=objFromRender.getTag("classname")
+					if className=="asteroid":
+						obj=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
+						self.pointToLookAt=obj.getPos()
+					elif className=="asteroid":
+						obj=Ship.getShipById(int(objFromRender.getTag("id")))
+						self.pointToLookAt=obj.getPos()
+					#~ print nn
+					#~ print nn.getPythonTag("name")
+					#~ if nn.getTag("id") != '':
+						#~ print nn
+				#~ nodeInQueue=self.pq.getEntry(0).getIntoNodePath()
+				#~ self.pointToLookAt=self.pq.getEntry(0).getSurfacePoint(render)
+				#~ if str(nodeInQueue).find("Earth")==-1:
+					#~ print nodeInQueue.getTag("id")
+					#~ print nodeInQueue
+		
+		return task.cont
 
 	def showShipName(self):
 		Ship.lock.acquire()
@@ -510,51 +557,62 @@ class GameInSpace(DirectObject,threading.Thread):
 					
 					if globalClock.getRealTime()-self.updateInput>0.1:
 						self.updateInput=globalClock.getRealTime()
-						posMouseX=0
-						posMouseY=0
-						if self.mousebtn[2]==1:
-							self.mouseToUpdate=True
-							if base.mouseWatcherNode.hasMouse():
-								posMouseX=-base.mouseWatcherNode.getMouseX()
-								posMouseY=base.mouseWatcherNode.getMouseY()
-								absx=abs(posMouseX)
-								absy=abs(posMouseY)
-								## Trying to get smooth mouse to accelerating mouse 
-								if absx>=0:
-									posMouseX*=1
-								elif absx>=0.25 and absx<0.5:
-									posMouseX*=2
-								elif absx>=0.5 and absx<0.75:
-									posMouseX*=3
-								elif absx>=0.75 and absx<0.9:
-									posMouseX*=5
-								elif absx>=0.9:
-									posMouseX*=7
-								if absy>=0:
-									posMouseY*=1
-								elif absy>0.25 and absy<0.5:
-									posMouseY*=2
-								elif absy>=0.5 and absy<0.75:
-									posMouseY*=3
-								elif absy>=0.75 and absy<0.9:
-									posMouseY*=5
-								elif absy>=0.9:
-									posMouseY*=7
-						#~ print "gameInSpace :: update posmouse " + str(posMouseX) + "/" + str(posMouseY)
-							nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
-							nm.addUInt(User.getInstance().getId())
-							nm.addFloat(posMouseX)
-							nm.addFloat(posMouseY)
-							NetworkZoneServer.getInstance().sendMessage(nm)
-							self.speedup=0
-						elif self.mouseToUpdate==True:
-							self.mouseToUpdate=False
-							nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
-							nm.addUInt(User.getInstance().getId())
-							nm.addFloat(posMouseX)
-							nm.addFloat(posMouseY)
-							NetworkZoneServer.getInstance().sendMessage(nm)
+						#~ posMouseX=0
+						#~ posMouseY=0
+						#~ if self.mousebtn[2]==1:
+							#~ self.mouseToUpdate=True
+							#~ if base.mouseWatcherNode.hasMouse():
+								#~ posMouseX=-base.mouseWatcherNode.getMouseX()
+								#~ posMouseY=base.mouseWatcherNode.getMouseY()
+								#~ absx=abs(posMouseX)
+								#~ absy=abs(posMouseY)
+								#~ ## Trying to get smooth mouse to accelerating mouse 
+								#~ if absx>=0:
+									#~ posMouseX*=1
+								#~ elif absx>=0.25 and absx<0.5:
+									#~ posMouseX*=3
+								#~ elif absx>=0.5 and absx<0.75:
+									#~ posMouseX*=3
+								#~ elif absx>=0.75:# and absx<0.9:
+									#~ posMouseX*=9
+								#~ elif absx>=0.9:
+									#~ posMouseX*=4
+								#~ if absy>=0:
+									#~ posMouseY*=1
+								#~ elif absy>0.25 and absy<0.5:
+									#~ posMouseY*=3
+								#~ elif absy>=0.5 and absy<0.75:
+									#~ posMouseY*=3
+								#~ elif absy>=0.75:# and absy<0.9:
+									#~ posMouseY*=9
+								#~ elif absy>=0.9:
+									#~ posMouseY*=27
 						
+							#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
+							#~ nm.addUInt(User.getInstance().getId())
+							#~ nm.addFloat(posMouseX)
+							#~ nm.addFloat(posMouseY)
+							#~ NetworkZoneServer.getInstance().sendMessage(nm)
+							#~ self.speedup=0
+						#~ elif self.mouseToUpdate==True:
+							#~ self.mouseToUpdate=False
+							#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
+							#~ nm.addUInt(User.getInstance().getId())
+							#~ nm.addFloat(posMouseX)
+							#~ nm.addFloat(posMouseY)
+							#~ NetworkZoneServer.getInstance().sendMessage(nm)
+						if len(self.historyKey)>0:
+							nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+							nm.addInt(User.getInstance().getId())
+							nm.addInt(len(self.historyKey))
+							for key in self.historyKey.keys():
+								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+									nm.addString(key)
+									nm.addInt(self.historyKey[key])
+							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
+							NetworkZoneServer.getInstance().sendMessage(nm)
+							
+							self.historyKey.clear()
 						if self.speedup!=0:
 							nm=netMessage(C_NETWORK_CHARACTER_SPEED)
 							nm.addUInt(User.getInstance().getId())
@@ -581,16 +639,29 @@ class GameInSpace(DirectObject,threading.Thread):
 							#~ if self.mousebtn[0]==1:
 								#~ print "shot"
 								if ship.shot()==True:
+									self.pointerLookingAt.setPos(ship.getPos())
+									if self.pointToLookAt!=None:
+										self.pointerLookingAt.lookAt(self.pointToLookAt)
+									else:
+										if base.mouseWatcherNode.hasMouse():
+											x=base.mouseWatcherNode.getMouseX()
+											y=base.mouseWatcherNode.getMouseY()
+											t1=Point3()
+											t2=Point3()
+											ret=base.camLens.extrude(Point2(x,y),t1,t2)
+											t2=t2/100
+											t2relative=render.getRelativePoint(camera,t2)   	
+											self.pointerLookingAt.lookAt(t2relative)
 									nm=netMessage(C_NETWORK_CHAR_SHOT)
 									nm.addUInt(ship.getOwner().getUserId())
 									nm.addUInt(ship.getOwner().getId())
 									nm.addFloat(ship.getPos().getX())
 									nm.addFloat(ship.getPos().getY())
 									nm.addFloat(ship.getPos().getZ())
-									nm.addFloat(ship.getQuat().getR())
-									nm.addFloat(ship.getQuat().getI())
-									nm.addFloat(ship.getQuat().getJ())
-									nm.addFloat(ship.getQuat().getK())
+									nm.addFloat(self.pointerLookingAt.getQuat().getR())
+									nm.addFloat(self.pointerLookingAt.getQuat().getI())
+									nm.addFloat(self.pointerLookingAt.getQuat().getJ())
+									nm.addFloat(self.pointerLookingAt.getQuat().getK())
 									NetworkZoneServer.getInstance().sendMessage(nm)
 							
 							if self.keysDown.has_key('t'):
@@ -632,7 +703,16 @@ class GameInSpace(DirectObject,threading.Thread):
 			self.renderTarget(dt)
 			
 			
-			if dt>0.1:
+			if dt>0.05:
+				md = base.win.getPointer(0)
+				x = md.getX()
+				z = md.getY()				
+				x=x-(C_USER_WIDTH/2)
+				z=z-(C_USER_HEIGHT/2)
+				
+				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
+				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").setPosition(vec)
+				
 				self.ticksRenderUI=globalClock.getRealTime()
 				if ship!=None:
 					ship.lock.acquire()

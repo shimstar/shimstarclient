@@ -290,6 +290,7 @@ class Zone(threading.Thread):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_SHOT)
 		if len(tempMsg)>0:
 			for msg in tempMsg:
+				#~ print "zone::runupdateshot remove bullet"
 				netMsg=msg.getMessage()
 				Bullet.lock.acquire()
 				Bullet.removeBullet(netMsg[0])

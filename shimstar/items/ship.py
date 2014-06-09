@@ -30,6 +30,7 @@ class Ship:
 		self.lock=threading.Lock()
 		self.name = ""
 		self.id=id
+		self.pousse=0
 		self.template=idTemplate
 		self.shipTemplate=None
 		self.mainShip = False
@@ -69,6 +70,12 @@ class Ship:
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
 		self.textObject=None
+		
+	@staticmethod
+	def getShipById(id):
+		if Ship.listOfShip.has_index(id)!=-1:
+			return Ship.listOfShip[id]
+		return None
 		
 	def getPoussee(self):
 		return self.poussee
@@ -223,7 +230,9 @@ class Ship:
 		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
 		print "ship::loadTemplate " + str(self.node)
 		self.node.reparentTo(render)
-		self.node.setName(str(self.id))
+		self.node.setName("ship_" + str(self.id))
+		self.node.setTag("classname","ship")
+		self.node.setTag("id",str(self.id))		
 		textObject = OnscreenText(text = 'my text string',parent=self.node)
 		
 	def getId(self):
@@ -378,7 +387,8 @@ class Ship:
 		return self.engine.getSpeedMax()
 			
 	def addBullet(self,bulId,pos,quat):
-		self.weapons.addBullet(bulId,pos,quat)
+		if self.weapons !=None:
+			self.weapons.addBullet(bulId,pos,quat)
 			
 	def shot(self):
 		if self.weapons!=None:

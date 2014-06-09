@@ -125,6 +125,8 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuDeath()
 		return Task.cont
 		
+	
+		
 #~ print 'Number of arguments:', len(sys.argv), 'arguments.'
 #~ print 'Argument List:', str(sys.argv)
 #~ dir="."
