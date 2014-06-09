@@ -20,7 +20,17 @@ class Character:
 		self.lastStation=0
 		self.visible=False
 		self.userRef=userRef #user obj
+		self.readDialogs=[]
 		print "character::init" + str(self.id)
+		
+	def getReadDialogs(self):
+		return self.readDialogs
+		
+	def appendDialogs(self,id):
+		if (id in self.readDialogs)==False:
+			self.readDialogs.append(id)
+			return True
+		return False
 		
 	def manageDeath(self):
 		if self.ship!=None:
