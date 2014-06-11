@@ -22,7 +22,7 @@ class Ship:
 	#~ def __init__(self,id,xmlPart):
 	listOfShip={}
 	lock=threading.Lock()
-	def __init__(self,id,idTemplate,hullpoints=0):
+	def __init__(self,id,idTemplate,hullpoints=0,visible=True):
 		print "ship::init " + str(id) + "/" + str(idTemplate)
 		Ship.lock.acquire()
 		Ship.listOfShip[id]=self
@@ -31,6 +31,7 @@ class Ship:
 		self.name = ""
 		self.id=id
 		self.pousse=0
+		self.visible=visible
 		self.template=idTemplate
 		self.shipTemplate=None
 		self.mainShip = False
@@ -71,9 +72,12 @@ class Ship:
 		#~ print "ship init" + str(self.id)
 		self.textObject=None
 		
+	def getPointerToGo(self):
+		return self.pointerToGo
+		
 	@staticmethod
 	def getShipById(id):
-		if Ship.listOfShip.has_index(id)!=-1:
+		if Ship.listOfShip.has_key(id)!=-1:
 			return Ship.listOfShip[id]
 		return None
 		
@@ -97,8 +101,10 @@ class Ship:
 		#~ return float(prcent),self.hullpoints,self.maxhull
 		
 	def getPrcentSpeed(self):
-		prcent = float(self.poussee)/float(self.engine.getSpeedMax())
-		return float(prcent),self.poussee,self.engine.getSpeedMax()
+		if self.engine!=None:
+			prcent = float(self.poussee)/float(self.engine.getSpeedMax())
+			return float(prcent),self.poussee,self.engine.getSpeedMax()
+		return 0
 		
 	def setOwner(self,owner):
 		self.owner=owner
@@ -226,14 +232,14 @@ class Ship:
 				#~ idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
 				#~ item=itemFactory.getItemFromXml(itXml,typeItem)
 				#~ self.itemInInventory.append(item)
-		
-		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
-		print "ship::loadTemplate " + str(self.node)
-		self.node.reparentTo(render)
-		self.node.setName("ship_" + str(self.id))
-		self.node.setTag("classname","ship")
-		self.node.setTag("id",str(self.id))		
-		textObject = OnscreenText(text = 'my text string',parent=self.node)
+
+		if self.visible==True:
+			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+			self.node.reparentTo(render)
+			self.node.setName("ship_" + str(self.id))
+			self.node.setTag("classname","ship")
+			self.node.setTag("id",str(self.id))		
+			textObject = OnscreenText(text = 'my text string',parent=self.node)
 		
 	def getId(self):
 		return self.id
@@ -419,7 +425,7 @@ class Ship:
 	## Return True if ship has hull>0
 	## Return False if shup has hull<=0
 	def takeDamage(self, hitpoints):
-		print "ship::takedamage " + str(hitpoints) + "/" + str(self.hullpoints)
+		#~ print "ship::takedamage " + str(hitpoints) + "/" + str(self.hullpoints)
 		self.hullpoints -= hitpoints
 		if self.hullpoints <= 0:
 			#~ self.setVisible(False)

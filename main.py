@@ -1,7 +1,9 @@
 from pandac.PandaModules import loadPrcFileData 
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
+#~ loadPrcFileData('', 'win-size %i %i' % (1600, 900))
 #~ loadPrcFileData('', 'state-cache 0')
+#~ loadPrcFileData('','fullscreen 1')
 import sys,os
 from array import array
 import direct.directbase.DirectStart
@@ -26,6 +28,7 @@ base.win.setCloseRequestEvent("CLOSEF4")
 
 class ShimStarClient(DirectObject):
 	def __init__(self):
+		print base.getAspectRatio()
 		GameState().setState(0)
 		NetworkMainServer.getInstance().start()
 		self.menu=None

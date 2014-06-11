@@ -15,6 +15,10 @@ from shimstar.npc.npcinstation import *
 
 class GuiStation(DirectObject):
 	def __init__(self):
+		self.usrLoaded=False
+		msg=netMessage(C_NETWORK_ASKING_CHAR)
+		msg.addUInt(User.getInstance().getId())
+		NetworkMainServer.getInstance().sendMessage(msg)
 		self.idZone=User.getInstance().getCurrentCharacter().getIdZone()
 		self.zone=Zone(self.idZone)
 		self.listOfImageSet={}
@@ -30,6 +34,18 @@ class GuiStation(DirectObject):
 		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
 		
 	def event(self,arg):
+		if self.usrLoaded==False:
+			tempMsg=NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CURRENT_CHAR_INFO)
+			if len(tempMsg)>0:
+				for msg in tempMsg:
+					netMsg=msg.getMessage()
+					ch=User.getInstance().getCurrentCharacter()
+					ch.setShip(netMsg[0],netMsg[1],netMsg[2],False)
+					nbDialog=netMsg[3]
+					for i in range (nbDialog):
+						ch.appendDialogs(netMsg[4+i])
+					NetworkMainServer.getInstance().removeMessage(msg)
+					self.usrLoaded=True
 		return Task.cont
 		
 	def quitGame(self,):
@@ -54,6 +70,60 @@ class GuiStation(DirectObject):
 			self.showNPC()
 			self.OutDialogAnimationInstance.start()
 			self.CEGUI.WindowManager.getWindow("Station/Personnel").moveToFront ()
+		elif (windowEventArgs.window.getName() == "Station/Menus/Vaisseau"):
+			self.InShipAnimationInstance.start()
+			self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront ()
+			self.showFitting()
+			
+	def showFitting(self):
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		i=0
+		slots=ship.getSlots()
+		for s in slots:
+			button=self.CEGUI.WindowManager.createWindow("Shimstar/ImageButton","Station/Vaisseau/bckground/Front/slot" + str(s.getId()))
+			
+			if self.listOfImageSet.has_key("TempImagesetslot1" ) ==False:
+				customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesetslot1", "/windows/slot1.png", "images")
+				customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+				customImageset.setAutoScalingEnabled(False)
+				self.listOfImageSet["TempImagesetslot1"]=customImageset
+				
+			button.setProperty("NormalImage", "set:TempImagesetslot1 image:full_image")
+			button.setProperty("HoverImage", "set:TempImagesetslot1 image:full_image")
+			button.setProperty("PushedImage", "set:TempImagesetslot1 image:full_image")
+			button.setProperty("UnifiedAreaRect", "{{" + str(0.10+0.15*i) + ",0},{0.14,0},{" + str(0.218+0.15*i) + ",0},{0.268,0}}");
+			button.setProperty("UnifiedSize","{{0,64},{0,64}}")
+			button.setUserData(s)
+			#~ button.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseNpc')
+			self.CEGUI.WindowManager.getWindow("Station/Vaisseau/bckground/Front").addChildWindow(button)
+			
+			tp=s.getTypes()
+
+			lblType=""
+			for t in tp:
+				if t==C_ITEM_ENGINE:
+					lblType+="M"
+				elif t==C_ITEM_WEAPON:
+					lblType+="A"
+				elif t==C_ITEM_ENERGY:
+					lblType+="J"
+				elif t==C_ITEM_CONTAINER:
+					lblType+="C"
+				elif t==C_ITEM_ELECTRO:
+					lblType+="E"
+				elif t==C_ITEM_RADAR:
+					lblType+="R"
+				elif t==C_ITEM_MINING:
+					lblType+="G"
+			label=self.CEGUI.WindowManager.createWindow("Shimstar/Button","Station/Vaisseau/bckground/Front/slotlabel" + str(s.getId()))
+			#~ label.setProperty("UnifiedAreaRect", "{{" + str(0.10+0.15*i) + ",0},{0.30,0},{" + str(0.31+0.15*i) + ",0},{0.65,0}}");
+			label.setProperty("UnifiedAreaRect", "{{" + str(0.08+0.15*i) +",0},{0.28,0},{" + str(0.2+0.15*i) + ",0},{0.35,0}}");
+			label.setText(lblType)
+			label.setUserData(s)
+			label.setFont("Brassiere-s")
+			#~ label.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseNpc')
+			self.CEGUI.WindowManager.getWindow("Station/Vaisseau/bckground/Front").addChildWindow(label)
+			i+=1
 
 	def destroy(self):
 		self.ignore("escape")
@@ -76,9 +146,17 @@ class GuiStation(DirectObject):
 		self.CEGUI.System.setGUISheet(self.root) 
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Sortir").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Personnel").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
+		self.CEGUI.WindowManager.getWindow("Station/Menus/Vaisseau").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		
 		self.CEGUI.WindowManager.getWindow("root/Quit/CancelQuit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onCancelQuitGame')
 		self.CEGUI.WindowManager.getWindow("root/Quit/Quit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onQuiGameConfirmed')
+		
+		self.CEGUI.WindowManager.getWindow("Station/Personnel").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		self.CEGUI.WindowManager.getWindow("Station/Vaisseau").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		self.CEGUI.WindowManager.getWindow("Station/Dialog").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		self.CEGUI.WindowManager.getWindow("root/Skills").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		
 		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
@@ -89,12 +167,26 @@ class GuiStation(DirectObject):
 		self.OutNPCAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Personnel"))
 		self.InNPCAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Personnel"))
 		
+		self.OutShipAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InShipAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Vaisseau"))
+		self.InShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Vaisseau"))
+		
 		self.OutDialogAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InDialogAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
 		self.InDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
 		
-		
+	def closeClicked(self,windowEventArgs):
+		if (windowEventArgs.window.getName() == "Inventaire"):
+			self.OutInventaireAnimationInstance.start()
+		elif (windowEventArgs.window.getName() == "Station/Vaisseau"):
+			self.OutShipAnimationInstance.start()
+		elif (windowEventArgs.window.getName() == "Station/Personnel"):
+			self.OutNPCAnimationInstance.start()
+		elif (windowEventArgs.window.getName() == "Station/Dialog"):
+			self.OutDialogAnimationInstance.start()
+	
 	def emptyNPCWindow(self):
 		if self.CEGUI.WindowManager.getWindow("Station/Personnel/Container").getContentPane().getChildCount()>0:
 			for itChild in range( self.CEGUI.WindowManager.getWindow("Station/Personnel/Container").getContentPane().getChildCount()):
@@ -157,9 +249,8 @@ class GuiStation(DirectObject):
 	def loadKeywords(self,npcChoosed):
 		self.emptyKeywordsWindow()
 		i=0
+		listOfReadDialogs=User.getInstance().getCurrentCharacter().getReadDialogs()
 		for k in npcChoosed.getListOfKeywords():
-			#~ listOfReadDialogs=User.getInstance().getCurrentCharacter().getReadDialogs()
-			listOfReadDialogs=[]
 			dialog=npcChoosed.getDialogueFromKeyword( k)
 			showKeyword=True
 			if dialog.getParent()>0:

@@ -15,10 +15,6 @@ class NetworkMainServer(threading.Thread):
 		threading.Thread.__init__(self)
 		self.port=7777
 		self.ip=shimConfig.getInstance().getIp()
-		#~ self.ip="127.0.0.1"
-		#~ self.ip="82.66.133.219"
-		#~ self.ip="62.147.217.96"
-		#~ self.ip="10.85.80.74"
 		self.stopThread=False
 		self.timeout_in_miliseconds=3000  # 3 seconds
 		self.listOfMessage=[] 
@@ -79,6 +75,19 @@ class NetworkMainServer(threading.Thread):
 					msgTab.append(myIterator.getString())
 					msgTab.append(myIterator.getString())
 					msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_CURRENT_CHAR_INFO:
+			msgTab.append(myIterator.getUint32())		
+			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())
+			lenInv=int(myIterator.getUint32())
+			for i in range(lenInv):
+				inv=int(myIterator.getUint32())
+			nbDialog=int(myIterator.getUint32())
+			msgTab.append(nbDialog)
+			for i in range (nbDialog):
+				msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_CREATE_USER:
