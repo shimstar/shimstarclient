@@ -73,7 +73,7 @@ class Asteroid(DirectObject):
 	def destroy(self):
 		self.node.detachNode()
 		self.node.removeNode()
-		if Asteroid.listOfAsteroid.has_index(self.id)!=-1:
+		if Asteroid.listOfAsteroid.has_key(self.id)!=-1:
 			Asteroid.listOfAsteroid.remove(self.id)
 			del Asteroid.listOfAsteroid[self.id]
 		

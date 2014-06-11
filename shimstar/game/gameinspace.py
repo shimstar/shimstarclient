@@ -205,9 +205,9 @@ class GameInSpace(DirectObject,threading.Thread):
 			if dt>0.1:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("NormalImage", "set:TempImageset" + self.target.name + " image:full_image")
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:TempImageset" + self.target.name + " image:full_image")
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("PushedImage", "set:TempImageset" + self.target.name + " image:full_image")
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("NormalImage", "set:TempImageset" + self.target.name + " image:full_image")
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:TempImageset" + self.target.name + " image:full_image")
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("PushedImage", "set:TempImageset" + self.target.name + " image:full_image")
 			
 			###Reticule de suivi de la cible ou point rouge sur le bord
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
@@ -219,8 +219,11 @@ class GameInSpace(DirectObject,threading.Thread):
 				z2=pos2.d_y.d_offset
 				x=pos.getX()
 				z=pos.getZ()
-				z=C_USER_HEIGHT/2*z*-1
-				x=(x*C_USER_WIDTH/(C_RATIO*2))
+				height=base.win.getYSize()
+				width=base.win.getXSize()
+				ratio=float(width)/float(height)
+				z=height/2*z*-1
+				x=(x*width/(ratio*2))
 				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
 				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setPosition(vec)
 				prctHull=0
@@ -260,9 +263,13 @@ class GameInSpace(DirectObject,threading.Thread):
 					if className=="asteroid":
 						obj=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
 						self.pointToLookAt=obj.getPos()
-					elif className=="asteroid":
+						break
+					elif className=="ship":
 						obj=Ship.getShipById(int(objFromRender.getTag("id")))
-						self.pointToLookAt=obj.getPos()
+						ship=User.getInstance().getCurrentCharacter().getShip()
+						if obj.getId()!=ship.getId():
+							self.pointToLookAt=obj.getPointerToGo().getPos()
+							break
 					#~ print nn
 					#~ print nn.getPythonTag("name")
 					#~ if nn.getTag("id") != '':
@@ -707,8 +714,10 @@ class GameInSpace(DirectObject,threading.Thread):
 				md = base.win.getPointer(0)
 				x = md.getX()
 				z = md.getY()				
-				x=x-(C_USER_WIDTH/2)
-				z=z-(C_USER_HEIGHT/2)
+				height=base.win.getYSize()
+				width=base.win.getXSize()
+				x=x-(width/2)
+				z=z-(height/2)
 				
 				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
 				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").setPosition(vec)
