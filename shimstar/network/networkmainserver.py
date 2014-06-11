@@ -82,8 +82,14 @@ class NetworkMainServer(threading.Thread):
 			msgTab.append(myIterator.getUint32())
 			msgTab.append(myIterator.getUint32())
 			lenInv=int(myIterator.getUint32())
+			msgTab.append(lenInv)
 			for i in range(lenInv):
-				inv=int(myIterator.getUint32())
+				typeItem=int(myIterator.getUint32())
+				templateItem=int(myIterator.getUint32())
+				idItem=int(myIterator.getUint32())
+				msgTab.append(typeItem)
+				msgTab.append(templateItem)
+				msgTab.append(idItem)
 			nbDialog=int(myIterator.getUint32())
 			msgTab.append(nbDialog)
 			for i in range (nbDialog):

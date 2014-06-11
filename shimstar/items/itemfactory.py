@@ -21,6 +21,16 @@ class itemFactory():
 		return item
 		
 	@staticmethod
+	def getItemFromTemplateType(templateId,typeItem):
+		if typeItem==C_ITEM_ENGINE:
+			item=Engine(templateId)
+		elif typeItem==C_ITEM_WEAPON:
+			item=Weapon(templateId)
+		else:
+			item=ShimstarItem(templateId)
+		return item
+		
+	@staticmethod
 	def getItemFromXml(xmlPart,typeItem):
 		item=None
 		if typeItem==C_ITEM_ENGINE:

@@ -70,6 +70,14 @@ class ItemTemplate(object):
 		return itemTemplate.listOfTemplate
 		
 	@staticmethod
+	def getTemplateById(idTemplate):
+		if len(ItemTemplate.listOfTemplate)==0:
+			ItemTemplate.loadXml()
+		for i in ItemTemplate.listOfTemplate:
+			if ItemTemplate.listOfTemplate[i].templateId==idTemplate:
+				return ItemTemplate.listOfTemplate[i]
+		
+	@staticmethod
 	def getTemplate(idTemplate,typeItem):
 		if len(ItemTemplate.listOfTemplate)==0:
 			ItemTemplate.loadXml()

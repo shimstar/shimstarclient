@@ -65,12 +65,49 @@ class Ship:
 		self.firstMove=False
 		self.renderCounter = 0
 		self.slots=[]
+		self.itemInInventory = []
 		self.pousse=0
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
 		self.textObject=None
+		
+	def getItemInInventory(self):
+		return self.itemInInventory
+		
+	def addItemInInventory(self, item):
+		self.itemInInventory.append(item)
+		
+	def removeItemInInventory(self, item):
+		self.itemInInventory.remove(item)
+		
+	def getFirstPlaceFreeInInventory(self):
+		"""
+			return the first place free in the inventory. The item have each a number allowing to locate it when the inventory is shown.
+			This function returns first place not allocated.
+		"""
+		places=[]
+		max=0
+		for i in self.itemInInventory:
+			places.append(i.getLocation())
+			if max<i.getLocation():
+				max=i.getLocation()
+		places.sort()
+		returnValue=-1
+		val=0
+		for p in places:
+			if (val)!=int(p):
+				if(val)<int(p):
+					returnValue=val
+				else:
+					returnValue=int(p)
+				break
+			val+=1
+			
+		if returnValue==-1:
+			returnValue=max+1
+		return returnValue
 		
 	def getPointerToGo(self):
 		return self.pointerToGo
@@ -196,7 +233,6 @@ class Ship:
 		
 	def loadTemplate(self):
 		self.shipTemplate=ShipTemplate.getTemplate(self.template)
-		print "ship::loadTemplate " + str(self.template)
 		self.name,self.maxhull,self.egg,self.img,self.slots=self.shipTemplate.getInfos()
 		for tempSlot in self.slots:
 			if tempSlot.getItem()!=None:
@@ -206,7 +242,6 @@ class Ship:
 					it.setShip(self)
 				if it.getTypeItem()==C_ITEM_ENGINE:
 					self.engine=it
-				#~ print "ship::loadTemplate slot " + str(it)
 		#~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		#~ self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
 		#~ self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
@@ -425,7 +460,6 @@ class Ship:
 	## Return True if ship has hull>0
 	## Return False if shup has hull<=0
 	def takeDamage(self, hitpoints):
-		#~ print "ship::takedamage " + str(hitpoints) + "/" + str(self.hullpoints)
 		self.hullpoints -= hitpoints
 		if self.hullpoints <= 0:
 			#~ self.setVisible(False)

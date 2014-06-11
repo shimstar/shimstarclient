@@ -7,11 +7,14 @@ from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from pandac.PandaModules import * 
 from shimstar.gui.shimcegui import * 
+from shimstar.gui.core.iteminfo import *
+from shimstar.gui.core.inventory import *
 from shimstar.core.shimconfig import *
 from shimstar.user.user import *
 from shimstar.world.zone.zone import *
 from shimstar.game.gamestate import *
 from shimstar.npc.npcinstation import *
+from shimstar.items.itemfactory import *
 
 class GuiStation(DirectObject):
 	def __init__(self):
@@ -33,6 +36,7 @@ class GuiStation(DirectObject):
 		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
 		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
 		
+		
 	def event(self,arg):
 		if self.usrLoaded==False:
 			tempMsg=NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CURRENT_CHAR_INFO)
@@ -41,11 +45,21 @@ class GuiStation(DirectObject):
 					netMsg=msg.getMessage()
 					ch=User.getInstance().getCurrentCharacter()
 					ch.setShip(netMsg[0],netMsg[1],netMsg[2],False)
-					nbDialog=netMsg[3]
+					nbInv=netMsg[3]
+					ship=ch.getShip()
+					for i in range(nbInv):
+						typeItem=netMsg[4+i]
+						templateId=netMsg[5+i]
+						idItem=netMsg[6+i]
+						it=itemFactory.getItemFromTemplateType(templateId,typeItem)
+						it.setId(idItem)
+						ship.addItemInInventory(it)
+					nbDialog=netMsg[4+3*nbInv]
 					for i in range (nbDialog):
-						ch.appendDialogs(netMsg[4+i])
+						ch.appendDialogs(netMsg[5+3*nbInv])
 					NetworkMainServer.getInstance().removeMessage(msg)
 					self.usrLoaded=True
+					menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
 		return Task.cont
 		
 	def quitGame(self,):
@@ -61,7 +75,6 @@ class GuiStation(DirectObject):
 	def ButtonClicked(self,windowEventArgs):
 		self.buttonSound.play()
 		if (windowEventArgs.window.getName() == "Station/Menus/Sortir"):
-			print "guistation::buttonclicked :: sortir de la station"
 			GameState.getInstance().setNewZone(self.zone.getExitZone())
 			#~ GameState.getInstance().setState(C_CHANGEZONE)
 			User.getInstance().getCurrentCharacter().changeZone()
@@ -74,6 +87,13 @@ class GuiStation(DirectObject):
 			self.InShipAnimationInstance.start()
 			self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront ()
 			self.showFitting()
+		elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
+			self.InInventaireAnimationInstance.start()
+			self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront ()
+			
+	def slotClicked(self,e):
+		self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").show()
+		self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").moveToFront()
 			
 	def showFitting(self):
 		ship=User.getInstance().getCurrentCharacter().getShip()
@@ -88,13 +108,27 @@ class GuiStation(DirectObject):
 				customImageset.setAutoScalingEnabled(False)
 				self.listOfImageSet["TempImagesetslot1"]=customImageset
 				
-			button.setProperty("NormalImage", "set:TempImagesetslot1 image:full_image")
-			button.setProperty("HoverImage", "set:TempImagesetslot1 image:full_image")
-			button.setProperty("PushedImage", "set:TempImagesetslot1 image:full_image")
+			if s.getItem()!=None:
+				if self.listOfImageSet.has_key("TempImageset" + s.getItem().getImg() ) ==False:
+					customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset" + s.getItem().getImg(), "/items/" + s.getItem().getImg() + ".png", "images")
+					customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+					customImageset.setAutoScalingEnabled(False)
+					self.listOfImageSet["TempImageset"+ s.getItem().getImg()]=customImageset
+				button.setProperty("NormalImage", "set:TempImageset" + s.getItem().getImg()  +" image:full_image")
+				button.setProperty("HoverImage", "set:TempImageset" + s.getItem().getImg()  + " image:full_image")
+				button.setProperty("PushedImage", "set:TempImageset" + s.getItem().getImg()  + " image:full_image")
+				button.subscribeEvent(PyCEGUI.Window.EventMouseEnters,self,'showInfo')
+				button.subscribeEvent(PyCEGUI.Window.EventMouseLeaves,self,'hideInfo')
+			else:
+				button.setProperty("NormalImage", "set:TempImagesetslot1 image:full_image")
+				button.setProperty("HoverImage", "set:TempImagesetslot1 image:full_image")
+				button.setProperty("PushedImage", "set:TempImagesetslot1 image:full_image")
+				
 			button.setProperty("UnifiedAreaRect", "{{" + str(0.10+0.15*i) + ",0},{0.14,0},{" + str(0.218+0.15*i) + ",0},{0.268,0}}");
 			button.setProperty("UnifiedSize","{{0,64},{0,64}}")
 			button.setUserData(s)
-			#~ button.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseNpc')
+			button.subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'slotClicked')
+	
 			self.CEGUI.WindowManager.getWindow("Station/Vaisseau/bckground/Front").addChildWindow(button)
 			
 			tp=s.getTypes()
@@ -124,6 +158,15 @@ class GuiStation(DirectObject):
 			#~ label.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseNpc')
 			self.CEGUI.WindowManager.getWindow("Station/Vaisseau/bckground/Front").addChildWindow(label)
 			i+=1
+			
+	def showInfo(self,args):
+		item=args.window.getUserData().getItem()
+		
+		menuItemInfo.getInstance().setObj(item)
+		self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(args.window.getPosition())
+		
+	def hideInfo(self,args):
+		menuItemInfo.getInstance().hide()
 
 	def destroy(self):
 		self.ignore("escape")
@@ -147,6 +190,7 @@ class GuiStation(DirectObject):
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Sortir").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Personnel").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Vaisseau").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
+		self.CEGUI.WindowManager.getWindow("Station/Menus/Inventaire").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		
 		self.CEGUI.WindowManager.getWindow("root/Quit/CancelQuit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onCancelQuitGame')
 		self.CEGUI.WindowManager.getWindow("root/Quit/Quit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onQuiGameConfirmed')
@@ -176,6 +220,11 @@ class GuiStation(DirectObject):
 		self.InDialogAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
 		self.InDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
+		
+		self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+		self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 		
 	def closeClicked(self,windowEventArgs):
 		if (windowEventArgs.window.getName() == "Inventaire"):
@@ -266,7 +315,11 @@ class GuiStation(DirectObject):
 				#~ if dialog.getTypeDialog()==C_DIALOG_TYPE_MISSION:
 					#~ label.setText("[colour='FF00FF00']" + k)
 				#~ else:
-				label.setText(k)
+				if dialog.getId() in listOfReadDialogs:
+					label.setText(k)
+				else:
+					label.setText("[colour='FFFFAA00']" + k)
+				
 				label.setUserData(npcChoosed)
 				label.setUserString("keyword",k)
 				self.CEGUI.WindowManager.getWindow("Station/Dialog/Keywords").addChildWindow(label)
@@ -400,3 +453,4 @@ class GuiStation(DirectObject):
 				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionRecompense").setText(textRecompense)
 			
 		self.loadKeywords(npcChoosed)
+		
