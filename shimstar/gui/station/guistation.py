@@ -65,7 +65,6 @@ class GuiStation(DirectObject):
 					compteur+=1
 					for n in range(nbSlot):
 						idSlot=netMsg[compteur]
-						print "idSlot " + str(idSlot)
 						tempSlot=Slot(None,idSlot)
 						compteur+=1
 						nbTypes=netMsg[compteur]

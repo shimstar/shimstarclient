@@ -34,11 +34,15 @@ class menuInventory(DirectObject):
 		self.items=self.obj.getItemInInventory()
 		self.setItems()
 		 
-	def emptyInvWindow(self):
-		if self.CEGUI.WindowManager.getWindow("Inventaire/Panel").getContentPane().getChildCount()>0:
-				for itChild in range( self.CEGUI.WindowManager.getWindow("Inventaire/Panel").getContentPane().getChildCount()):
-					wnd=self.CEGUI.WindowManager.getWindow("Inventaire/Panel").getContentPane().getChildAtIdx (0)
-					self.CEGUI.WindowManager.getWindow("Inventaire/Panel").getContentPane().removeChildWindow(wnd)
+	def emptyInvWindow(self,wndName=""):
+		if wndName=="":
+			wndName="Inventaire/Panel"
+		if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()>0:
+				for itChild in range( self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
+					wnd=self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx (0)
+					print wnd.getName()
+					#~ self.emptyInvWindow(wnd.getName())
+					self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
 					wnd.destroy()
 				
 	def setParent(self,parent):
@@ -66,10 +70,12 @@ class menuInventory(DirectObject):
 				i=0
 				j+=1
 		#~ print self.items
+		numItemI=0
+		numItemJ=0
 		for it in self.items:
-			loc=it.getLocation()
-			locI=loc%7
-			locJ=loc/7
+			#~ loc=it.getLocation()
+			locI=numItemI%7
+			locJ=int(numItemI/7)
 			wnd=self.CEGUI.WindowManager.getWindow("Inventaire/Panel/DragDropSlot" + str(locI) + "-" + str(locJ))
 			if listOfImageSet.has_key("TempImageset" + str(it.getImg()) )==False:
 				customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset" + str(it.getImg()) , "items/" + str(it.getImg()) + ".png", "images")
@@ -83,6 +89,7 @@ class menuInventory(DirectObject):
 			wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters,self,'showInfo')
 			wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves,self,'hideInfo')
 			wnd.addChildWindow(img)
+			numItemI+=1
 	
 	def showInfo(self,args):
 		if args.window.getChildCount()>0:
