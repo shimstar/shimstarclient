@@ -337,7 +337,9 @@ class Ship:
 	def uninstallItem(self,slot):
 		self.itemInInventory.append(slot.getItem())
 		slot.setItem(None)
-		network.reference.sendMessage(C_CHAR_UPDATE, str(self.character.getUserId()) + "/" + str(self.character.getId()) + "/uninstall=" + str(slot.getId()))
+		
+	def removeTemplateSlots(self):
+		self.slots=[]
 
 	def installItem(self, item,slot):
 		slotToInstall=None
@@ -469,4 +471,5 @@ class Ship:
 	def getHullPoints(self):
 		return self.hullpoints
 		
-		
+	def addSlot(self,s):
+		self.slots.append(s)

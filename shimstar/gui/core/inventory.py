@@ -52,8 +52,7 @@ class menuInventory(DirectObject):
 		self.emptyInvWindow()
 		i=0
 		j=0
-		listOfImageSet={'titi':'toto'}
-		listOfImageSet.clear()
+		listOfImageSet={}
 
 		for sl in range(40):
 			wnd=self.CEGUI.WindowManager.createWindow("DragContainer","Inventaire/Panel/DragDropSlot" + str(i) + "-" + str(j))
@@ -90,7 +89,8 @@ class menuInventory(DirectObject):
 			img=args.window.getChildAtIdx(0)
 			item=img.getUserData()
 			menuItemInfo.getInstance().setObj(item)
-			#~ self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(args.window.getPosition())
+			
+			self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(args.window.getPosition())
 		
 	def hideInfo(self,args):
 		menuItemInfo.getInstance().hide()
