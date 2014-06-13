@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*- 
 import sys,os
 
 import PyCEGUI
 from shimstar.gui.shimcegui import *
 from shimstar.user.user import *
+from shimstar.gui.core.iteminfo import *
 
 class chooseItemShip():
 	#~ def __init__(self,slotType,location,ship):
@@ -18,7 +18,7 @@ class chooseItemShip():
 		self.CEGUI.WindowManager.getWindow("Station/ChoixItem").moveToFront()
 		self.InShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/ChoixItem"))
 		self.CEGUI.WindowManager.getWindow("Station/ChoixItem").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
-
+	
 		self.InShipAnimationInstance.start()
 		inventory=ship.getItemInInventory()
 		self.slot=pslot

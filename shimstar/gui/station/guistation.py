@@ -108,7 +108,6 @@ class GuiStation(DirectObject):
 		self.buttonSound.play()
 		if (windowEventArgs.window.getName() == "Station/Menus/Sortir"):
 			GameState.getInstance().setNewZone(self.zone.getExitZone())
-			#~ GameState.getInstance().setState(C_CHANGEZONE)
 			User.getInstance().getCurrentCharacter().changeZone()
 		elif (windowEventArgs.window.getName() == "Station/Menus/Personnel"):
 			self.InNPCAnimationInstance.start()
@@ -127,6 +126,7 @@ class GuiStation(DirectObject):
 		self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").show()
 		self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").moveToFront()
 		self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").setUserData(e.window.getUserData())
+		self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Modify").setUserData(e.window.getUserData())
 		
 			
 	def showFitting(self):
@@ -210,9 +210,9 @@ class GuiStation(DirectObject):
 		
 	def modifyItem(self,winArgs):
 		self.OutAddSuppressAnimationInstance.start()
-		self.choix=chooseItemShip(winArgs.window.getUserData(),self.ship)
+		self.choix=chooseItemShip(winArgs.window.getUserData(),User.getInstance().getCurrentCharacter().getShip())
 		
-	def emptyWindowSlot(self):
+	def emptyWindowSlot(self,winArgs=None):
 		wndName="Station/Vaisseau/bckground/Front"
 		if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()>0:
 				for itChild in range( self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
@@ -222,19 +222,10 @@ class GuiStation(DirectObject):
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		menuInventory.getInstance('soute').setObj(ship)
 		self.showFitting()
-		
-	def modifyItem(self,winArgs):
-		#~ self.OutAddSuppressAnimationInstance.start()
-		#~ self.choix=chooseItemShip(winArgs.window.getUserData(),self.ship)
-		pass
-		
+				
 	def suppressItem(self,winArgs):
 		sl=winArgs.window.getUserData()
 		User.getInstance().getCurrentCharacter().getShip().uninstallItem(sl)
-		msg=netMessage(C_NETWORK_CHARACTER_UNINSTALL_SLOT)
-		msg.addUInt(User.getInstance().getId())
-		msg.addUInt(sl.getId())
-		NetworkMainServer.getInstance().sendMessage(msg)
 		self.OutAddSuppressAnimationInstance.start()
 		self.emptyWindowSlot()
 				

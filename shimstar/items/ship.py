@@ -1,5 +1,3 @@
-##TODO send current Hull to ship
-
 import xml.dom.minidom
 from math import sin, cos, pi
 from math import sqrt
@@ -7,6 +5,9 @@ from math import sqrt
 from pandac.PandaModules import *
 from direct.gui.OnscreenText import OnscreenText
 
+from shimstar.network.networkmainserver import *
+from shimstar.network.message import *
+from shimstar.network.netmessage import *
 from shimstar.items.slot import *
 from shimstar.items.engine import *
 from shimstar.items.weapon import *
@@ -337,29 +338,29 @@ class Ship:
 	def uninstallItem(self,slot):
 		self.itemInInventory.append(slot.getItem())
 		slot.setItem(None)
+		msg=netMessage(C_NETWORK_CHARACTER_UNINSTALL_SLOT)
+		msg.addUInt(self.owner.userRef.id)
+		msg.addUInt(slot.getId())
+		NetworkMainServer.getInstance().sendMessage(msg)
 		
 	def removeTemplateSlots(self):
 		self.slots=[]
 
 	def installItem(self, item,slot):
-		slotToInstall=None
-		for s in self.slots:
-			if s.getId()==int(slot):
-				slotToInstall=s
-				break
+		slotToInstall=slot
 		if slotToInstall!=None:
 			if slotToInstall.getItem()!=None:
 				self.uninstallItem(slotToInstall)
 			
-			itemToInstall=None
-			for i in self.itemInInventory:
-				if i.getId()==int(item):
-					itemToInstall=i
-					break
+			itemToInstall=item
 			if itemToInstall!=None:				
 				slotToInstall.setItem(itemToInstall)
-				network.reference.sendMessage(C_CHAR_UPDATE, str(self.character.getUserId()) + "/" + str(self.character.getId()) + "/install=" + str(itemToInstall.getId()) + "#" + str(slotToInstall.getId()))
 				self.itemInInventory.remove(itemToInstall)
+				msg=netMessage(C_NETWORK_CHARACTER_INSTALL_SLOT)
+				msg.addUInt(self.owner.userRef.id)
+				msg.addUInt(slotToInstall.getId())
+				msg.addUInt(itemToInstall.getId())
+				NetworkMainServer.getInstance().sendMessage(msg)
 						
 	def addMinerals(self, id,typeMineral, qt):
 		alreadyGot = False

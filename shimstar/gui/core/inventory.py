@@ -40,8 +40,6 @@ class menuInventory(DirectObject):
 		if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()>0:
 				for itChild in range( self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
 					wnd=self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx (0)
-					print wnd.getName()
-					#~ self.emptyInvWindow(wnd.getName())
 					self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
 					wnd.destroy()
 				
