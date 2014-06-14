@@ -33,6 +33,7 @@ class Zone(threading.Thread):
 		Zone.instance=self
 		self.typeZone=0
 		self.box=None
+		self.music=""
 		self.loadXml()
 		
 	@staticmethod
@@ -351,6 +352,9 @@ class Zone(threading.Thread):
 		
 	def getTypeZone(self):
 		return self.typeZone
+	
+	def getMusic(self):
+		return self.music
 		
 	@staticmethod
 	def getTinyInfosFromZone(idZone):

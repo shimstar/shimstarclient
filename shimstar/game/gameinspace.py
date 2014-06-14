@@ -111,6 +111,10 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("mouse3-up", self.setMouseBtn, [2, 0])
 		self.accept("wheel_up", self.speedUp,[1])
 		self.accept("wheel_down", self.speedUp,[-1])
+		self.ambientSound = base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() +  self.currentZone.getMusic())
+		print shimConfig.getInstance().getConvRessourceDirectory()  + self.currentZone.getMusic()
+		self.ambientSound.setLoop(True)
+		self.ambientSound.play()
 		#~ self.setupRocketUI()
 		self.setupUI()
 		self.CEGUI.enable() 
@@ -253,6 +257,7 @@ class GameInSpace(DirectObject,threading.Thread):
 
 			self.picker.traverse(render)
 			self.pointToLookAt=None
+			objPicked=None
 			if self.pq.getNumEntries() > 0:
 				self.pq.sortEntries() #this is so we get the closest object
 				for p in self.pq.getEntries():
@@ -261,15 +266,18 @@ class GameInSpace(DirectObject,threading.Thread):
 					objFromRender=render.find(tabNode[1]).node()
 					className=objFromRender.getTag("classname")
 					if className=="asteroid":
-						obj=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
-						self.pointToLookAt=obj.getPos()
+						objPicked=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
+						self.pointToLookAt=objPicked.getPos()
 						break
 					elif className=="ship":
-						obj=Ship.getShipById(int(objFromRender.getTag("id")))
+						objPicked=Ship.getShipById(int(objFromRender.getTag("id")))
 						ship=User.getInstance().getCurrentCharacter().getShip()
-						if obj.getId()!=ship.getId():
-							self.pointToLookAt=obj.getPointerToGo().getPos()
+						if objPicked.getId()!=ship.getId():
+							self.pointToLookAt=objPicked.getPointerToGo().getPos()
 							break
+					elif className=="station":
+						objPicked=Station.getStationById(int(objFromRender.getTag("id")))
+						
 					#~ print nn
 					#~ print nn.getPythonTag("name")
 					#~ if nn.getTag("id") != '':
@@ -279,7 +287,8 @@ class GameInSpace(DirectObject,threading.Thread):
 				#~ if str(nodeInQueue).find("Earth")==-1:
 					#~ print nodeInQueue.getTag("id")
 					#~ print nodeInQueue
-		
+			if self.mousebtn[2]==1:
+				pass
 		return task.cont
 
 	def showShipName(self):
@@ -427,6 +436,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		
 	def destroy(self):
 		GameInstance=None
+		self.ambientSound.stop()
 		for expl in self.listOfExplosion:
 			expl.delete()
 		self.ignoreKey(None)
