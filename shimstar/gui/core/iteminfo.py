@@ -23,9 +23,10 @@ class menuItemInfo(DirectObject):
 
 	def event(self,task):
 		dt= globalClock.getRealTime()-self.startTicks
-		if self.CEGUI.WindowManager.getWindow("InfoItem").isVisible():
-			if dt>2:
-				self.CEGUI.WindowManager.getWindow("InfoItem").hide()
+		if self.CEGUI.WindowManager.isWindowPresent("InfoItem")==True:
+			if self.CEGUI.WindowManager.getWindow("InfoItem").isVisible():
+				if dt>2:
+					self.CEGUI.WindowManager.getWindow("InfoItem").hide()
 		return task.cont
 		
 	def hideField(self):
