@@ -25,6 +25,9 @@ class GuiStation(DirectObject):
 		NetworkMainServer.getInstance().sendMessage(msg)
 		self.idZone=User.getInstance().getCurrentCharacter().getIdZone()
 		self.zone=Zone(self.idZone)
+		self.ambientSound = base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() +  self.zone.getMusic())
+		self.ambientSound.setLoop(True)
+		self.ambientSound.play()
 		self.listOfImageSet={}
 		self.CEGUI=ShimCEGUI.getInstance()
 		self.name=""

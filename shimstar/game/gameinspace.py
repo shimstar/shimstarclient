@@ -112,7 +112,6 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("wheel_up", self.speedUp,[1])
 		self.accept("wheel_down", self.speedUp,[-1])
 		self.ambientSound = base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() +  self.currentZone.getMusic())
-		print shimConfig.getInstance().getConvRessourceDirectory()  + self.currentZone.getMusic()
 		self.ambientSound.setLoop(True)
 		self.ambientSound.play()
 		#~ self.setupRocketUI()
@@ -427,8 +426,6 @@ class GameInSpace(DirectObject,threading.Thread):
 				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
 					self.historyKey[key]=1
 			self.keysDown[key]=value
-	
-
 		
 	@staticmethod
 	def getInstance():
@@ -442,6 +439,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.ignoreKey(None)
 		if self.ceGuiRootWindow!=None:
 			self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
+		taskMgr.remove("pickmouse")
 		
 	def calcDistance(self,targetNode):
 		currentDistance=0
