@@ -15,7 +15,6 @@ from shimstar.core.shimconfig import *
 class MenuChooseHeroCegui(DirectObject):
 	def __init__(self):
 		self.text=[]
-		
 		self.faces=[]
 		self.btns=[]
 		self.currentFace=0

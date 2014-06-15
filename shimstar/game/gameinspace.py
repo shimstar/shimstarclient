@@ -200,14 +200,15 @@ class GameInSpace(DirectObject,threading.Thread):
 	def renderTarget(self,dt):
 		
 		if self.target!=None and self.target.getNode().isEmpty()!=True:
-			self.target.getLock().acquire()
+			if isinstance(self.target,Ship):
+				self.target.getLock().acquire()
 
 			###Ecran Info
-			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
-			if dt>0.1:
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
+			#~ if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
+			#~ if dt>0.1:
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
 				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("NormalImage", "set:TempImageset" + self.target.name + " image:full_image")
 				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:TempImageset" + self.target.name + " image:full_image")
 				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("PushedImage", "set:TempImageset" + self.target.name + " image:full_image")
@@ -229,18 +230,19 @@ class GameInSpace(DirectObject,threading.Thread):
 				x=(x*width/(ratio*2))
 				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
 				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setPosition(vec)
-				prctHull=0
-				if self.target!=None:
-					prctHull,currentHull,maxHull=self.target.getPrcentHull()
-				#~ print "gameinspace::rendertarget " + str(prctHull)
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
+				if isinstance(self.target,Ship):
+					prctHull=0
+					if self.target!=None:
+						prctHull,currentHull,maxHull=self.target.getPrcentHull()
+					#~ print "gameinspace::rendertarget " + str(prctHull)
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
 			else:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
 					
 				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:TempImageset image:full_image")
-					
-			self.target.getLock().release()
+			if isinstance(self.target,Ship):		
+				self.target.getLock().release()
 		elif self.target!=None and self.target.getNode().isEmpty()==True:
 				self.target=None
 		else:
@@ -274,20 +276,16 @@ class GameInSpace(DirectObject,threading.Thread):
 						if objPicked.getId()!=ship.getId():
 							self.pointToLookAt=objPicked.getPointerToGo().getPos()
 							break
+						else:
+							objPicked=None
 					elif className=="station":
 						objPicked=Station.getStationById(int(objFromRender.getTag("id")))
-						
-					#~ print nn
-					#~ print nn.getPythonTag("name")
-					#~ if nn.getTag("id") != '':
-						#~ print nn
-				#~ nodeInQueue=self.pq.getEntry(0).getIntoNodePath()
-				#~ self.pointToLookAt=self.pq.getEntry(0).getSurfacePoint(render)
-				#~ if str(nodeInQueue).find("Earth")==-1:
-					#~ print nodeInQueue.getTag("id")
-					#~ print nodeInQueue
+						break
 			if self.mousebtn[2]==1:
-				pass
+				if objPicked!=None:
+					Follower.getInstance().setTarget(objPicked.getNode())
+			#~ rocketTarget.getInstance().showWindow(newTarget.getShip())
+					self.target=objPicked
 		return task.cont
 
 	def showShipName(self):
@@ -545,7 +543,9 @@ class GameInSpace(DirectObject,threading.Thread):
 		mt=MenuTuto.getInstance()
 		mt.setCeguiManager(self.CEGUI)
 		
-		mt.displayTuto(C_MENU_TUTO_SPACE)
+		if shimConfig.getInstance().hasReadTuto(C_MENU_TUTO_SPACE)==False:
+			mt.displayTuto(C_MENU_TUTO_SPACE)
+			shimConfig.getInstance().readTuto(C_MENU_TUTO_SPACE)
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		#~ self.PE = ParticleEngine(ship.node, nb=40, ray=30, move = True)
 		#~ self.PE.start()

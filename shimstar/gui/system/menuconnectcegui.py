@@ -234,5 +234,3 @@ class MenuConnectCegui(ShowBase):
 		self.CEGUI.WindowManager.destroyWindow(self.root)
 		self.ignore("enter")
 		self.ignore("escape")
-	
-    

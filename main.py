@@ -28,7 +28,6 @@ base.win.setCloseRequestEvent("CLOSEF4")
 
 class ShimStarClient(DirectObject):
 	def __init__(self):
-		print base.getAspectRatio()
 		GameState().setState(0)
 		NetworkMainServer.getInstance().start()
 		self.menu=None
