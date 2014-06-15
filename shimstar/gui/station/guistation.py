@@ -30,7 +30,7 @@ class GuiStation(DirectObject):
 		self.ambientSound.play()
 		self.listOfImageSet={}
 		self.CEGUI=ShimCEGUI.getInstance()
-		self.name=""
+		self.name=self.zone.getName()
 		self.back=self.zone.getEgg()
 		self.setupUI()
 		taskMgr.add(self.event,"event reader",-40)  
@@ -40,6 +40,9 @@ class GuiStation(DirectObject):
 		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
 		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
 		
+	def destroy(self):
+		taskMgr.remove("event reader")
+		self.ambientSound.stop()
 		
 	def event(self,arg):
 		if self.usrLoaded==False:
