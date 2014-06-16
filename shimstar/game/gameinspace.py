@@ -202,17 +202,17 @@ class GameInSpace(DirectObject,threading.Thread):
 		if self.target!=None and self.target.getNode().isEmpty()!=True:
 			if isinstance(self.target,Ship):
 				self.target.getLock().acquire()
-
+			#~ print dt
 			###Ecran Info
-			#~ if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
-			#~ if dt>0.1:
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("NormalImage", "set:TempImageset" + self.target.name + " image:full_image")
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:TempImageset" + self.target.name + " image:full_image")
-				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("PushedImage", "set:TempImageset" + self.target.name + " image:full_image")
-			
+			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
+			if dt>0.05:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:ShimstarImageset image:" + self.target.name )
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:" + self.target.name + " image:full_image")
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("PushedImage", "set:" + self.target.name + " image:full_image")
+				
 			###Reticule de suivi de la cible ou point rouge sur le bord
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
 			if pos!=None:
