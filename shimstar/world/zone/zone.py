@@ -8,6 +8,7 @@ from shimstar.world.zone.station import *
 from shimstar.user.user import *
 from shimstar.npc.npc import *
 from shimstar.core.constantes import *
+from shimstar.gui.core.inventory import *
 
 C_TYPEZONE_SPACE=1
 C_TYPEZONE_STATION=2
@@ -66,11 +67,34 @@ class Zone(threading.Thread):
 		self.runNewIncoming()
 		self.runNewNpc()
 		self.runUpdatePosNPC()
+		self.runUpdateChar()
 		self.runDamageNpc()
 		self.runRemoveNpc()
 		self.runDamageChar()
 		self.runRemoveChar()
 		self.runCharOutgoing()
+		
+	def runUpdateChar(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_ADD_TO_INVENTORY)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				tabMsg=msg.getMessage()
+				User.lock.acquire()
+				ship=User.getInstance().getCurrentCharacter().getShip()
+				it=ship.getItemFromInventory(tabMsg[2])
+				if it!=None:
+					if tabMsg[0]==C_ITEM_MINERAL:
+						it.addMineral(tabMsg[3])
+				else:
+					it=itemFactory.getItemFromTemplateType(tabMsg[1],tabMsg[0])
+					it.setId(tabMsg[2])
+					if tabMsg[0]==C_ITEM_MINERAL:
+						it.addMineral(tabMsg[3])
+					ship.addItemInInventory(it)
+				menuInventory.getInstance('inventaire').setItems()
+				User.lock.release()
+				NetworkZoneServer.getInstance().removeMessage(msg)
+		
 		
 	def runCharOutgoing(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_USER_OUTGOING)

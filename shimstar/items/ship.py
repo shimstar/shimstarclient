@@ -280,6 +280,13 @@ class Ship:
 	def getId(self):
 		return self.id
 		
+	def getItemFromInventory(self,id):
+		for it in self.itemInInventory:
+			if it.getId()==id:
+				return it
+				
+		return None
+		
 	def getItemInInventory(self):
 		return self.itemInInventory
 		
@@ -419,6 +426,9 @@ class Ship:
 		self.node.show()
 		
 	def setInvisible(self):
+		if self.node==None:
+			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+			self.node.reparentTo(render)
 		self.node.hide()
 		
 	def isHidden(self):

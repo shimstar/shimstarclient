@@ -71,22 +71,31 @@ class menuInventory(DirectObject):
 		numItemI=0
 		numItemJ=0
 		for it in self.items:
+			#~ print it
 			#~ loc=it.getLocation()
 			locI=numItemI%7
 			locJ=int(numItemI/7)
+			panel=self.CEGUI.WindowManager.getWindow("Inventaire/Panel")
 			wnd=self.CEGUI.WindowManager.getWindow("Inventaire/Panel/DragDropSlot" + str(locI) + "-" + str(locJ))
-			if listOfImageSet.has_key("TempImageset" + str(it.getImg()) )==False:
-				customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset" + str(it.getImg()) , "items/" + str(it.getImg()) + ".png", "images")
-				customImageset.setNativeResolution(PyCEGUI.Size(64,64))
-				customImageset.setAutoScalingEnabled(False)
-				listOfImageSet["TempImageset" + str(it.getImg()) ]=customImageset
+			#~ if listOfImageSet.has_key("TempImageset" + str(it.getImg()) )==False:
+				#~ customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset" + str(it.getImg()) , "items/" + str(it.getImg()) + ".png", "images")
+				#~ customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+				#~ customImageset.setAutoScalingEnabled(False)
+				#~ listOfImageSet["TempImageset" + str(it.getImg()) ]=customImageset
 			img=self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage","Inventaire/Panel/DragDropSlot" + str(locI) + "-" + str(locJ) + "/img" + str(locI) + "-" + str(locJ))
-			img.setProperty("BackgroundImage", "set:TempImageset" + str(it.getImg())  +  " image:full_image")
+			img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
+			
 			img.setMousePassThroughEnabled(True)
 			img.setUserData(it)
 			wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters,self,'showInfo')
 			wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves,self,'hideInfo')
 			wnd.addChildWindow(img)
+			if it.getTypeItem()==C_ITEM_MINERAL:
+				label=self.CEGUI.WindowManager.createWindow("Shimstar/Button","Inventaire/Panel/label" + str(it.getId()))			
+				label.setProperty("UnifiedAreaRect", "{{" + str(0.025+0.115*locI) + ",0},{0.2,0},{" + str(0.125+0.115*locI) + ",0},{0.3,0}}");
+				label.setProperty("Font","Brassiere-s")
+				label.setText(str(it.getQuantity()))
+				panel.addChildWindow(label)
 			numItemI+=1
 	
 	def showInfo(self,args):

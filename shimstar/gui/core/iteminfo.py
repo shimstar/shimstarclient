@@ -76,7 +76,7 @@ class menuItemInfo(DirectObject):
 
 	def showCommons(self):
 		self.CEGUI.WindowManager.getWindow("InfoItem/Name").setText("Nom : " + self.obj.getName())
-		self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Energie : " + str(self.obj.getEnergyCost() ))
+		#~ self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Energie : " + str(self.obj.getEnergyCost() ))
 		self.CEGUI.WindowManager.getWindow("InfoItem/Encombrement").setText("Encombrement : " + str(self.obj.getSpace() ))
 		
 	def hide(self):

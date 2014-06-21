@@ -112,7 +112,50 @@ class ShimStarClient(DirectObject):
 			if len(tempMsg)>0:
 				for msg in tempMsg:
 					netMsg=msg.getMessage()
-					User.getInstance().getCurrentCharacter().setShip(netMsg[0],netMsg[1],netMsg[2])
+					ch=User.getInstance().getCurrentCharacter()
+					ch.setShip(netMsg[0],netMsg[1],netMsg[2],False)
+					nbInv=netMsg[3]
+					ship=ch.getShip()
+					compteur=4
+					for i in range(nbInv):
+						typeItem=netMsg[compteur]
+						compteur+=1
+						templateId=netMsg[compteur]
+						compteur+=1
+						idItem=netMsg[compteur]
+						compteur+=1
+						it=itemFactory.getItemFromTemplateType(templateId,typeItem)
+						it.setId(idItem)
+						quantity=netMsg[compteur]
+						compteur+=1
+						if typeItem==C_ITEM_MINERAL:
+							it.setQuantity(quantity)
+						ship.addItemInInventory(it)
+						
+					nbSlot=netMsg[compteur]
+					ship.removeTemplateSlots()
+					compteur+=1
+					for n in range(nbSlot):
+						idSlot=netMsg[compteur]
+						tempSlot=Slot(None,idSlot)
+						compteur+=1
+						nbTypes=netMsg[compteur]
+						compteur+=1
+						for t in range(nbTypes):
+							idType=netMsg[compteur]
+							compteur+=1
+							tempSlot.appendTypes(idType)
+						typeItem=netMsg[compteur]
+						compteur+=1
+						templateItem=netMsg[compteur]
+						compteur+=1
+						idItem=netMsg[compteur]
+						compteur+=1
+						if idItem!=0:
+							it=itemFactory.getItemFromTemplateType(templateItem,typeItem)
+							it.setId(idItem)
+							tempSlot.setItem(it)
+						ship.addSlot(tempSlot)
 					GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
 					NetworkZoneServer.getInstance().removeMessage(msg)
 		elif state==C_QUIT:
@@ -126,8 +169,6 @@ class ShimStarClient(DirectObject):
 			else:
 				self.menu=MenuDeath()
 		return Task.cont
-		
-	
 		
 #~ print 'Number of arguments:', len(sys.argv), 'arguments.'
 #~ print 'Argument List:', str(sys.argv)

@@ -13,6 +13,7 @@ from shimstar.game.gamestate import *
 from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
 from shimstar.gui.core.menututo import *
+from shimstar.gui.core.inventory import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
 from shimstar.game.particleEngine import *
@@ -34,6 +35,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.expTask=[]
 		self.target=None
 		self.customIm={}
+		self.startQtyMineral=0
 		self.mousebtn = [0,0,0]
 		self.enableKey(None)
 		base.camera.setPos(0,-600,50)
@@ -68,6 +70,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.picker.addCollider(self.pickerNP, self.pq)
 		taskMgr.add(self.pickmouse,"pickmouse")
 		self.pointToLookAt=Vec3(0,0,0)
+		
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -212,13 +215,16 @@ class GameInSpace(DirectObject,threading.Thread):
 			#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").setVisible(True)
 		if isinstance(obj,Station):
 			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
 			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
 		elif isinstance(obj,Ship):
 			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
 			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
-		else:
+		elif isinstance(obj,Asteroid):
 			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
 			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
 		
 	def renderTarget(self,dt):
 		if self.target!=None and self.target.getNode().isEmpty()!=True:
@@ -370,6 +376,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Missions").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuMissions')
 		self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Quitter").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuQuitter')
+		self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").subscribeEvent(PyCEGUI.Window.EventMouseButtonDown, self, 'clickOnHUD')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").subscribeEvent(PyCEGUI.Window.EventMouseButtonDown, self, 'clickOnHUD')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").subscribeEvent(PyCEGUI.Window.EventMouseButtonDown, self, 'clickOnHUD')
@@ -378,15 +385,35 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/info").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickInfo')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickEnterStation')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickMining')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickStopMining')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickStartMining')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/info").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickInfo')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
 		#~ customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset", "background/backmenuconnect.jpg", "images")
 		#~ self.customIm = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesettgt", "/ships/ship1.png", "images")
 		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
 		self.InQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
+		
+		self.OutMiningAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InMiningAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutMiningAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining"))
+		self.InMiningAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining"))
+		
+		menuInventory.getInstance('inventaire').setParent(self)
+		menuInventory.getInstance('inventaire').setObj(User.getInstance().getCurrentCharacter().getShip())
+		
+		self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+		self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+		
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setFont("Brassiere-s")
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").show()
 		self.CEGUI.WindowManager.getWindow("Station").hide()
@@ -410,13 +437,63 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("InfoItem"))
 	
+	def onMenuInventaire(self,args):
+		self.InInventaireAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
+	
+	def onClickMining(self,args):
+		self.InMiningAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").hide()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").show()
+		
+	def mining(self,task):
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		inv=ship.getItemInInventory()
+		qty=0
+		for it in inv:
+			if it.getTypeItem()==C_ITEM_MINERAL:
+				qty=it.getQuantity()
+				break
+		qtyMined=qty-self.startQtyMineral
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Current").setText("Minerai recolte : " + str(qtyMined))
+		return task.cont
+		
+	def onClickStartMining(self,args):
+		nm=netMessage(C_NETWORK_START_MINING)
+		nm.addInt(User.getInstance().getId())
+		nm.addInt(self.target.getId())
+		NetworkZoneServer.getInstance().sendMessage(nm)
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").show()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").hide()
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		inv=ship.getItemInInventory()
+		for it in inv:
+			if it.getTypeItem()==C_ITEM_MINERAL:
+				self.startQtyMineral=it.getQuantity()
+				break
+		taskMgr.add(self.mining,"mining")
+		
+	def onClickStopMining(self,args):
+		nm=netMessage(C_NETWORK_STOP_MINING)
+		nm.addInt(User.getInstance().getId())
+		NetworkZoneServer.getInstance().sendMessage(nm)
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").hide()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").show()
+		taskMgr.remove("mining")
+	
 	def	onClickEnterStation(self,windowEventArgs):
 		if isinstance(self.target,Station)==True:
 			GameState.getInstance().setNewZone(self.target.getId())
 			User.getInstance().getCurrentCharacter().changeZone()
 		
 	def onCloseClicked(self,windowEventArgs):
-		windowEventArgs.window.hide()
+		if windowEventArgs.window.getName()=="HUD/Cockpit/Mining":
+			self.OutMiningAnimationInstance.start()
+			self.onClickStopMining(None)
+		elif windowEventArgs.window.getName()=="Inventaire":
+			self.OutInventaireAnimationInstance.start()
+		else:
+			windowEventArgs.window.hide()
 		
 	def onMenuQuitter(self,args):
 		self.InQuitAnimationInstance.start()
@@ -479,6 +556,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		if self.ceGuiRootWindow!=None:
 			self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
 		taskMgr.remove("pickmouse")
+		taskMgr.remove("mining")
 		
 	def calcDistance(self,targetNode):
 		currentDistance=0

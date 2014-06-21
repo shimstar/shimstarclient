@@ -64,6 +64,10 @@ class GuiStation(DirectObject):
 						compteur+=1
 						it=itemFactory.getItemFromTemplateType(templateId,typeItem)
 						it.setId(idItem)
+						quantity=netMsg[compteur]
+						compteur+=1
+						if typeItem==C_ITEM_MINERAL:
+							it.setQuantity(quantity)
 						ship.addItemInInventory(it)
 						
 					nbSlot=netMsg[compteur]
