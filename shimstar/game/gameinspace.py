@@ -33,6 +33,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.keysDown={}
 		self.historyKey={}
 		self.expTask=[]
+		self.doubleQTicks=0
+		self.doubleDTicks=0
 		self.target=None
 		self.customIm={}
 		self.startQtyMineral=0
@@ -537,10 +539,25 @@ class GameInSpace(DirectObject,threading.Thread):
 				del self.keysDown[key]
 				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
 					self.historyKey[key]=0
+				if key=='q':
+					self.historyKey['qq']=0
+				if key=='d':
+					self.historyKey['dd']=0
 		else:
 			if self.keysDown.has_key(key)==False:
 				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
 					self.historyKey[key]=1
+				if key=='q':
+					dt=globalClock.getRealTime()-self.doubleQTicks
+					if dt<0.3:
+						self.historyKey['qq']=1
+					self.doubleQTicks=globalClock.getRealTime()
+				if key=='d':
+					dt=globalClock.getRealTime()-self.doubleDTicks
+					if dt<0.3:
+						self.historyKey['dd']=1
+					self.doubleDTicks=globalClock.getRealTime()
+						
 			self.keysDown[key]=value
 		
 	@staticmethod
@@ -742,7 +759,7 @@ class GameInSpace(DirectObject,threading.Thread):
 							nm.addInt(User.getInstance().getId())
 							nm.addInt(len(self.historyKey))
 							for key in self.historyKey.keys():
-								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq':
 									nm.addString(key)
 									nm.addInt(self.historyKey[key])
 							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
