@@ -6,6 +6,7 @@ loadPrcFileData('', 'win-size %i %i' % (1280, 720))
 #~ loadPrcFileData('','fullscreen 1')
 import sys,os
 from array import array
+#~ import win32api
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import * 
@@ -34,13 +35,17 @@ class ShimStarClient(DirectObject):
 		base.disableMouse()
 		base.setFrameRateMeter(True)
 		render.setAntialias(AntialiasAttrib.MAuto)
+	
 		self.preLoad()
 		taskMgr.add(self.dispatch,"dispatch Main",-40)  
+		#~ while 1:
+			#~ self.dispatch()
 		
 	def preLoad(self):
 		Explosion.preload()
 	
 	def dispatch(self,task):
+	#~ def dispatch(self):
 		state=GameState.getInstance().getState()
 		if state==C_INIT:
 			if self.menu!=None:
@@ -60,10 +65,13 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuChooseHeroCegui()				
 		elif state==C_CHANGEZONE:
 			idZone=GameState.getInstance().getNewZone()
-		
+			
 			if idZone==0 or idZone==User.getInstance().getCurrentCharacter().getIdZone():
 				idZone=User.getInstance().getCurrentCharacter().getIdZone()
-			
+			#~ msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
+			#~ msg.addUInt(User.getInstance().getId())
+			#~ msg.addUInt(idZone)
+			#~ NetworkMainServer.getInstance().sendMessage(msg)
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
 			if typeZone==C_TYPEZONE_SPACE:
 				msg=netMessage(C_NETWORK_INFO_ZONE)
@@ -96,6 +104,10 @@ class ShimStarClient(DirectObject):
 					self.menu=GuiStation()
 				#~ else:
 					#~ self.menu=GuiStation()
+		#~ elif state==C_PLAYING:
+			#~ if isinstance(self.menu,GameInSpace)==True:
+				#~ self.menu.run()
+				
 		elif state==C_RECEIVED_INFOZONE:
 			msg=netMessage(C_NETWORK_CONNECT)
 			msg.addUInt(User.getInstance().getId())
@@ -168,6 +180,11 @@ class ShimStarClient(DirectObject):
 					self.menu=MenuDeath()
 			else:
 				self.menu=MenuDeath()
+		
+		
+		GameState.lock.acquire()
+		GameState.lock.release()
+		
 		return Task.cont
 		
 #~ print 'Number of arguments:', len(sys.argv), 'arguments.'

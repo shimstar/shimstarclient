@@ -18,10 +18,17 @@ class Character:
 		self.ship=None
 		self.idZone=idZone
 		self.lastStation=0
+		self.missions=[]
 		self.visible=False
 		self.userRef=userRef #user obj
 		self.readDialogs=[]
 		print "character::init" + str(self.id)
+		
+	def getMissions(self):
+		return self.missions
+		
+	def addMission(self,m):
+		self.missions.append(m)
 		
 	def getReadDialogs(self):
 		return self.readDialogs
@@ -95,8 +102,8 @@ class Character:
 		if GameState.getInstance().getNewZone()!=0:			
 			self.idZone=GameState.getInstance().getNewZone()
 		msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
+		print "characeter::changeZone " + str(self.userRef.id) + "/" + str(self.userRef.getId())
 		msg.addUInt(self.userRef.getId())
-		msg.addUInt(self.id)
 		msg.addUInt(self.idZone)
 		NetworkMainServer.getInstance().sendMessage(msg)
 		if self.ship!=None:
@@ -107,5 +114,35 @@ class Character:
 			GameState.getInstance().setState(C_CHANGEZONE)
 		return 
 
+	def evaluateMission(self,id,idNPC):
+		for m in self.missions:
+			if m.getId()==int(id):
+				if m.getStatus()==C_STATEMISSION_FINISHED:
+					return C_STATEMISSION_FINISHED
+				else:
+					missionFinished=False
+					objectifs=m.getObjectifs()
+					for o in objectifs:
+						if C_OBJECTIF_TRANSPORT==o.getIdType():
+							for i in self.ship.getItemInInventory():
+								if i.getTemplate()==o.getIdItem():
+									if i.getQuantity()>=o.getNbItem():
+										o.setStatus(True)
+									break
+						
+					for o in objectifs:
+						if o.getStatus()==False:
+							missionFinished=o.getStatus()
+							break
+						else:
+							missionFinished=o.getStatus()
+					if m.getEndingNPC()!=int(idNPC):
+						missionFinished=False
+					if missionFinished==True: 
+						return C_STATEMISSION_SUCCESS
+					else:
+						return C_STATEMISSION_INPROGRESS
 		
-		
+		return C_STATEMISSION_DONTHAVE
+				
+				

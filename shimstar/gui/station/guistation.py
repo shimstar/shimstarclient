@@ -32,6 +32,7 @@ class GuiStation(DirectObject):
 		self.CEGUI=ShimCEGUI.getInstance()
 		self.name=self.zone.getName()
 		self.back=self.zone.getEgg()
+		self.resolutionList=[]
 		self.setupUI()
 		taskMgr.add(self.event,"event reader",-40)  
 		self.accept("escape",self.quitGame,)
@@ -99,6 +100,17 @@ class GuiStation(DirectObject):
 					for i in range (nbDialog):
 						ch.appendDialogs(netMsg[compteur])
 						compteur+=1
+					
+					nbMission=netMsg[compteur]
+					compteur+=1
+					for i in range(nbMission):
+						idMission=netMsg[compteur]
+						compteur+=1
+						statusMission=netMsg[compteur]
+						compteur+=1
+						tempMission=Mission(idMission)
+						tempMission.setStatus(statusMission)
+						ch=User.getInstance().getCurrentCharacter().addMission(tempMission)
 					NetworkMainServer.getInstance().removeMessage(msg)
 					self.usrLoaded=True
 					menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
@@ -114,11 +126,35 @@ class GuiStation(DirectObject):
 	def onQuiGameConfirmed(self,args):
 		GameState.getInstance().setState(C_QUIT)
 		
+	def loadResolution(self):
+		if len(self.resolutionList)==0:
+			info = base.pipe.getDisplayInformation( )
+			listB=self.CEGUI.WindowManager.getWindow("Options/OptionVideo/Resolution")
+			for idx in range( info.getTotalDisplayModes( ) ):
+				width  = info.getDisplayModeWidth( idx )
+				height = info.getDisplayModeHeight( idx )
+				bits   = info.getDisplayModeBitsPerPixel( idx )
+
+				if bits==32:
+					item = PyCEGUI.ListboxTextItem(str(width) +"*" + str(height))
+					self.resolutionList.append(item)
+					item.setSelectionColours(PyCEGUI.colour(1,1,1,1))
+					listB.addItem(item)
+		
 	def ButtonClicked(self,windowEventArgs):
 		self.buttonSound.play()
+		print windowEventArgs.window.getName()
 		if (windowEventArgs.window.getName() == "Station/Menus/Sortir"):
 			GameState.getInstance().setNewZone(self.zone.getExitZone())
 			User.getInstance().getCurrentCharacter().changeZone()
+		elif (windowEventArgs.window.getName() == "Station/Menus/Options"):
+			self.InOptionsAnimationInstance.start()
+			self.CEGUI.WindowManager.getWindow("Options").moveToFront ()
+		elif (windowEventArgs.window.getName() == "Options/Video"):
+			self.OutOptionsAnimationInstance.start()
+			self.loadResolution()
+			self.InOptionsVideoAnimationInstance.start()
+			self.CEGUI.WindowManager.getWindow("Options/OptionVideo").moveToFront ()
 		elif (windowEventArgs.window.getName() == "Station/Menus/Personnel"):
 			self.InNPCAnimationInstance.start()
 			self.showNPC()
@@ -257,6 +293,9 @@ class GuiStation(DirectObject):
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Personnel").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Vaisseau").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Menus/Inventaire").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
+		self.CEGUI.WindowManager.getWindow("Station/Menus/Options").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
+		
+		self.CEGUI.WindowManager.getWindow("Options/Video").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'ButtonClicked')
 		
 		self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'suppressItem')
 		self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Modify").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'modifyItem')
@@ -269,7 +308,14 @@ class GuiStation(DirectObject):
 		self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Vaisseau").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
 		self.CEGUI.WindowManager.getWindow("Station/Dialog").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		
+		self.CEGUI.WindowManager.getWindow("Station/Background").subscribeEvent(PyCEGUI.FrameWindow.EventMouseClick,self,'backgroundClicked')
+		
 		self.CEGUI.WindowManager.getWindow("root/Skills").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'closeClicked')
+		
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'acceptMission')
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'cancelMission')
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").subscribeEvent(PyCEGUI.PushButton.EventClicked,self,'endMission')
 		
 		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
@@ -296,10 +342,24 @@ class GuiStation(DirectObject):
 		self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 		self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 		
+		self.OutOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutOptionsAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Options"))
+		self.InOptionsAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Options"))
+		
+		self.OutOptionsVideoAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InOptionsVideoAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutOptionsVideoAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Options/OptionVideo"))
+		self.InOptionsVideoAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Options/OptionVideo"))
+		
 		self.OutAddSuppressAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InAddSuppressAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutAddSuppressAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem"))
 		self.InAddSuppressAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem"))
+		
+		
+	def backgroundClicked(self,evt):
+		self.CEGUI.WindowManager.getWindow("Station/Background").moveToBack ()
 		
 		
 	def closeClicked(self,windowEventArgs):
@@ -398,42 +458,44 @@ class GuiStation(DirectObject):
 				
 				label.setUserData(npcChoosed)
 				label.setUserString("keyword",k)
+				label.setUserString("idnpc",str(npcChoosed.getId()))
 				self.CEGUI.WindowManager.getWindow("Station/Dialog/Keywords").addChildWindow(label)
 				label.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseKeywords')
 				i+=1
 				
-		#~ for m in npcChoosed.getMissions():
-			#~ charMissions=user.instance.getCurrentCharacter().getMissions()
-			#~ found=False
-			#~ statusMission=C_STATEMISSION_DONTHAVE
-			#~ for mc in charMissions:
-				#~ if mc.getId()==m.getId():
-					#~ found=True
-					#~ statusMission=user.instance.getCurrentCharacter().evaluateMission(m.getId(),npcChoosed.getId())
-					#~ break
-			#~ dial=m.getPreDialog()
-			#~ if dial!=None:
-				#~ keywords=dial.getKeywords()
-				#~ for k in keywords:
-					#~ if statusMission!=C_STATEMISSION_FINISHED:
-						#~ label=self.CEGUI.WindowManager.createWindow("Shimstar/Button","Station/Dialog/Keywords/keyword" + k + str(i))
-						#~ label.setProperty("UnifiedAreaRect", "{{-0.060259,0},{" + str(0.0237858+0.06*i) + ",0},{0.919381,0},{" + str(0.0926617+0.06*i) + ",0}}");
-						#~ label.setFont("Brassiere-s")
-						#~ if statusMission==C_STATEMISSION_SUCCESS:
-							#~ label.setText("[colour='FFFFFF00']" + k)
-						#~ elif statusMission==C_STATEMISSION_INPROGRESS:
-							#~ label.setText("[colour='FFFFAA00']" + k)
-						#~ else:
-							#~ label.setText("[colour='FF00FF00']" + k)
-						#~ label.setUserData(npcChoosed)
-						#~ label.setUserString("keyword","-1")
-						#~ label.setUserString("mission",str(m.getId()))
-						#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/Keywords").addChildWindow(label)
-						#~ label.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseKeywords')
-						#~ i+=1
+		for m in npcChoosed.getMissions():
+			charMissions=User.getInstance().getCurrentCharacter().getMissions()
+			found=False
+			statusMission=C_STATEMISSION_DONTHAVE
+			for mc in charMissions:
+				if mc.getId()==m.getId():
+					found=True
+					statusMission=User.getInstance().getCurrentCharacter().evaluateMission(m.getId(),npcChoosed.getId())
+					break
+			dial=m.getPreDialog()
+			if dial!=None:
+				keywords=dial.getKeywords()
+				for k in keywords:
+					if statusMission!=C_STATEMISSION_FINISHED:
+						label=self.CEGUI.WindowManager.createWindow("Shimstar/Button","Station/Dialog/Keywords/keyword" + str(k) + str(i))
+						label.setProperty("UnifiedAreaRect", "{{-0.060259,0},{" + str(0.0237858+0.06*i) + ",0},{0.919381,0},{" + str(0.0926617+0.06*i) + ",0}}");
+						label.setFont("Brassiere-s")
+						if statusMission==C_STATEMISSION_SUCCESS:
+							label.setText("[colour='FFFFFF00']" + str(keywords[k]))
+						elif statusMission==C_STATEMISSION_INPROGRESS:
+							label.setText("[colour='FFFFAA00']" + str(keywords[k]))
+						else:
+							label.setText("[colour='FF00FF00']" + str(keywords[k]))
+						label.setUserData(npcChoosed)
+						label.setUserString("keyword","-1")
+						label.setUserString("idnpc",str(npcChoosed.getId()))
+						label.setUserString("mission",str(m.getId()))
+						self.CEGUI.WindowManager.getWindow("Station/Dialog/Keywords").addChildWindow(label)
+						label.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseKeywords')
+						i+=1
 						
 	def onChooseKeywords(self,args):
-		npcChoosed=args.window.getUserData()
+		npcChoosed=NPCInStation.getNPCById(int(args.window.getUserString("idnpc")))
 		keyword=args.window.getUserString("keyword")
 		if keyword!="-1":
 			dialog=npcChoosed.getDialogueFromKeyword(keyword)
@@ -456,77 +518,118 @@ class GuiStation(DirectObject):
 				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
 				self.CEGUI.WindowManager.getWindow("Station/Dialog/Text").setText(dial)
 				
-		#~ else:
-			#~ missionId=args.window.getUserString("mission")
-			#~ m=npcChoosed.getMission(missionId)
-			#~ if m!=None:
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/Text").hide()
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").show()
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionObjectif").show()
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionRecompense").show()
-				#~ charMissions=user.instance.getCurrentCharacter().getMissions()
-				#~ found=False
-				#~ statusMission=C_STATEMISSION_DONTHAVE
-				#~ for mc in charMissions:
-					#~ if mc.getId()==int(missionId):
-						#~ found=True
-						#~ statusMission=user.instance.getCurrentCharacter().evaluateMission(mc.getId(),npcChoosed.getId())
-						#~ break
+		else:
+			missionId=args.window.getUserString("mission")
+			m=npcChoosed.getMission(missionId)
+			if m!=None:
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/Text").hide()
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").show()
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionObjectif").show()
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionRecompense").show()
+				charMissions=User.getInstance().getCurrentCharacter().getMissions()
+				found=False
+				statusMission=C_STATEMISSION_DONTHAVE
+				for mc in charMissions:
+					if mc.getId()==int(missionId):
+						found=True
+						statusMission=User.getInstance().getCurrentCharacter().evaluateMission(mc.getId(),npcChoosed.getId())
+						break
 				
-				#~ if statusMission==C_STATEMISSION_SUCCESS:
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").show()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").show()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").enable()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setText("Terminer" )
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setUserData(npcChoosed )
-					#~ dialog=m.getPostDialog()
-					#~ if dialog!=None:
-						#~ dial=dialog.getText().replace('\\2n','\n \n')
-						#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").setText(dial)
-				#~ elif found==True:
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").show()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").show()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").disable()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setText("[colour='FFFF0000']Terminer" )
-					#~ dialog=m.getCurrentDialog()
-					#~ if dialog!=None:
-						#~ dial=dialog.getText().replace('\\2n','\n \n')
-						#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").setText(dial)
-				#~ else:
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").show()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
-					#~ dialog=m.getPreDialog()
-					#~ if dialog!=None:
-						#~ dial=dialog.getText().replace('\\2n','\n \n')
-						#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").setText(dial)
+				if statusMission==C_STATEMISSION_SUCCESS:
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").show()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").show()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").enable()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setText("Terminer" )
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setUserData(npcChoosed )
+					dialog=m.getPostDialog()
+					if dialog!=None:
+						dial=dialog.getText().replace('\\2n','\n \n')
+						dial=dialog.getText().replace('\\1n','\n')
+						self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").setText(dial)
+				elif found==True:
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").show()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").show()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").disable()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setText("[colour='FFFF0000']Terminer" )
+					dialog=m.getCurrentDialog()
+					if dialog!=None:
+						dial=dialog.getText().replace('\\2n','\n \n')
+						dial=dialog.getText().replace('\\1n','\n')
+						self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").setText(dial)
+				else:
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").show()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
+					dialog=m.getPreDialog()
+					if dialog!=None:
+						dial=dialog.getText().replace('\2n','\n \n')
+						dial=dialog.getText().replace('\\1n','\n')
+						self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").setText(dial)
 					
 						
-				#~ objectifs=m.getObjectifs()
+				objectifs=m.getObjectifs()
 
-				#~ for o in objectifs:
-					#~ textObj=o.getText()
-					#~ if o.getIdType()==C_OBJECTIF_DESTROY:
-						#~ idItem=o.getIdItem()
-						#~ it=ShimstarItem(idItem)
-						#~ textObj+=" : " + str(o.getNbItemCharacter()) + " / " + str(o.getNbItem()) + " " + it.getName()
-					#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionObjectif").setText(textObj)
+				for o in objectifs:
+					textObj=o.getText()
+					if o.getIdType()==C_OBJECTIF_DESTROY:
+						idItem=o.getIdItem()
+						it=ShimstarItem(idItem)
+						textObj+=" : " + str(o.getNbItemCharacter()) + " / " + str(o.getNbItem()) + " " + it.getName()
+					self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionObjectif").setText(textObj)
 					
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").setUserString("mission",missionId)
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").setUserString("mission",missionId)
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setUserString("mission",missionId)
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").setUserString("mission",missionId)
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").setUserString("mission",missionId)
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").setUserString("mission",missionId)
 				
-				#~ idEndingNPC=m.getEndingNPC()
-				#~ endingNPC=NPCInStation(idEndingNPC)
-				#~ stationNpc=zone(endingNPC.getLocation())
-				#~ textRecompense="Voir pour votre recompense : " + str(endingNPC.getName()) + " a la station " + stationNpc.getName()
-				#~ rewards=m.getRewards()
-				#~ for r in rewards:
-					#~ if r.getTypeReward()==C_REWARD_COIN:
-						#~ textRecompense+="\n\n           " + str(r.getNb()) + " Credits imperiaux"
-				#~ self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionRecompense").setText(textRecompense)
+				idEndingNPC=m.getEndingNPC()
+				endingNPC=NPCInStation(idEndingNPC)
+				stationNpc=Zone(endingNPC.getLocation())
+				textRecompense="Voir pour votre recompense : " + str(endingNPC.getName()) + " a la station " + stationNpc.getName()
+				rewards=m.getRewards()
+				for r in rewards:
+					if r.getTypeReward()==C_REWARD_COIN:
+						textRecompense+="\n\n           " + str(r.getNb()) + " Credits imperiaux"
+				self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionRecompense").setText(textRecompense)
 			
 		self.loadKeywords(npcChoosed)
+
+	def hideMissionPanel(self):
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionText").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionObjectif").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionRecompense").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
+		
+	def acceptMission(self,windowEventArgs):
+		missionId=windowEventArgs.window.getUserString("mission")
+		msg=netMessage(C_NETWORK_CHARACTER_ACCEPT_MISSION)
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(missionId))
+		NetworkMainServer.getInstance().sendMessage(msg)
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").show()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").show()
+		
+	def cancelMission(self,windowEventArgs):
+		missionId=windowEventArgs.window.getUserString("mission")
+		msg=netMessage(C_NETWORK_CHARACTER_CANCEL_MISSION)
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(missionId))
+		NetworkMainServer.getInstance().sendMessage(msg)
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").show()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
+		
+	def endMission(self,wa):
+		missionId=windowEventArgs.window.getUserString("mission")
+		msg=netMessage(C_NETWORK_CHARACTER_END_MISSION)
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(missionId))
+		NetworkMainServer.getInstance().sendMessage(msg)
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
+		self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
 		

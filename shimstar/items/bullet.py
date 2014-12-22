@@ -50,7 +50,7 @@ class Bullet(threading.Thread):
 	@staticmethod			
 	def removeBullet(id):
 		if Bullet.listOfBullet.has_key(id)==True:
-			Bullet.listOfBullet[id].lock.acquire()
+			#~ Bullet.listOfBullet[id].lock.acquire()
 			Bullet.listOfBullet[id].destroy()
 			del Bullet.listOfBullet[id]
 			
@@ -87,8 +87,11 @@ class Bullet(threading.Thread):
 		#~ audio3d.detachSound(self.bulletSound)
 		#~ audio3d.detachSound(self.node)
 		#~ self.node.setLightOff()
+		self.lock.acquire()
 		self.node.detachNode()
 		self.node.removeNode()
+		self.lock.release()
+		self.node=None
 		
 	def stateBullet(self):
 		"""

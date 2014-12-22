@@ -35,6 +35,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.expTask=[]
 		self.doubleQTicks=0
 		self.doubleDTicks=0
+		self.doubleZTicks=0
+		self.doubleSTicks=0
 		self.target=None
 		self.customIm={}
 		self.startQtyMineral=0
@@ -126,7 +128,7 @@ class GameInSpace(DirectObject,threading.Thread):
 	def speedUp(self,sp):
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		if ship!=None:
-			ship.lock.acquire
+			ship.lock.acquire()
 			if ship.engine!=None:
 				acc=ship.engine.getAcceleration()
 				self.speedup+=acc*sp
@@ -543,6 +545,11 @@ class GameInSpace(DirectObject,threading.Thread):
 					self.historyKey['qq']=0
 				if key=='d':
 					self.historyKey['dd']=0
+				if key=='s':
+					self.historyKey['ss']=0
+				if key=='z':
+					self.historyKey['zz']=0
+				
 		else:
 			if self.keysDown.has_key(key)==False:
 				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
@@ -557,6 +564,16 @@ class GameInSpace(DirectObject,threading.Thread):
 					if dt<0.3:
 						self.historyKey['dd']=1
 					self.doubleDTicks=globalClock.getRealTime()
+				if key=='s':
+					dt=globalClock.getRealTime()-self.doubleSTicks
+					if dt<0.3:
+						self.historyKey['ss']=1
+					self.doubleSTicks=globalClock.getRealTime()
+				if key=='z':
+					dt=globalClock.getRealTime()-self.doubleZTicks
+					if dt<0.3:
+						self.historyKey['zz']=1
+					self.doubleZTicks=globalClock.getRealTime()
 						
 			self.keysDown[key]=value
 		
@@ -579,7 +596,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		currentDistance=0
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		#~ print "gameinSpace::calcDistance " + str(ship.getNode()) + "/" + str(targetNode)
-		if ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
+		if ship!=None and ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
 			posShip=ship.getNode().getPos()
 			posItem=targetNode.getPos()
 			dx=posShip.getX()-posItem.getX()
@@ -690,7 +707,9 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.PE.stop()
 		#~ self.PE.speed=100
 		while not self.stopThread and GameState.getInstance().getState()==C_PLAYING:
-			
+			#~ print "here"
+			GameState.lock.acquire()
+			#~ print "here2"
 			ship=User.getInstance().getCurrentCharacter().getShip()
 			ship.lock.acquire()
 			if ship!=None:
@@ -759,7 +778,7 @@ class GameInSpace(DirectObject,threading.Thread):
 							nm.addInt(User.getInstance().getId())
 							nm.addInt(len(self.historyKey))
 							for key in self.historyKey.keys():
-								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq':
+								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' :
 									nm.addString(key)
 									nm.addInt(self.historyKey[key])
 							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
@@ -780,7 +799,7 @@ class GameInSpace(DirectObject,threading.Thread):
 								nm.addUInt(User.getInstance().getId())
 								nm.addUInt(len(self.historyKey))
 								for key in self.historyKey.keys():
-									if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+									if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' :
 										nm.addString(key)
 										nm.addUInt(self.historyKey[key])
 								#~ NetworkZoneUdp.getInstance().sendMessage(nm)
@@ -884,3 +903,5 @@ class GameInSpace(DirectObject,threading.Thread):
 					#~ print prctSpeed
 					#~ self.PE.speed=prctSpeed*100*5
 					ship.lock.release()
+			
+			GameState.lock.release()

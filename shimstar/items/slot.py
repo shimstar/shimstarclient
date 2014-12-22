@@ -14,6 +14,7 @@ class Slot:
 			self.loadXml(xmlPart)
 			
 	def loadXml(self,xmlPart):
+		#~ print "Slot::init " + str(xmlPart.toxml())
 		self.id=int(xmlPart.getElementsByTagName('id')[0].firstChild.data)
 		self.location=int(xmlPart.getElementsByTagName('location')[0].firstChild.data)
 		typeString=str(xmlPart.getElementsByTagName('types')[0].firstChild.data)

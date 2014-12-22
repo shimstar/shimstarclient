@@ -107,6 +107,12 @@ class NetworkMainServer(threading.Thread):
 			msgTab.append(nbDialog)
 			for i in range (nbDialog):
 				msgTab.append(myIterator.getUint32())    #id dialogue lu
+				
+			nbMission=int(myIterator.getUint32())
+			msgTab.append(nbMission)
+			for m in range(nbMission):
+				msgTab.append(myIterator.getUint32())   #mission id
+				msgTab.append(myIterator.getUint32())   #mission status
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_CREATE_USER:

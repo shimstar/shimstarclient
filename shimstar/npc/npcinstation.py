@@ -1,11 +1,10 @@
 from shimstar.items.ship import *
 from math import sqrt
 from shimstar.user.user import *
-#~ from shimstar.user.character.mission import *
+from shimstar.user.character.mission import *
 from shimstar.core.constantes import *
 from shimstar.core.decorators import *
 from shimstar.npc.dialog import *
-#~ from shimstar.user.character.mission import *
 from shimstar.core.shimconfig import *
 
 class NPCInStation:
@@ -41,6 +40,8 @@ class NPCInStation:
 		return listOfNpc
 		
 	def loadXml(self):
+		self.dialogs=[]
+		self.missions=[]		
 		dom = xml.dom.minidom.parse(shimConfig.getInstance().getRessourceDirectory() +"config\\pnjs.xml")
 		pnjs=dom.getElementsByTagName('pnj')
 		for p in pnjs:
@@ -58,7 +59,7 @@ class NPCInStation:
 				missions=p.getElementsByTagName('idmission')
 				for missionsXml in missions:
 					idm=int(missionsXml.firstChild.data)
-					#~ self.missions.append(mission(idm))
+					self.missions.append(Mission(idm))
 					
 	def getTypeNpc(self):
 		return self.typeNpc
