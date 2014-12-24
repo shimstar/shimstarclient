@@ -25,6 +25,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		print "GameInSpace::__init__"
 		threading.Thread.__init__(self)
 		self.Terminated = False
+		self.volume=1
 		self.CEGUI=ShimCEGUI.getInstance()
 		self.ceGuiRootWindow=None
 		self.stopThread=False
@@ -106,6 +107,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("t-up",self.keyDown,['t',0])
 		self.accept("n",self.keyDown,['n',1])
 		self.accept("n-up",self.keyDown,['n',0])
+		self.accept("k",self.keyDown,['k',1])
+		self.accept("k-up",self.keyDown,['k',0])
 		self.accept("f12",self.keyDown,['f12',1])
 		self.accept("f12-up",self.keyDown,['f12',0])
 		self.accept("escape",self.quitGame,)
@@ -120,6 +123,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("wheel_down", self.speedUp,[-1])
 		self.ambientSound = base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() +  self.currentZone.getMusic())
 		self.ambientSound.setLoop(True)
+		self.ambientSound.setVolume(shimConfig.getInstance().getAmbientVolume())
 		self.ambientSound.play()
 		#~ self.setupRocketUI()
 		self.setupUI()
@@ -845,7 +849,12 @@ class GameInSpace(DirectObject,threading.Thread):
 								if (self.keysDown['v']!=0):
 									self.getNextTarget()
 									self.keysDown['v']=0
-									
+							if self.keysDown.has_key('k'):
+								if (self.keysDown['k']!=0):
+									self.volume-=0.1
+									self.keysDown['k']=0
+									self.ambientSound.setVolume(self.volume)
+									print  "self.volume " + str(self.volume)
 							if self.keysDown.has_key('f12'):
 								del self.keysDown['f12']
 								if ship.isHidden()==True:

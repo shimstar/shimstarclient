@@ -27,6 +27,7 @@ class GuiStation(DirectObject):
 		self.zone=Zone(self.idZone)
 		self.ambientSound = base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() +  self.zone.getMusic())
 		self.ambientSound.setLoop(True)
+		self.ambientSound.setVolume(shimConfig.getInstance().getAmbientVolume())
 		self.ambientSound.play()
 		self.listOfImageSet={}
 		self.CEGUI=ShimCEGUI.getInstance()
@@ -39,7 +40,9 @@ class GuiStation(DirectObject):
 		self.CEGUI.enable() 
 		GameState.getInstance().setState(C_PLAYING)
 		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
+		self.buttonSound.setVolume(shimConfig.getInstance().getSoundVolume())
 		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
+		self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
 		
 	def destroy(self):
 		taskMgr.remove("event reader")

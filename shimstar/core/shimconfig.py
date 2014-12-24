@@ -12,6 +12,8 @@ class shimConfig:
 		self.user=""
 		self.pwd=""
 		self.ip=""
+		self.ambientVolume=0.3
+		self.soundVolume=0.5
 		self.readTutos=[]
 		self.loadXml()
 		
@@ -61,6 +63,24 @@ class shimConfig:
 	
 	def getReadTutos(self):
 		return self.readTutos
+		
+	def getAmbientVolume(self):
+		if self.ambientVolume>0:
+			return self.ambientVolume
+		return 0
+		
+	def getSoundVolume(self):
+		if self.soundVolume>=0:
+			return self.soundVolume
+		return 0
+		
+	def setSoundVolume(self,v):
+		if v>=0:
+			self.soundVolume=v
+		
+	def setAmbientVolume(self,v):
+		if v>=0:
+			self.ambientVolume=v
 		
 	def hasReadTuto(self,id):
 		if id in self.readTutos:
