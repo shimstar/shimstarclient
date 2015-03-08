@@ -271,7 +271,10 @@ class NetworkZoneServer(threading.Thread):
 		
 	def removeMessage(self,msg):
 		if self.listOfMessage.count(msg)>0:
-			self.listOfMessage.remove(msg)
+			try:
+				self.listOfMessage.remove(msg)
+			except:
+				print "NetWorkZoneServer::RemoveMessage Warning : Message was'nt present into list of message"
 		
 	def sendMessage(self,msg):
 		self.cWriter.send(msg.getMsg(),self.myConnection)

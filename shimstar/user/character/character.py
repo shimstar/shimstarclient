@@ -109,7 +109,7 @@ class Character:
 		
 		if NetworkZoneServer.getInstance()!=None:
 			nm=netMessage(C_NETWORK_USER_CHANGE_ZONE)
-			msg.addUInt(self.userRef.getId())
+			nm.addUInt(self.userRef.getId())
 			NetworkZoneServer.getInstance().sendMessage(nm)
 		
 		if self.ship!=None:
