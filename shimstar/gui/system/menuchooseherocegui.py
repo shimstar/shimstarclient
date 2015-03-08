@@ -15,7 +15,6 @@ from shimstar.core.shimconfig import *
 class MenuChooseHeroCegui(DirectObject):
 	def __init__(self):
 		self.text=[]
-		
 		self.faces=[]
 		self.btns=[]
 		self.currentFace=0
@@ -56,13 +55,17 @@ class MenuChooseHeroCegui(DirectObject):
 		self.InFadeNewHeroAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("FadeIn")
 		self.OutFadeNewHeroAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("ConnexionBg/new"))
 		self.InFadeNewHeroAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("ConnexionBg/new"))
-		
+		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
+		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
+		self.buttonSound.setVolume(shimConfig.getInstance().getSoundVolume())
+		self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
 		self.accept("escape",self.quitGame)
 		
 		self.loadCharacters()
 		self.CEGUI.enable() 
 		
 	def closeClicked(self,winArgs):
+		self.buttonSound.play()
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero").hide()
 		self.OutChooseHeroAnimationInstance.start()
 		self.InFadeChooseHeroAnimationInstance.start()
@@ -148,6 +151,7 @@ class MenuChooseHeroCegui(DirectObject):
 		return task.cont
 
 	def onChooseHero(self,arg):
+		self.buttonSound2.play()
 		#~ index=find(arg.window.getName(),"hero=")
 		#~ idHero=arg.window.getName()[index+5:]
 		idHero=arg.window.getUserString("id")
@@ -178,14 +182,16 @@ class MenuChooseHeroCegui(DirectObject):
 		s.setProperty("BackgroundImage", "set:" + img  +  " image:full_image")
 		
 	def onPlay(self,winArgs):
+		self.buttonSound.play()
 		User.getInstance().chooseCharacter(int(winArgs.window.getUserString("id")))
 		msg=netMessage(C_NETWORK_USER_CHOOSE_HERO)
-		msg.addInt(User.getInstance().getId())
-		msg.addInt(int(winArgs.window.getUserString("id")))
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(winArgs.window.getUserString("id")))
 		NetworkMainServer.getInstance().sendMessage(msg)
 		User.getInstance().getCurrentCharacter().changeZone()
 		
 	def newhero(self,arg):
+		self.buttonSound.play()
 		self.CEGUI.WindowManager.getWindow("ConnexionBg/Group1").show()
 		directory=shimConfig.getInstance().getRessourceDirectory() +'datafiles/images/faces'
 		for files in os.listdir(directory):
@@ -200,6 +206,7 @@ class MenuChooseHeroCegui(DirectObject):
 			s.setUserString("file",self.faces[0])
 		
 	def onNext(self,args):
+		self.buttonSound.play()
 		self.currentFace+=1
 		if self.currentFace>=len(self.faces):
 			self.currentFace=0
@@ -210,6 +217,7 @@ class MenuChooseHeroCegui(DirectObject):
 		s.setUserString("file",self.faces[self.currentFace])
 		
 	def onPrevious(self,args):
+		self.buttonSound.play()
 		self.currentFace-=1
 		if self.currentFace<0:
 			self.currentFace=len(self.faces)-1
@@ -220,12 +228,13 @@ class MenuChooseHeroCegui(DirectObject):
 		s.setUserString("file",self.faces[self.currentFace])
 		
 	def onCreateNewHero(self,arg):
+		self.buttonSound.play()
 		face=self.CEGUI.WindowManager.getWindow("ConnexionBg/Face").getUserString('file').split('.')
 		name=self.CEGUI.WindowManager.getWindow("ConnexionBg/NameEdit").getText()
 		#~ user.instance.addCharacter(name,face[0])
 		
 		msg=netMessage(C_USER_ADD_CHAR)
-		msg.addInt(User.getInstance().getId())
+		msg.addUInt(User.getInstance().getId())
 		msg.addString(name)
 		msg.addString(face[0])
 		#~ print "name" + name + "/" + str(face) + "/" + str(face[0])
@@ -235,20 +244,23 @@ class MenuChooseHeroCegui(DirectObject):
 		self.OutChooseHeroAnimationInstance.start()
 		
 	def onDelete(self,winArgs):
+		self.buttonSound.play()
 		self.InDeleteAnimationInstance.start()
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Confirm").show()
 		self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Confirm").moveToFront()
 		
 	def onCancelDelete(self,winArgs):
+		self.buttonSound.play()
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Confirm").hide()
 		self.OutDeleteAnimationInstance.start()
 		
 	def onDeleteConfirmed(self,winArgs):
+		self.buttonSound2.play()
 		usrId=User.getInstance().getId()
 		heroId=self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Name").getUserString("id")
 		msg=netMessage(C_USER_DELETE_CHAR)
-		msg.addInt(User.getInstance().getId())
-		msg.addInt(int(heroId))
+		msg.addUInt(User.getInstance().getId())
+		msg.addUInt(int(heroId))
 		NetworkMainServer.getInstance().sendMessage(msg)
 		#~ network.reference.sendMessage(C_USER_DELETE_CHAR,str(usrId)+"/"+heroId)
 		#~ self.CEGUI.WindowManager.getWindow("ConnexionBg/InfoHero/Confirm").hide()

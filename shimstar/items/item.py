@@ -7,6 +7,7 @@ from shimstar.core.constantes import *
 
 class ShimstarItem(object):
 	def __init__(self,id=None,typeItem=0,xmlPart=None):
+		#~ print "shimstarItem " + str(id) + "/" + str(typeItem)
 		self.container=0
 		self.owner=0
 		self.typeItem=typeItem
@@ -28,13 +29,14 @@ class ShimstarItem(object):
 		if xmlPart!=None:
 			self.loadXml(xmlPart)
 		else:
-			print "///// " + str(self.template)
-			if self.typeItem!=C_ITEM_WEAPON and self.typeItem!=C_ITEM_ENGINE:
+			if self.typeItem==0:
+				self.template=ItemTemplate.getTemplateById(id)
+				self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
+			elif self.typeItem!=C_ITEM_WEAPON and self.typeItem!=C_ITEM_ENGINE:
 			#~ if isinstance(self,Weapon)==False and isinstance(self,Engine)==False:
 			#~ if True:
+				
 				self.template=ItemTemplate.getTemplate(id,self.typeItem)
-				print "/////@@@ " + str(self.template)
-				print self
 				self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
 			#~ print t
 			#~ if isinstance(self.template,WeaponTemplate) or isinstance(self.template,EngineTemplate):

@@ -63,9 +63,7 @@ class User(threading.Thread):
 		return None
 		
 	def chooseCharacter(self,id):
-		print "usr::choosecharacter " + str(id)
 		for ch in self.listOfCharacter:
-			print "usr::choosecharacter ch = " + str(ch.getId())
 			if ch.getId()==id:
 				ch.setCurrent(True)
 			else:
@@ -79,7 +77,6 @@ class User(threading.Thread):
 		return None
 	
 	def addCharacter(self,id,name,egg,idZone):
-		print "user:addCharacter" + str(id) + "/" + str(name) + "/" + str(egg) + "/" + str(idZone)
 		temp=Character(id,name,egg,idZone,self)
 		self.listOfCharacter.append(temp)
 		return temp

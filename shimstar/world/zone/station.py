@@ -55,14 +55,16 @@ class Station:
 			self.node.setPos(self.pos)
 			self.node.setHpr(self.hpr)
 			self.node.setTag("name","station")
+			self.node.setTag("classname","station")
+			self.node.setTag("id",str(self.id))
 			self.node.setShaderAuto()
 	
 	@staticmethod
 	def getStationById(id,visible=True):
-		for s in station.stations:
+		for s in Station.stations:
 			if str(s.getId())==str(id):
 				return s
-		s=station(id,None,visible)
+		s=Station(id,None,visible)
 		return s
 	
 	def getId(self):

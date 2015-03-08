@@ -1,5 +1,3 @@
-##TODO send current Hull to ship
-
 import xml.dom.minidom
 from math import sin, cos, pi
 from math import sqrt
@@ -7,6 +5,9 @@ from math import sqrt
 from pandac.PandaModules import *
 from direct.gui.OnscreenText import OnscreenText
 
+from shimstar.network.networkmainserver import *
+from shimstar.network.message import *
+from shimstar.network.netmessage import *
 from shimstar.items.slot import *
 from shimstar.items.engine import *
 from shimstar.items.weapon import *
@@ -22,7 +23,7 @@ class Ship:
 	#~ def __init__(self,id,xmlPart):
 	listOfShip={}
 	lock=threading.Lock()
-	def __init__(self,id,idTemplate,hullpoints=0):
+	def __init__(self,id,idTemplate,hullpoints=0,visible=True):
 		print "ship::init " + str(id) + "/" + str(idTemplate)
 		Ship.lock.acquire()
 		Ship.listOfShip[id]=self
@@ -30,6 +31,8 @@ class Ship:
 		self.lock=threading.Lock()
 		self.name = ""
 		self.id=id
+		self.pousse=0
+		self.visible=visible
 		self.template=idTemplate
 		self.shipTemplate=None
 		self.mainShip = False
@@ -63,11 +66,64 @@ class Ship:
 		self.firstMove=False
 		self.renderCounter = 0
 		self.slots=[]
+		self.itemInInventory = []
+		self.pousse=0
 		self.itemInInventory= []
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
 		self.textObject=None
+		
+	def getItemInInventory(self):
+		return self.itemInInventory
+		
+	def addItemInInventory(self, item):
+		self.itemInInventory.append(item)
+		
+	def removeItemInInventory(self, item):
+		self.itemInInventory.remove(item)
+		
+	def getFirstPlaceFreeInInventory(self):
+		"""
+			return the first place free in the inventory. The item have each a number allowing to locate it when the inventory is shown.
+			This function returns first place not allocated.
+		"""
+		places=[]
+		max=0
+		for i in self.itemInInventory:
+			places.append(i.getLocation())
+			if max<i.getLocation():
+				max=i.getLocation()
+		places.sort()
+		returnValue=-1
+		val=0
+		for p in places:
+			if (val)!=int(p):
+				if(val)<int(p):
+					returnValue=val
+				else:
+					returnValue=int(p)
+				break
+			val+=1
+			
+		if returnValue==-1:
+			returnValue=max+1
+		return returnValue
+		
+	def getPointerToGo(self):
+		return self.pointerToGo
+		
+	@staticmethod
+	def getShipById(id):
+		if Ship.listOfShip.has_key(id)!=-1:
+			return Ship.listOfShip[id]
+		return None
+		
+	def getPoussee(self):
+		return self.poussee
+		
+	def setPoussee(self,p):
+		self.poussee=p
 		
 	def getLock(self):
 		return self.lock
@@ -78,9 +134,15 @@ class Ship:
 	def setTextObject(self,t):
 		self.textObject=t
 		
-	def getPrcentHull(self):
-		prcent = float(self.hullpoints) / float(self.maxhull) 
-		return float(prcent),self.hullpoints,self.maxhull
+	#~ def getPrcentHull(self):
+		#~ prcent = float(self.hullpoints) / float(self.maxhull) 
+		#~ return float(prcent),self.hullpoints,self.maxhull
+		
+	def getPrcentSpeed(self):
+		if self.engine!=None:
+			prcent = float(self.poussee)/float(self.engine.getSpeedMax())
+			return float(prcent),self.poussee,self.engine.getSpeedMax()
+		return 0
 		
 	def setOwner(self,owner):
 		self.owner=owner
@@ -172,7 +234,6 @@ class Ship:
 		
 	def loadTemplate(self):
 		self.shipTemplate=ShipTemplate.getTemplate(self.template)
-		print "ship::loadTemplate " + str(self.template)
 		self.name,self.maxhull,self.egg,self.img,self.slots=self.shipTemplate.getInfos()
 		for tempSlot in self.slots:
 			if tempSlot.getItem()!=None:
@@ -182,7 +243,6 @@ class Ship:
 					it.setShip(self)
 				if it.getTypeItem()==C_ITEM_ENGINE:
 					self.engine=it
-				#~ print "ship::loadTemplate slot " + str(it)
 		#~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
 		#~ self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
 		#~ self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
@@ -208,15 +268,24 @@ class Ship:
 				#~ idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
 				#~ item=itemFactory.getItemFromXml(itXml,typeItem)
 				#~ self.itemInInventory.append(item)
-		
-		self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
-		print "ship::loadTemplate " + str(self.node)
-		self.node.reparentTo(render)
-		self.node.setName(str(self.id))
-		textObject = OnscreenText(text = 'my text string',parent=self.node)
+
+		if self.visible==True:
+			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+			self.node.reparentTo(render)
+			self.node.setName("ship_" + str(self.id))
+			self.node.setTag("classname","ship")
+			self.node.setTag("id",str(self.id))		
+			textObject = OnscreenText(text = 'my text string',parent=self.node)
 		
 	def getId(self):
 		return self.id
+		
+	def getItemFromInventory(self,id):
+		for it in self.itemInInventory:
+			if it.getId()==id:
+				return it
+				
+		return None
 		
 	def getItemInInventory(self):
 		return self.itemInInventory
@@ -276,27 +345,29 @@ class Ship:
 	def uninstallItem(self,slot):
 		self.itemInInventory.append(slot.getItem())
 		slot.setItem(None)
-		network.reference.sendMessage(C_CHAR_UPDATE, str(self.character.getUserId()) + "/" + str(self.character.getId()) + "/uninstall=" + str(slot.getId()))
+		msg=netMessage(C_NETWORK_CHARACTER_UNINSTALL_SLOT)
+		msg.addUInt(self.owner.userRef.id)
+		msg.addUInt(slot.getId())
+		NetworkMainServer.getInstance().sendMessage(msg)
+		
+	def removeTemplateSlots(self):
+		self.slots=[]
 
 	def installItem(self, item,slot):
-		slotToInstall=None
-		for s in self.slots:
-			if s.getId()==int(slot):
-				slotToInstall=s
-				break
+		slotToInstall=slot
 		if slotToInstall!=None:
 			if slotToInstall.getItem()!=None:
 				self.uninstallItem(slotToInstall)
 			
-			itemToInstall=None
-			for i in self.itemInInventory:
-				if i.getId()==int(item):
-					itemToInstall=i
-					break
+			itemToInstall=item
 			if itemToInstall!=None:				
 				slotToInstall.setItem(itemToInstall)
-				network.reference.sendMessage(C_CHAR_UPDATE, str(self.character.getUserId()) + "/" + str(self.character.getId()) + "/install=" + str(itemToInstall.getId()) + "#" + str(slotToInstall.getId()))
 				self.itemInInventory.remove(itemToInstall)
+				msg=netMessage(C_NETWORK_CHARACTER_INSTALL_SLOT)
+				msg.addUInt(self.owner.userRef.id)
+				msg.addUInt(slotToInstall.getId())
+				msg.addUInt(itemToInstall.getId())
+				NetworkMainServer.getInstance().sendMessage(msg)
 						
 	def addMinerals(self, id,typeMineral, qt):
 		alreadyGot = False
@@ -355,6 +426,9 @@ class Ship:
 		self.node.show()
 		
 	def setInvisible(self):
+		if self.node==None:
+			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+			self.node.reparentTo(render)
 		self.node.hide()
 		
 	def isHidden(self):
@@ -367,7 +441,8 @@ class Ship:
 		return self.engine.getSpeedMax()
 			
 	def addBullet(self,bulId,pos,quat):
-		self.weapons.addBullet(bulId,pos,quat)
+		if self.weapons !=None:
+			self.weapons.addBullet(bulId,pos,quat)
 			
 	def shot(self):
 		if self.weapons!=None:
@@ -398,7 +473,6 @@ class Ship:
 	## Return True if ship has hull>0
 	## Return False if shup has hull<=0
 	def takeDamage(self, hitpoints):
-		print "ship::takedamage " + str(hitpoints) + "/" + str(self.hullpoints)
 		self.hullpoints -= hitpoints
 		if self.hullpoints <= 0:
 			#~ self.setVisible(False)
@@ -408,4 +482,5 @@ class Ship:
 	def getHullPoints(self):
 		return self.hullpoints
 		
-		
+	def addSlot(self,s):
+		self.slots.append(s)

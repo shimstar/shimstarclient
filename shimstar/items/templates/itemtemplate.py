@@ -10,13 +10,23 @@ class ItemTemplate(object):
 		self.skillItems={}
 		self.templateId=int(xmlPart.getElementsByTagName('templateid')[0].firstChild.data)
 		self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
-		self.cost=int(xmlPart.getElementsByTagName('cost')[0].firstChild.data)
-		self.sell=int(xmlPart.getElementsByTagName('sell')[0].firstChild.data)
-		self.energyCost=int(xmlPart.getElementsByTagName('energyCost')[0].firstChild.data)
-		self.space=int(xmlPart.getElementsByTagName('space')[0].firstChild.data)
+		self.cost=0
+		if len(xmlPart.getElementsByTagName('cost'))>0:
+			self.cost=int(xmlPart.getElementsByTagName('cost')[0].firstChild.data)
+		self.sell=0
+		if len(xmlPart.getElementsByTagName('sell'))>0:
+			self.sell=int(xmlPart.getElementsByTagName('sell')[0].firstChild.data)
+		self.energyCost=0
+		if len(xmlPart.getElementsByTagName('energyCost'))>0:
+			self.energyCost=int(xmlPart.getElementsByTagName('energyCost')[0].firstChild.data)
+		self.space=0
+		if len(xmlPart.getElementsByTagName('space'))>0:
+			self.space=int(xmlPart.getElementsByTagName('space')[0].firstChild.data)
 		self.img=str(xmlPart.getElementsByTagName('img')[0].firstChild.data)
 		self.typeItem=int(xmlPart.getElementsByTagName('typeitem')[0].firstChild.data)
-		self.location=int(xmlPart.getElementsByTagName('location')[0].firstChild.data)
+		self.location=0
+		if len(xmlPart.getElementsByTagName('location'))>0:
+			self.location=int(xmlPart.getElementsByTagName('location')[0].firstChild.data)
 		skillItems=xmlPart.getElementsByTagName('skillitem')
 		for s in skillItems:
 			sk=int(xmlPart.getElementsByTagName('skillid')[0].firstChild.data)
@@ -60,14 +70,22 @@ class ItemTemplate(object):
 		it=dom.getElementsByTagName('item')
 		for i in it:
 			typeItem=int(i.getElementsByTagName('typeitem')[0].firstChild.data)
-			if typeItem!=7:
-				ItemTemplate(i)
+			ItemTemplate(i)
 		
 	@staticmethod
 	def getListOfTemplate():
 		if len(itemTemplate.listOfTemplate)==0:
 			itemTemplate.loadXml()
 		return itemTemplate.listOfTemplate
+		
+	@staticmethod
+	def getTemplateById(idTemplate):
+		if len(ItemTemplate.listOfTemplate)==0:
+			ItemTemplate.loadXml()
+		ItemTemplate.loadXml()
+		for i in ItemTemplate.listOfTemplate:
+			if ItemTemplate.listOfTemplate[i].templateId==idTemplate:
+				return ItemTemplate.listOfTemplate[i]
 		
 	@staticmethod
 	def getTemplate(idTemplate,typeItem):

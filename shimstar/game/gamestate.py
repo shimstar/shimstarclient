@@ -23,10 +23,11 @@ C_WAITING_INFO_CHARACTER=21
 C_WAITING_ASKING_INFO_CHARACTER=22
 C_WAITING_NPC_RECEIVED=23
 C_WAITING_CHARACTER_RECEIVED=24
+from direct.stdpy import threading
 
-
-class GameState:
+class GameState(threading.Thread):
 	instance=None
+	lock=threading.Lock()
 	def __init__(self):
 		self.state=C_INIT
 		GameState.instance=self

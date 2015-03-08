@@ -8,6 +8,7 @@ from shimstar.world.zone.station import *
 from shimstar.user.user import *
 from shimstar.npc.npc import *
 from shimstar.core.constantes import *
+from shimstar.gui.core.inventory import *
 
 C_TYPEZONE_SPACE=1
 C_TYPEZONE_STATION=2
@@ -33,6 +34,7 @@ class Zone(threading.Thread):
 		Zone.instance=self
 		self.typeZone=0
 		self.box=None
+		self.music=""
 		self.loadXml()
 		
 	@staticmethod
@@ -65,17 +67,41 @@ class Zone(threading.Thread):
 		self.runNewIncoming()
 		self.runNewNpc()
 		self.runUpdatePosNPC()
+		self.runUpdateChar()
 		self.runDamageNpc()
 		self.runRemoveNpc()
 		self.runDamageChar()
 		self.runRemoveChar()
 		self.runCharOutgoing()
 		
+	def runUpdateChar(self):
+		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_ADD_TO_INVENTORY)
+		if len(tempMsg)>0:
+			for msg in tempMsg:
+				tabMsg=msg.getMessage()
+				User.lock.acquire()
+				ship=User.getInstance().getCurrentCharacter().getShip()
+				it=ship.getItemFromInventory(tabMsg[2])
+				if it!=None:
+					if tabMsg[0]==C_ITEM_MINERAL:
+						it.addMineral(tabMsg[3])
+				else:
+					it=itemFactory.getItemFromTemplateType(tabMsg[1],tabMsg[0])
+					it.setId(tabMsg[2])
+					if tabMsg[0]==C_ITEM_MINERAL:
+						it.addMineral(tabMsg[3])
+					ship.addItemInInventory(it)
+				menuInventory.getInstance('inventaire').setItems()
+				User.lock.release()
+				NetworkZoneServer.getInstance().removeMessage(msg)
+		
+		
 	def runCharOutgoing(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_USER_OUTGOING)
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				tabMsg=msg.getMessage()
+				print "character is leaving zone "  + str(tabMsg[0])
 				User.lock.acquire()
 				if User.listOfUser.has_key(tabMsg[0]):
 					User.listOfUser[tabMsg[0]].destroy()
@@ -179,10 +205,10 @@ class Zone(threading.Thread):
 				User.getInstance().getCurrentCharacter().manageDeath()
 				User.getInstance().getCurrentCharacter().changeZone(True)
 				msg=netMessage(C_NETWORK_DEATH_CHAR)
-				msg.addInt(User.getInstance().getId())
+				msg.addUInt(User.getInstance().getId())
 				NetworkMainServer.getInstance().sendMessage(msg)
 				msg=netMessage(C_NETWORK_DEATH_CHAR)
-				msg.addInt(User.getInstance().getId())
+				msg.addUInt(User.getInstance().getId())
 				NetworkZoneServer.getInstance().sendMessage(msg)
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
@@ -197,7 +223,7 @@ class Zone(threading.Thread):
 				existingNpc=self.getNpcById(id)
 				NPC.lock.acquire()
 				if existingNpc==None:
-					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3],netMsg[4])
+					temp=NPC(id,netMsg[1],netMsg[2],netMsg[3],netMsg[4],netMsg[5])
 					self.npc.append(temp)
 				NPC.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
@@ -216,6 +242,7 @@ class Zone(threading.Thread):
 					if  User.getInstance().getCurrentCharacter().getShip()!=None:
 						User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
 						User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
+						User.getInstance().getCurrentCharacter().getShip().setPoussee(netMsg[9])
 				else:
 					tempUser=User.getUserById(usr)
 					if tempUser!=None:
@@ -289,6 +316,7 @@ class Zone(threading.Thread):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_SHOT)
 		if len(tempMsg)>0:
 			for msg in tempMsg:
+				#~ print "zone::runupdateshot remove bullet"
 				netMsg=msg.getMessage()
 				Bullet.lock.acquire()
 				Bullet.removeBullet(netMsg[0])
@@ -349,6 +377,9 @@ class Zone(threading.Thread):
 		
 	def getTypeZone(self):
 		return self.typeZone
+	
+	def getMusic(self):
+		return self.music
 		
 	@staticmethod
 	def getTinyInfosFromZone(idZone):

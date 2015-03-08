@@ -18,18 +18,35 @@ class Character:
 		self.ship=None
 		self.idZone=idZone
 		self.lastStation=0
+		self.missions=[]
 		self.visible=False
 		self.userRef=userRef #user obj
+		self.readDialogs=[]
 		print "character::init" + str(self.id)
+		
+	def getMissions(self):
+		return self.missions
+		
+	def addMission(self,m):
+		self.missions.append(m)
+		
+	def getReadDialogs(self):
+		return self.readDialogs
+		
+	def appendDialogs(self,id):
+		if (id in self.readDialogs)==False:
+			self.readDialogs.append(id)
+			return True
+		return False
 		
 	def manageDeath(self):
 		if self.ship!=None:
 			self.ship.destroy()
 			self.ship=None
 				
-	def setShip(self,idShip,idTemplate,hullpoints):
+	def setShip(self,idShip,idTemplate,hullpoints,visible=True):
 		#~ print "character :: setsHip " + str(hullpoints)
-		self.ship=Ship(idShip,idTemplate,hullpoints)
+		self.ship=Ship(idShip,idTemplate,hullpoints,visible)
 		self.ship.setOwner(self)
 		print "character:setShip" + str(self.ship)
 	
@@ -40,7 +57,9 @@ class Character:
 			
 	def takeDamage(self,damage):
 		#~ print "character::takedamage " + str(damage)
-		return self.ship.takeDamage(damage)
+		if self.ship!=None:
+			return self.ship.takeDamage(damage)
+		return None
 				
 	def setPos(self,pos):
 		self.ship.setPos(pos)
@@ -83,10 +102,16 @@ class Character:
 		if GameState.getInstance().getNewZone()!=0:			
 			self.idZone=GameState.getInstance().getNewZone()
 		msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
-		msg.addInt(self.userRef.getId())
-		msg.addInt(self.id)
-		msg.addInt(self.idZone)
+		print "characeter::changeZone " + str(self.userRef.id) + "/" + str(self.userRef.getId()) + "/" + str(self.ship)
+		msg.addUInt(self.userRef.getId())
+		msg.addUInt(self.idZone)
 		NetworkMainServer.getInstance().sendMessage(msg)
+		
+		if NetworkZoneServer.getInstance()!=None:
+			nm=netMessage(C_NETWORK_USER_CHANGE_ZONE)
+			msg.addUInt(self.userRef.getId())
+			NetworkZoneServer.getInstance().sendMessage(nm)
+		
 		if self.ship!=None:
 			self.ship.changeZone()
 		if death:
@@ -95,5 +120,35 @@ class Character:
 			GameState.getInstance().setState(C_CHANGEZONE)
 		return 
 
+	def evaluateMission(self,id,idNPC):
+		for m in self.missions:
+			if m.getId()==int(id):
+				if m.getStatus()==C_STATEMISSION_FINISHED:
+					return C_STATEMISSION_FINISHED
+				else:
+					missionFinished=False
+					objectifs=m.getObjectifs()
+					for o in objectifs:
+						if C_OBJECTIF_TRANSPORT==o.getIdType():
+							for i in self.ship.getItemInInventory():
+								if i.getTemplate()==o.getIdItem():
+									if i.getQuantity()>=o.getNbItem():
+										o.setStatus(True)
+									break
+						
+					for o in objectifs:
+						if o.getStatus()==False:
+							missionFinished=o.getStatus()
+							break
+						else:
+							missionFinished=o.getStatus()
+					if m.getEndingNPC()!=int(idNPC):
+						missionFinished=False
+					if missionFinished==True: 
+						return C_STATEMISSION_SUCCESS
+					else:
+						return C_STATEMISSION_INPROGRESS
 		
-		
+		return C_STATEMISSION_DONTHAVE
+				
+				

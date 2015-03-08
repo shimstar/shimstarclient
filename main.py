@@ -1,9 +1,12 @@
 from pandac.PandaModules import loadPrcFileData 
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
+#~ loadPrcFileData('', 'win-size %i %i' % (1600, 900))
 #~ loadPrcFileData('', 'state-cache 0')
+#~ loadPrcFileData('','fullscreen 1')
 import sys,os
 from array import array
+#~ import win32api
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import * 
@@ -32,13 +35,17 @@ class ShimStarClient(DirectObject):
 		base.disableMouse()
 		base.setFrameRateMeter(True)
 		render.setAntialias(AntialiasAttrib.MAuto)
+	
 		self.preLoad()
 		taskMgr.add(self.dispatch,"dispatch Main",-40)  
+		#~ while 1:
+			#~ self.dispatch()
 		
 	def preLoad(self):
 		Explosion.preload()
 	
 	def dispatch(self,task):
+	#~ def dispatch(self):
 		state=GameState.getInstance().getState()
 		if state==C_INIT:
 			if self.menu!=None:
@@ -58,29 +65,24 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuChooseHeroCegui()				
 		elif state==C_CHANGEZONE:
 			idZone=GameState.getInstance().getNewZone()
-			print "main::dispatch CHANGEZONE1 " + str(idZone)
+			
 			if idZone==0 or idZone==User.getInstance().getCurrentCharacter().getIdZone():
 				idZone=User.getInstance().getCurrentCharacter().getIdZone()
-			#~ else:
-				#~ msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
-				#~ msg.addInt(User.getInstance().getId())
-				#~ msg.addInt(idZone)
-				#~ NetworkMainServer.getInstance().sendMessage(msg)
-			#~ idZone=User.getInstance().getCurrentCharacter().getIdZone()
-			#~ User.getInstance().getCurrentCharacter().setIdZone(idZone)
-			print "main::dispatch CHANGEZONE2 " + str(idZone)
+			#~ msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
+			#~ msg.addUInt(User.getInstance().getId())
+			#~ msg.addUInt(idZone)
+			#~ NetworkMainServer.getInstance().sendMessage(msg)
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
 			if typeZone==C_TYPEZONE_SPACE:
 				msg=netMessage(C_NETWORK_INFO_ZONE)
-				msg.addInt(idZone)
+				msg.addUInt(idZone)
 				NetworkMainServer.getInstance().sendMessage(msg)
 				GameState.getInstance().setState(C_WAITING_INFOZONE)
 				if isinstance(self.menu,MenuLoadZoneCegui)!=True:
 					self.menu.destroy()
 					self.menu=None
 					self.menu=MenuLoadZoneCegui()
-				#~ else:
-					#~ self.menu=MenuLoadZoneCegui()
+				
 			else:
 				GameState.getInstance().setState(C_GOPLAY)
 
@@ -93,8 +95,7 @@ class ShimStarClient(DirectObject):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=GameInSpace()
-				#~ else:
-					#~ self.menu=GameInSpace()
+				
 				self.menu.start()
 			else:
 				if isinstance(self.menu,GuiStation)!=True:
@@ -103,11 +104,15 @@ class ShimStarClient(DirectObject):
 					self.menu=GuiStation()
 				#~ else:
 					#~ self.menu=GuiStation()
+		#~ elif state==C_PLAYING:
+			#~ if isinstance(self.menu,GameInSpace)==True:
+				#~ self.menu.run()
+				
 		elif state==C_RECEIVED_INFOZONE:
 			msg=netMessage(C_NETWORK_CONNECT)
-			msg.addInt(User.getInstance().getId())
-			msg.addInt(User.getInstance().getCurrentCharacter().getId())
-			#~ msg.addInt(NetworkZoneUdp.getInstance().port)
+			msg.addUInt(User.getInstance().getId())
+			msg.addUInt(User.getInstance().getCurrentCharacter().getId())
+			#~ msg.addUInt(NetworkZoneUdp.getInstance().port)
 			NetworkZoneServer.getInstance().sendMessage(msg)
 			NetworkZoneServer.getInstance().start()
 			#~ NetworkZoneUdp.getInstance().start()
@@ -119,7 +124,50 @@ class ShimStarClient(DirectObject):
 			if len(tempMsg)>0:
 				for msg in tempMsg:
 					netMsg=msg.getMessage()
-					User.getInstance().getCurrentCharacter().setShip(netMsg[0],netMsg[1],netMsg[2])
+					ch=User.getInstance().getCurrentCharacter()
+					ch.setShip(netMsg[0],netMsg[1],netMsg[2],False)
+					nbInv=netMsg[3]
+					ship=ch.getShip()
+					compteur=4
+					for i in range(nbInv):
+						typeItem=netMsg[compteur]
+						compteur+=1
+						templateId=netMsg[compteur]
+						compteur+=1
+						idItem=netMsg[compteur]
+						compteur+=1
+						it=itemFactory.getItemFromTemplateType(templateId,typeItem)
+						it.setId(idItem)
+						quantity=netMsg[compteur]
+						compteur+=1
+						if typeItem==C_ITEM_MINERAL:
+							it.setQuantity(quantity)
+						ship.addItemInInventory(it)
+						
+					nbSlot=netMsg[compteur]
+					ship.removeTemplateSlots()
+					compteur+=1
+					for n in range(nbSlot):
+						idSlot=netMsg[compteur]
+						tempSlot=Slot(None,idSlot)
+						compteur+=1
+						nbTypes=netMsg[compteur]
+						compteur+=1
+						for t in range(nbTypes):
+							idType=netMsg[compteur]
+							compteur+=1
+							tempSlot.appendTypes(idType)
+						typeItem=netMsg[compteur]
+						compteur+=1
+						templateItem=netMsg[compteur]
+						compteur+=1
+						idItem=netMsg[compteur]
+						compteur+=1
+						if idItem!=0:
+							it=itemFactory.getItemFromTemplateType(templateItem,typeItem)
+							it.setId(idItem)
+							tempSlot.setItem(it)
+						ship.addSlot(tempSlot)
 					GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
 					NetworkZoneServer.getInstance().removeMessage(msg)
 		elif state==C_QUIT:
@@ -132,10 +180,15 @@ class ShimStarClient(DirectObject):
 					self.menu=MenuDeath()
 			else:
 				self.menu=MenuDeath()
+		
+		
+		GameState.lock.acquire()
+		GameState.lock.release()
+		
 		return Task.cont
 		
-print 'Number of arguments:', len(sys.argv), 'arguments.'
-print 'Argument List:', str(sys.argv)
+#~ print 'Number of arguments:', len(sys.argv), 'arguments.'
+#~ print 'Argument List:', str(sys.argv)
 #~ dir="."
 #~ if len(sys.argv):
 	#~ dir=str(sys.argv)
