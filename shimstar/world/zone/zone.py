@@ -236,7 +236,7 @@ class Zone(threading.Thread):
 				netMsg=msg.getMessage()
 				usr=int(netMsg[0])
 				charact=int(netMsg[1])
-				print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
+				#~ print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
 				if usr==User.getInstance().getId():
 					if  User.getInstance().getCurrentCharacter().getShip()!=None:
 						User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))

@@ -619,7 +619,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		
 	def getNextTarget(self):
 		listOfObj=self.currentZone.getListOfNPC()
-		listOfObj+=self.currentZone.getListOfPlayer()
+		#~ listOfObj+=self.currentZone.getListOfPlayer()
 		actualTarget=Follower.getInstance().getTarget()
 		
 		found=False
