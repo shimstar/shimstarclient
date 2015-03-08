@@ -102,10 +102,11 @@ class Zone(threading.Thread):
 			for msg in tempMsg:
 				tabMsg=msg.getMessage()
 				print "character is leaving zone "  + str(tabMsg[0])
-				User.lock.acquire()
-				if User.listOfUser.has_key(tabMsg[0]):
-					User.listOfUser[tabMsg[0]].destroy()
-				User.lock.release()
+				if User.getInstance().getId()!= tabMsg[0]:
+					User.lock.acquire()
+					if User.listOfUser.has_key(tabMsg[0]):
+						User.listOfUser[tabMsg[0]].destroy()
+					User.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
 	
 	def runRemoveNpc(self):
@@ -235,7 +236,7 @@ class Zone(threading.Thread):
 				netMsg=msg.getMessage()
 				usr=int(netMsg[0])
 				charact=int(netMsg[1])
-				#~ print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
+				print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
 				if usr==User.getInstance().getId():
 					if  User.getInstance().getCurrentCharacter().getShip()!=None:
 						User.getInstance().getCurrentCharacter().getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
