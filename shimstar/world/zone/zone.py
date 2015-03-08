@@ -229,9 +229,7 @@ class Zone(threading.Thread):
 				NetworkZoneServer.getInstance().removeMessage(msg)
 		
 	def runUpdatePosChar(self):
-		#~ tempMsg=NetworkZoneUdp.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_UPDATE_POS)
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_UPDATE_POS)
-		#~ print "zone::runUpdatePosChar "
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
@@ -251,7 +249,6 @@ class Zone(threading.Thread):
 							if  ch.getShip()!=None:
 								ch.getShip().setHprToGo((netMsg[2],netMsg[3],netMsg[4],netMsg[5]))
 								ch.getShip().setPosToGo((netMsg[6],netMsg[7],netMsg[8]))
-				#~ NetworkZoneUdp.getInstance().removeMessage(msg)
 				NetworkZoneServer.getInstance().removeMessage(msg)
 			
 	def runUpdatePosNPC(self):
