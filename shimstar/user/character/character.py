@@ -40,6 +40,7 @@ class Character:
 		return False
 		
 	def manageDeath(self):
+		print "Character::manageDeath"
 		if self.ship!=None:
 			self.ship.destroy()
 			self.ship=None
@@ -49,6 +50,10 @@ class Character:
 		self.ship=Ship(idShip,idTemplate,hullpoints,visible)
 		self.ship.setOwner(self)
 		print "character:setShip" + str(self.ship)
+	
+	#~ def removeShip(self):
+		
+	
 	
 	def destroy(self):
 		if self.ship!=None:
@@ -102,7 +107,7 @@ class Character:
 		if GameState.getInstance().getNewZone()!=0:			
 			self.idZone=GameState.getInstance().getNewZone()
 		msg=netMessage(C_NETWORK_USER_CHANGE_ZONE)
-		print "characeter::changeZone " + str(self.userRef.id) + "/" + str(self.userRef.getId()) + "/" + str(self.ship)
+		#~ print "characeter::changeZone " + str(self.userRef.id) + "/" + str(self.userRef.getId()) + "/" + str(self.ship)
 		msg.addUInt(self.userRef.getId())
 		msg.addUInt(self.idZone)
 		NetworkMainServer.getInstance().sendMessage(msg)

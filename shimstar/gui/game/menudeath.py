@@ -46,6 +46,7 @@ class MenuDeath(ShowBase):
 				idShip=int(netMsg[0])
 				idTemplateShip=int(netMsg[1])
 				hullpoints=int(netMsg[2])
+				#~ USer.getInstance().getCurrentCharacter().removeShip()
 				User.getInstance().getCurrentCharacter().setShip(idShip,idTemplateShip,hullpoints)
 				GameState.getInstance().setState(C_DEATH_WAITING_VALIDATION)
 				self.btnQuit.enable()

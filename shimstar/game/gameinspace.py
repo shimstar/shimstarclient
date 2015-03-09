@@ -345,7 +345,7 @@ class GameInSpace(DirectObject,threading.Thread):
 				textObject = OnscreenText(text = ship.owner.name, pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
 				ship.setTextObject(textObject)
 			if abs(distance)<2000:
-				if isInView(nShip)!=True: 
+				if nShip!=None and nShip.isEmpty()!=True and isInView(nShip)!=True: 
 					textObject.hide() 
 				else: 
 					textObject.show() 
@@ -608,7 +608,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		currentDistance=0
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		#~ print "gameinSpace::calcDistance " + str(ship.getNode()) + "/" + str(targetNode)
-		if ship!=None and ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
+		if ship!=None and ship.getNode()!=None and targetNode!=None and ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
 			posShip=ship.getNode().getPos()
 			posItem=targetNode.getPos()
 			dx=posShip.getX()-posItem.getX()
@@ -723,155 +723,156 @@ class GameInSpace(DirectObject,threading.Thread):
 			GameState.lock.acquire()
 			#~ print "here2"
 			ship=User.getInstance().getCurrentCharacter().getShip()
-			ship.lock.acquire()
 			if ship!=None:
-				if ship.node.isEmpty()==False:
-					
-					forwardVec=Quat(ship.node.getQuat()).getForward()
-					if ship.isHidden()==True:
-						if ship.node.isEmpty()==False:
-							base.camera.setPos((forwardVec*(1.0))+ ship.node.getPos())
-							base.camera.setHpr(ship.node.getHpr())
-					else:
-						if ship.node.isEmpty()==False:
-						#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
-							mvtCam = (((forwardVec*(-200.0)) + ship.node.getPos()) * 0.20) + (base.camera.getPos() * 0.80)
-							hprCam = ship.node.getHpr()*0.2 + base.camera.getHpr()*0.8
-							base.camera.setPos(mvtCam)
-							base.camera.setHpr(hprCam)
-					
-					if globalClock.getRealTime()-self.updateInput>0.1:
-						self.updateInput=globalClock.getRealTime()
-						#~ posMouseX=0
-						#~ posMouseY=0
-						#~ if self.mousebtn[2]==1:
-							#~ self.mouseToUpdate=True
-							#~ if base.mouseWatcherNode.hasMouse():
-								#~ posMouseX=-base.mouseWatcherNode.getMouseX()
-								#~ posMouseY=base.mouseWatcherNode.getMouseY()
-								#~ absx=abs(posMouseX)
-								#~ absy=abs(posMouseY)
-								#~ ## Trying to get smooth mouse to accelerating mouse 
-								#~ if absx>=0:
-									#~ posMouseX*=1
-								#~ elif absx>=0.25 and absx<0.5:
-									#~ posMouseX*=3
-								#~ elif absx>=0.5 and absx<0.75:
-									#~ posMouseX*=3
-								#~ elif absx>=0.75:# and absx<0.9:
-									#~ posMouseX*=9
-								#~ elif absx>=0.9:
-									#~ posMouseX*=4
-								#~ if absy>=0:
-									#~ posMouseY*=1
-								#~ elif absy>0.25 and absy<0.5:
-									#~ posMouseY*=3
-								#~ elif absy>=0.5 and absy<0.75:
-									#~ posMouseY*=3
-								#~ elif absy>=0.75:# and absy<0.9:
-									#~ posMouseY*=9
-								#~ elif absy>=0.9:
-									#~ posMouseY*=27
+				ship.lock.acquire()
+				if ship!=None:
+					if ship.node.isEmpty()==False:
 						
-							#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
-							#~ nm.addUInt(User.getInstance().getId())
-							#~ nm.addFloat(posMouseX)
-							#~ nm.addFloat(posMouseY)
-							#~ NetworkZoneServer.getInstance().sendMessage(nm)
-							#~ self.speedup=0
-						#~ elif self.mouseToUpdate==True:
-							#~ self.mouseToUpdate=False
-							#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
-							#~ nm.addUInt(User.getInstance().getId())
-							#~ nm.addFloat(posMouseX)
-							#~ nm.addFloat(posMouseY)
-							#~ NetworkZoneServer.getInstance().sendMessage(nm)
+						forwardVec=Quat(ship.node.getQuat()).getForward()
+						if ship.isHidden()==True:
+							if ship.node.isEmpty()==False:
+								base.camera.setPos((forwardVec*(1.0))+ ship.node.getPos())
+								base.camera.setHpr(ship.node.getHpr())
+						else:
+							if ship.node.isEmpty()==False:
+							#~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
+								mvtCam = (((forwardVec*(-200.0)) + ship.node.getPos()) * 0.20) + (base.camera.getPos() * 0.80)
+								hprCam = ship.node.getHpr()*0.2 + base.camera.getHpr()*0.8
+								base.camera.setPos(mvtCam)
+								base.camera.setHpr(hprCam)
 						
-						if len(self.historyKey)>0:
-							nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-							nm.addInt(User.getInstance().getId())
-							nm.addInt(len(self.historyKey))
-							for key in self.historyKey.keys():
-								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' or key=="lcontrol":
-									nm.addString(key)
-									nm.addInt(self.historyKey[key])
-							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
-							NetworkZoneServer.getInstance().sendMessage(nm)
+						if globalClock.getRealTime()-self.updateInput>0.1:
+							self.updateInput=globalClock.getRealTime()
+							#~ posMouseX=0
+							#~ posMouseY=0
+							#~ if self.mousebtn[2]==1:
+								#~ self.mouseToUpdate=True
+								#~ if base.mouseWatcherNode.hasMouse():
+									#~ posMouseX=-base.mouseWatcherNode.getMouseX()
+									#~ posMouseY=base.mouseWatcherNode.getMouseY()
+									#~ absx=abs(posMouseX)
+									#~ absy=abs(posMouseY)
+									#~ ## Trying to get smooth mouse to accelerating mouse 
+									#~ if absx>=0:
+										#~ posMouseX*=1
+									#~ elif absx>=0.25 and absx<0.5:
+										#~ posMouseX*=3
+									#~ elif absx>=0.5 and absx<0.75:
+										#~ posMouseX*=3
+									#~ elif absx>=0.75:# and absx<0.9:
+										#~ posMouseX*=9
+									#~ elif absx>=0.9:
+										#~ posMouseX*=4
+									#~ if absy>=0:
+										#~ posMouseY*=1
+									#~ elif absy>0.25 and absy<0.5:
+										#~ posMouseY*=3
+									#~ elif absy>=0.5 and absy<0.75:
+										#~ posMouseY*=3
+									#~ elif absy>=0.75:# and absy<0.9:
+										#~ posMouseY*=9
+									#~ elif absy>=0.9:
+										#~ posMouseY*=27
 							
-							self.historyKey.clear()
-						if self.speedup!=0:
-							nm=netMessage(C_NETWORK_CHARACTER_SPEED)
-							nm.addUInt(User.getInstance().getId())
-							nm.addInt(self.speedup)
-							self.speedup=0
-							NetworkZoneServer.getInstance().sendMessage(nm)
-						
-						if MenuTuto.getInstance().isActiv()==False:
+								#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
+								#~ nm.addUInt(User.getInstance().getId())
+								#~ nm.addFloat(posMouseX)
+								#~ nm.addFloat(posMouseY)
+								#~ NetworkZoneServer.getInstance().sendMessage(nm)
+								#~ self.speedup=0
+							#~ elif self.mouseToUpdate==True:
+								#~ self.mouseToUpdate=False
+								#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
+								#~ nm.addUInt(User.getInstance().getId())
+								#~ nm.addFloat(posMouseX)
+								#~ nm.addFloat(posMouseY)
+								#~ NetworkZoneServer.getInstance().sendMessage(nm)
 							
 							if len(self.historyKey)>0:
 								nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-								nm.addUInt(User.getInstance().getId())
-								nm.addUInt(len(self.historyKey))
+								nm.addInt(User.getInstance().getId())
+								nm.addInt(len(self.historyKey))
 								for key in self.historyKey.keys():
 									if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' or key=="lcontrol":
 										nm.addString(key)
-										nm.addUInt(self.historyKey[key])
+										nm.addInt(self.historyKey[key])
 								#~ NetworkZoneUdp.getInstance().sendMessage(nm)
 								NetworkZoneServer.getInstance().sendMessage(nm)
+								
+								self.historyKey.clear()
+							if self.speedup!=0:
+								nm=netMessage(C_NETWORK_CHARACTER_SPEED)
+								nm.addUInt(User.getInstance().getId())
+								nm.addInt(self.speedup)
+								self.speedup=0
+								NetworkZoneServer.getInstance().sendMessage(nm)
 							
-							self.historyKey.clear()
-							
-							if self.shooting==True:
-							#~ if self.mousebtn[0]==1:
-								#~ print "shot"
-								if ship.shot()==True:
-									self.pointerLookingAt.setPos(ship.getPos())
-									if self.pointToLookAt!=None:
-										self.pointerLookingAt.lookAt(self.pointToLookAt)
-									else:
-										if base.mouseWatcherNode.hasMouse():
-											x=base.mouseWatcherNode.getMouseX()
-											y=base.mouseWatcherNode.getMouseY()
-											t1=Point3()
-											t2=Point3()
-											ret=base.camLens.extrude(Point2(x,y),t1,t2)
-											t2=t2/100
-											t2relative=render.getRelativePoint(camera,t2)   	
-											self.pointerLookingAt.lookAt(t2relative)
-									nm=netMessage(C_NETWORK_CHAR_SHOT)
-									nm.addUInt(ship.getOwner().getUserId())
-									nm.addUInt(ship.getOwner().getId())
-									nm.addFloat(ship.getPos().getX())
-									nm.addFloat(ship.getPos().getY())
-									nm.addFloat(ship.getPos().getZ())
-									nm.addFloat(self.pointerLookingAt.getQuat().getR())
-									nm.addFloat(self.pointerLookingAt.getQuat().getI())
-									nm.addFloat(self.pointerLookingAt.getQuat().getJ())
-									nm.addFloat(self.pointerLookingAt.getQuat().getK())
+							if MenuTuto.getInstance().isActiv()==False:
+								
+								if len(self.historyKey)>0:
+									nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+									nm.addUInt(User.getInstance().getId())
+									nm.addUInt(len(self.historyKey))
+									for key in self.historyKey.keys():
+										if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' or key=="lcontrol":
+											nm.addString(key)
+											nm.addUInt(self.historyKey[key])
+									#~ NetworkZoneUdp.getInstance().sendMessage(nm)
 									NetworkZoneServer.getInstance().sendMessage(nm)
-							
-							if self.keysDown.has_key('t'):
-								if (self.keysDown['t']!=0):
-									self.seekNearestTarget("NPC")
-									self.keysDown['t']=0
-									
-							if self.keysDown.has_key('v'):
-								if (self.keysDown['v']!=0):
-									self.getNextTarget()
-									self.keysDown['v']=0
-							if self.keysDown.has_key('k'):
-								if (self.keysDown['k']!=0):
-									self.volume-=0.1
-									self.keysDown['k']=0
-									self.ambientSound.setVolume(self.volume)
-									print  "self.volume " + str(self.volume)
-							if self.keysDown.has_key('f12'):
-								del self.keysDown['f12']
-								if ship.isHidden()==True:
-									ship.setVisible()
-								else:
-									ship.setInvisible()
-				ship.lock.release()		
+								
+								self.historyKey.clear()
+								
+								if self.shooting==True:
+								#~ if self.mousebtn[0]==1:
+									#~ print "shot"
+									if ship.shot()==True:
+										self.pointerLookingAt.setPos(ship.getPos())
+										if self.pointToLookAt!=None:
+											self.pointerLookingAt.lookAt(self.pointToLookAt)
+										else:
+											if base.mouseWatcherNode.hasMouse():
+												x=base.mouseWatcherNode.getMouseX()
+												y=base.mouseWatcherNode.getMouseY()
+												t1=Point3()
+												t2=Point3()
+												ret=base.camLens.extrude(Point2(x,y),t1,t2)
+												t2=t2/100
+												t2relative=render.getRelativePoint(camera,t2)   	
+												self.pointerLookingAt.lookAt(t2relative)
+										nm=netMessage(C_NETWORK_CHAR_SHOT)
+										nm.addUInt(ship.getOwner().getUserId())
+										nm.addUInt(ship.getOwner().getId())
+										nm.addFloat(ship.getPos().getX())
+										nm.addFloat(ship.getPos().getY())
+										nm.addFloat(ship.getPos().getZ())
+										nm.addFloat(self.pointerLookingAt.getQuat().getR())
+										nm.addFloat(self.pointerLookingAt.getQuat().getI())
+										nm.addFloat(self.pointerLookingAt.getQuat().getJ())
+										nm.addFloat(self.pointerLookingAt.getQuat().getK())
+										NetworkZoneServer.getInstance().sendMessage(nm)
+								
+								if self.keysDown.has_key('t'):
+									if (self.keysDown['t']!=0):
+										self.seekNearestTarget("NPC")
+										self.keysDown['t']=0
+										
+								if self.keysDown.has_key('v'):
+									if (self.keysDown['v']!=0):
+										self.getNextTarget()
+										self.keysDown['v']=0
+								if self.keysDown.has_key('k'):
+									if (self.keysDown['k']!=0):
+										self.volume-=0.1
+										self.keysDown['k']=0
+										self.ambientSound.setVolume(self.volume)
+										print  "self.volume " + str(self.volume)
+								if self.keysDown.has_key('f12'):
+									del self.keysDown['f12']
+									if ship.isHidden()==True:
+										ship.setVisible()
+									else:
+										ship.setInvisible()
+					ship.lock.release()		
 			User.lock.acquire()
 			for usr in User.listOfUser:
 				User.listOfUser[usr].getCurrentCharacter().run()

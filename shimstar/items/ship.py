@@ -453,8 +453,10 @@ class Ship:
 		self.lock.acquire()
 		self.node.detachNode()
 		self.node.removeNode()		
-		self.textObject.detachNode()
-		self.textObject.removeNode()
+		print "ship::destroy " + str(self.id)
+		if self.textObject!=None:
+			self.textObject.detachNode()
+			self.textObject.removeNode()
 		self.lock.release()
 		
 		Ship.lock.acquire()
