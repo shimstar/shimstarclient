@@ -131,7 +131,7 @@ class Zone(threading.Thread):
 		if len(tempMsg)>0:
 			for msg in tempMsg:
 				tabMsg=msg.getMessage()
-				print "zone::runNewIncoming"
+				print "zone::runNewIncoming " + str(tabMsg[0])
 				User.lock.acquire()
 				userId=tabMsg[0]
 				userFound=User.getUserById(userId)
@@ -147,6 +147,7 @@ class Zone(threading.Thread):
 					tempUser.getCurrentCharacter().setShip(tabMsg[6],tabMsg[7],tabMsg[8])
 				User.lock.release()
 				NetworkZoneServer.getInstance().removeMessage(msg)
+				print "zone!!runNewIncoming listOfuser" + str(User.listOfUser)
 		
 	def runDamageNpc(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_TAKE_DAMAGE_NPC)
@@ -185,8 +186,8 @@ class Zone(threading.Thread):
 				for u in User.listOfUser:
 					if User.listOfUser[u].getCurrentCharacter().getId()==idChar:
 						userToRemove=User.listOfUser[u]
-				print "zone::removeChar :: " +str(idChar) + "/" + str(userToRemove.getId()) + " vs " + str(User.getInstance().getId())
-				print "zone::removeChar :: " + str(User.listOfUser)
+				#~ print "zone::removeChar :: " +str(idChar) + "/" + str(userToRemove.getId()) + " vs " + str(User.getInstance().getId())
+				#~ print "zone::removeChar :: " + str(User.listOfUser)
 				if userToRemove!=None and userToRemove.getId()!=User.getInstance().getId():
 					userToRemove.destroy()
 				#~ else:
@@ -201,7 +202,7 @@ class Zone(threading.Thread):
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
 				idZone=int(netMsg[0])
-				print "zone::removeChar " + str(idZone)
+				#~ print "zone::removeChar " + str(idZone)
 				GameState.getInstance().setNewZone(idZone)
 				User.getInstance().getCurrentCharacter().manageDeath()
 				User.getInstance().getCurrentCharacter().changeZone(True)
