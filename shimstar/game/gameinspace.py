@@ -337,32 +337,36 @@ class GameInSpace(DirectObject,threading.Thread):
 		for s in Ship.listOfShip:
 			ship=Ship.listOfShip[s]
 			nShip=ship.node
-			textObject=ship.getTextObject()
-			distance=0
-			if ship!=User.getInstance().getCurrentCharacter().ship:
-				distance=self.calcDistance(ship.node)
-			if textObject==None:
-				textObject = OnscreenText(text = ship.owner.name, pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
-				ship.setTextObject(textObject)
-			if abs(distance)<2000:
-				if nShip!=None and nShip.isEmpty()!=True and isInView(nShip)!=True: 
-					textObject.hide() 
-				else: 
-					textObject.show() 
-					pos=self.map3dToAspect2d(render,nShip.getPos(render))
-					if pos!=None:
-						x=pos.getX()
-						z=pos.getZ()
-						distFactor=float(float(distance)/float(300))
-						if distFactor>0:
-							z+=float(float(0.1)/float(distFactor))
-						else:
-							z+=0.1
-						textObject.setPos(x, z) 
-			else:
-				textObject.hide()
-
-					
+			if ship!=None and nShip!=None and nShip.isEmpty()!=True:
+				textObject=ship.getTextObject()
+				distance=0
+				if ship!=User.getInstance().getCurrentCharacter().ship:
+					distance=self.calcDistance(ship.node)
+				if textObject==None:
+					textObject = OnscreenText(text = ship.owner.name, pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
+					ship.setTextObject(textObject)
+				if abs(distance)<2000:
+					if nShip!=None and nShip.isEmpty()!=True and isInView(nShip)!=True: 
+						textObject.hide() 
+					else: 
+						textObject.show() 
+						pos=self.map3dToAspect2d(render,nShip.getPos(render))
+						if pos!=None:
+							x=pos.getX()
+							z=pos.getZ()
+							distFactor=float(float(distance)/float(300))
+							if distFactor>0:
+								z+=float(float(0.1)/float(distFactor))
+							else:
+								z+=0.1
+							textObject.setPos(x, z) 
+				else:
+					textObject.hide()
+			elif ship!=None:
+				textObject=ship.getTextObject()
+				if textObject!=None:
+					textObject.hide()
+				
 		Ship.lock.release()
 		
 	def clickOnHUD(self,args):
