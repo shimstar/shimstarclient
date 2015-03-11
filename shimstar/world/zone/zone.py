@@ -202,7 +202,7 @@ class Zone(threading.Thread):
 			for msg in tempMsg:
 				netMsg=msg.getMessage()
 				idZone=int(netMsg[0])
-				#~ print "zone::removeChar " + str(idZone)
+				print "zone::runremoveChar " + str(idZone)
 				GameState.getInstance().setNewZone(idZone)
 				User.getInstance().getCurrentCharacter().manageDeath()
 				User.getInstance().getCurrentCharacter().changeZone(True)
@@ -213,6 +213,7 @@ class Zone(threading.Thread):
 				msg.addUInt(User.getInstance().getId())
 				NetworkZoneServer.getInstance().sendMessage(msg)
 				NetworkZoneServer.getInstance().removeMessage(msg)
+				self.stop()
 		
 	def runNewNpc(self):
 		
