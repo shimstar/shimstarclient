@@ -397,6 +397,8 @@ class Zone(threading.Thread):
 		"""
 			destructor
 		"""
+		self.stop()
+		
 		for aster in self.listOfAsteroid:
 			aster.destroy()
 		for sta in self.listOfStation:
@@ -409,4 +411,30 @@ class Zone(threading.Thread):
 			j.destroy()
 		self.box.detachNode()
 		self.box.removeNode()
+		
+		User.lock.acquire()
+		userToRemove=[]
+		for u in User.listOfUser:
+			if User.listOfUser[u]!=User.getInstance():
+				userToRemove.append(User.listOfUser[u])
+				
+		for u in userToRemove:
+			u.destroy()
+			
+		User.lock.release()
+		
+		NPC.lock.acquire()
+		npcToRemove=[]
+		for n in NPC.listOfNpc:
+			npcToRemove.append(NPC.listOfNpc[n])
+				
+		for n in npcToRemove:
+			n.destroy()
+			
+		NPC.lock.release()
+		
+		Zone.instance=None
+		
+		
+		
 		
