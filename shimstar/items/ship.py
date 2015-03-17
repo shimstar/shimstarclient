@@ -275,7 +275,7 @@ class Ship:
 			self.node.setName("ship_" + str(self.id))
 			self.node.setTag("classname","ship")
 			self.node.setTag("id",str(self.id))		
-			textObject = OnscreenText(text = 'my text string',parent=self.node)
+			self.textObject = OnscreenText(text = 'my text string',parent=self.node)
 		
 	def getId(self):
 		return self.id
@@ -423,13 +423,24 @@ class Ship:
 		return self.img
 		
 	def setVisible(self):
+		if self.node==None:
+			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+			self.node.reparentTo(render)
 		self.node.show()
+		if self.textObject == None:
+			self.textObject = OnscreenText(text = 'my text string',parent=self.node)
+		self.textObject.show()
 		
 	def setInvisible(self):
 		if self.node==None:
 			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
 			self.node.reparentTo(render)
 		self.node.hide()
+		
+		if self.textObject == None:
+			self.textObject = OnscreenText(text = 'my text string',parent=self.node)
+		self.textObject.hide()
+		
 		
 	def isHidden(self):
 		return self.node.isHidden()
