@@ -307,23 +307,28 @@ class GameInSpace(DirectObject,threading.Thread):
 				for p in self.pq.getEntries():
 					nn=p.getIntoNodePath()
 					tabNode=str(nn).split("/")
-					objFromRender=render.find(tabNode[1]).node()
-					className=objFromRender.getTag("classname")
-					if className=="asteroid":
-						objPicked=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
-						self.pointToLookAt=objPicked.getPos()
-						break
-					elif className=="ship":
-						objPicked=Ship.getShipById(int(objFromRender.getTag("id")))
-						ship=User.getInstance().getCurrentCharacter().getShip()
-						if ship!=None and objPicked!=None and objPicked.getId()!=ship.getId():
-							self.pointToLookAt=objPicked.getPointerToGo().getPos()
+					objFromRender=None
+					try:
+						objFromRender=render.find(tabNode[1]).node()
+					except:
+						print "gameinspace::pickMouse : render seems to be empty"
+					if objFromRender!=None:
+						className=objFromRender.getTag("classname")
+						if className=="asteroid":
+							objPicked=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
+							self.pointToLookAt=objPicked.getPos()
 							break
-						else:
-							objPicked=None
-					elif className=="station":
-						objPicked=Station.getStationById(int(objFromRender.getTag("id")))
-						break
+						elif className=="ship":
+							objPicked=Ship.getShipById(int(objFromRender.getTag("id")))
+							ship=User.getInstance().getCurrentCharacter().getShip()
+							if ship!=None and objPicked!=None and objPicked.getId()!=ship.getId():
+								self.pointToLookAt=objPicked.getPointerToGo().getPos()
+								break
+							else:
+								objPicked=None
+						elif className=="station":
+							objPicked=Station.getStationById(int(objFromRender.getTag("id")))
+							break
 			if self.mousebtn[2]==1:
 				if objPicked!=None:
 					Follower.getInstance().setTarget(objPicked.getNode())
