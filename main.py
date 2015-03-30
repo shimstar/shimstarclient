@@ -65,7 +65,8 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuChooseHeroCegui()				
 		elif state==C_CHANGEZONE:
 			idZone=GameState.getInstance().getNewZone()
-			
+			if Zone.getInstance()!=None:
+				Zone.getInstance().destroy()
 			if idZone==0 or idZone==User.getInstance().getCurrentCharacter().getIdZone():
 				idZone=User.getInstance().getCurrentCharacter().getIdZone()
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
