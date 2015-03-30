@@ -117,9 +117,12 @@ class Ship:
 		
 	@staticmethod
 	def getShipById(id):
+		Ship.lock.acquire()
+		shipToReturn=None
 		if Ship.listOfShip.has_key(id)!=True:
-			return Ship.listOfShip[id]
-		return None
+			shipToReturn=Ship.listOfShip[id]
+		Ship.lock.release()
+		return shipToReturn
 		
 	def getPoussee(self):
 		return self.poussee
