@@ -119,6 +119,7 @@ class Character:
 		
 		if self.ship!=None:
 			self.ship.changeZone()
+			
 		if death:
 			GameState.getInstance().setState(C_DEATH)
 		else:

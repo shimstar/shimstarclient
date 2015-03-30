@@ -316,7 +316,7 @@ class GameInSpace(DirectObject,threading.Thread):
 					elif className=="ship":
 						objPicked=Ship.getShipById(int(objFromRender.getTag("id")))
 						ship=User.getInstance().getCurrentCharacter().getShip()
-						if objPicked.getId()!=ship.getId():
+						if ship!=None and objPicked!=None and objPicked.getId()!=ship.getId():
 							self.pointToLookAt=objPicked.getPointerToGo().getPos()
 							break
 						else:

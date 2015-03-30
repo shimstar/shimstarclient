@@ -31,6 +31,7 @@ class Ship:
 		self.lock=threading.Lock()
 		self.name = ""
 		self.id=id
+		self.textObject=None
 		self.pousse=0
 		self.visible=visible
 		self.template=idTemplate
@@ -72,7 +73,7 @@ class Ship:
 		self.pyr = {'p':0, 'y':0, 'r':0, 'a':0}
 		self.loadTemplate()
 		#~ print "ship init" + str(self.id)
-		self.textObject=None
+		
 		
 	def getItemInInventory(self):
 		return self.itemInInventory
@@ -115,7 +116,7 @@ class Ship:
 		
 	@staticmethod
 	def getShipById(id):
-		if Ship.listOfShip.has_key(id)!=-1:
+		if Ship.listOfShip.has_key(id)!=True:
 			return Ship.listOfShip[id]
 		return None
 		
@@ -276,6 +277,7 @@ class Ship:
 			self.node.setTag("classname","ship")
 			self.node.setTag("id",str(self.id))		
 			textObject = OnscreenText(text = 'my text string',parent=self.node)
+			print "ship::loadTemplate " + str(self.node) + "/" + str(self.id)
 		
 	def getId(self):
 		return self.id
@@ -426,10 +428,13 @@ class Ship:
 		self.node.show()
 		
 	def setInvisible(self):
+		print "ship::setInvisibleA "  + str(self.node)
 		if self.node==None:
 			self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
 			self.node.reparentTo(render)
 		self.node.hide()
+		
+		print "ship::setInvisible " + str(self.id) + "/" + str(self.node)
 		
 	def isHidden(self):
 		return self.node.isHidden()
