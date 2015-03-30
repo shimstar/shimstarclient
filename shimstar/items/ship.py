@@ -51,6 +51,7 @@ class Ship:
 		self.hullpoints = hullpoints
 		self.maxhull = 0
 		self.maxTorque = 30
+		self.poussee=0
 		self.currentTorqueX = 0
 		self.currentTorqueY = 0
 		self.itemInInventory = []
