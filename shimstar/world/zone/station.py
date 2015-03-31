@@ -74,8 +74,8 @@ class Station:
 		if self.node!=None and not self.node.isEmpty():
 			self.node.detachNode()
 			self.node.removeNode()
-		if station.stations.count(self)>0:
-			station.stations.remove(self)
+		if Station.stations.count(self)>0:
+			Station.stations.remove(self)
 		
 	def getClassName(self):
 		return self.className
