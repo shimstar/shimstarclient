@@ -369,7 +369,7 @@ class GameInSpace(DirectObject,threading.Thread):
 					textObject.hide()
 			elif ship!=None:
 				textObject=ship.getTextObject()
-				if textObject!=None:
+				if textObject!=None and textObject.isEmpty()!=True:
 					textObject.hide()
 				
 		Ship.lock.release()
