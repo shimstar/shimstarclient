@@ -74,7 +74,6 @@ class Asteroid(DirectObject):
 		self.node.detachNode()
 		self.node.removeNode()
 		if Asteroid.listOfAsteroid.has_key(self.id)!=-1:
-			Asteroid.listOfAsteroid.remove(self.id)
 			del Asteroid.listOfAsteroid[self.id]
 		
 	def getPos(self):

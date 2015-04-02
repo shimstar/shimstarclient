@@ -409,8 +409,9 @@ class Zone(threading.Thread):
 			npc.destroy()  
 		for j in self.junks:
 			j.destroy()
-		self.box.detachNode()
-		self.box.removeNode()
+		if self.box!=None:
+			self.box.detachNode()
+			self.box.removeNode()
 		
 		User.lock.acquire()
 		userToRemove=[]
