@@ -26,6 +26,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		print "GameInSpace::__init__"
 		threading.Thread.__init__(self)
 		self.Terminated = False
+		self.lock=threading.Lock()
 		self.volume=1
 		self.CEGUI=ShimCEGUI.getInstance()
 		self.ceGuiRootWindow=None
@@ -603,6 +604,9 @@ class GameInSpace(DirectObject,threading.Thread):
 		return GameInSpace.instance
 		
 	def destroy(self):
+		self.stopThread=True
+		GameState.lock.acquire()
+		GameState.lock.release()
 		GameInstance=None
 		self.ambientSound.stop()
 		for expl in self.listOfExplosion:
