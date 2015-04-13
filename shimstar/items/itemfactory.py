@@ -3,7 +3,7 @@ from shimstar.items.weapon import *
 #~ from shimstar.items.mining import *
 from shimstar.items.item import *
 from shimstar.core.constantes import *
-from shimstar.items.mineral import *
+# from shimstar.items.mineral import *
 
 class itemFactory():
 	def __init__(self):

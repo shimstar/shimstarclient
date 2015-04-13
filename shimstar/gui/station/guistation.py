@@ -7,14 +7,14 @@ from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from pandac.PandaModules import * 
 from shimstar.gui.shimcegui import * 
-from shimstar.gui.core.iteminfo import *
-from shimstar.gui.core.inventory import *
+#import shimstar.gui.core.iteminfo
+# from shimstar.gui.core.inventory import *
 from shimstar.gui.station.guistationship import *
 from shimstar.core.shimconfig import *
 from shimstar.user.user import *
 from shimstar.world.zone.zone import *
 from shimstar.game.gamestate import *
-from shimstar.npc.npcinstation import *
+# from shimstar.npc.npcinstation import *
 from shimstar.items.itemfactory import *
 
 class GuiStation(DirectObject):

@@ -3,7 +3,7 @@ import sys,os
 import PyCEGUI
 from shimstar.gui.shimcegui import *
 from shimstar.user.user import *
-from shimstar.gui.core.iteminfo import *
+# from shimstar.gui.core.iteminfo import *
 
 class chooseItemShip():
 	#~ def __init__(self,slotType,location,ship):

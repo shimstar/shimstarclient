@@ -14,10 +14,10 @@ from shimstar.game.gamestate import *
 from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
 from shimstar.gui.core.menututo import *
-from shimstar.gui.core.inventory import *
+# from shimstar.gui.core.inventory import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
-from shimstar.game.particleEngine import *
+# from shimstar.game.particleEngine import *
 
 
 class GameInSpace(DirectObject,threading.Thread):

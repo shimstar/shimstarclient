@@ -8,7 +8,7 @@ from shimstar.world.zone.station import *
 from shimstar.user.user import *
 from shimstar.npc.npc import *
 from shimstar.core.constantes import *
-from shimstar.gui.core.inventory import *
+# from shimstar.gui.core.inventory import *
 
 C_TYPEZONE_SPACE=1
 C_TYPEZONE_STATION=2
