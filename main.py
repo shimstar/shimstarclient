@@ -48,16 +48,16 @@ class ShimStarClient(DirectObject):
 	#~ def dispatch(self):
 		state=GameState.getInstance().getState()
 		if state==C_INIT:
-			if self.menu!=None:
-				if isinstance(self.menu,MenuConnectCegui)!=True:
+			if self.menu is not None:
+				if not isinstance(self.menu, MenuConnectCegui):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=MenuConnectCegui()
 			else:
 				self.menu=MenuConnectCegui()
 		elif state==C_CHOOSE_HERO:
-			if self.menu!=None:
-				if isinstance(self.menu,MenuChooseHeroCegui)!=True:
+			if self.menu is not None:
+				if not isinstance(self.menu, MenuChooseHeroCegui):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=MenuChooseHeroCegui()				
@@ -65,7 +65,7 @@ class ShimStarClient(DirectObject):
 				self.menu=MenuChooseHeroCegui()				
 		elif state==C_CHANGEZONE:
 			idZone=GameState.getInstance().getNewZone()
-			if Zone.getInstance()!=None:
+			if Zone.getInstance() is not None:
 				Zone.getInstance().destroy()
 			if idZone==0 or idZone==User.getInstance().getCurrentCharacter().getIdZone():
 				idZone=User.getInstance().getCurrentCharacter().getIdZone()
@@ -75,7 +75,7 @@ class ShimStarClient(DirectObject):
 				msg.addUInt(idZone)
 				NetworkMainServer.getInstance().sendMessage(msg)
 				GameState.getInstance().setState(C_WAITING_INFOZONE)
-				if isinstance(self.menu,MenuLoadZoneCegui)!=True:
+				if not isinstance(self.menu, MenuLoadZoneCegui):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=MenuLoadZoneCegui()
@@ -88,14 +88,14 @@ class ShimStarClient(DirectObject):
 			print "main::dispatch GOPLAY" + str(idZone)
 			name,typeZone=Zone.getTinyInfosFromZone(idZone)
 			if typeZone==C_TYPEZONE_SPACE:
-				if isinstance(self.menu,GameInSpace)!=True:
+				if not isinstance(self.menu, GameInSpace):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=GameInSpace()
 				
 				self.menu.start()
 			else:
-				if isinstance(self.menu,GuiStation)!=True:
+				if not isinstance(self.menu, GuiStation):
 					self.menu.destroy()
 					self.menu=None
 					self.menu=GuiStation()
@@ -171,8 +171,8 @@ class ShimStarClient(DirectObject):
 			sys.exit()
 		elif state==C_DEATH:
 			Zone.getInstance().stop()
-			if self.menu!=None:
-				if isinstance(self.menu,MenuDeath)!=True:
+			if self.menu is not None:
+				if not isinstance(self.menu, MenuDeath):
 					self.menu.destroy()
 					self.menu=MenuDeath()
 			else:
