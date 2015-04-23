@@ -430,8 +430,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.OutMiningAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining"))
 		self.InMiningAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining"))
 		
-		menuInventory.getInstance('inventaire').setParent(self)
-		menuInventory.getInstance('inventaire').setObj(User.getInstance().getCurrentCharacter().getShip())
+		# menuInventory.getInstance('inventaire').setParent(self)
+		# menuInventory.getInstance('inventaire').setObj(User.getInstance().getCurrentCharacter().getShip())
 		
 		self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
