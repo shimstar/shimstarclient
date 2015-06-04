@@ -835,12 +835,12 @@ class GameInSpace(DirectObject,threading.Thread):
 								
 								self.historyKey.clear()
 								
-								if self.shooting==True:
+								if self.shooting:
 								#~ if self.mousebtn[0]==1:
 									#~ print "shot"
-									if ship.shot()==True:
+									if ship.shot():
 										self.pointerLookingAt.setPos(ship.getPos())
-										if self.pointToLookAt!=None:
+										if self.pointToLookAt is not None:
 											self.pointerLookingAt.lookAt(self.pointToLookAt)
 										else:
 											if base.mouseWatcherNode.hasMouse():
