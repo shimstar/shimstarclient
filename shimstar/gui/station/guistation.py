@@ -8,7 +8,7 @@ from direct.task import Task
 from pandac.PandaModules import * 
 from shimstar.gui.shimcegui import * 
 #import shimstar.gui.core.iteminfo
-# from shimstar.gui.core.inventory import *
+from shimstar.gui.core.inventory import *
 from shimstar.gui.station.guistationship import *
 from shimstar.core.shimconfig import *
 from shimstar.user.user import *

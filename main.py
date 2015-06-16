@@ -1,9 +1,9 @@
 from pandac.PandaModules import loadPrcFileData 
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
-#~ loadPrcFileData('', 'win-size %i %i' % (1600, 900))
+# loadPrcFileData('', 'win-size %i %i' % (1920, 1080))
 #~ loadPrcFileData('', 'state-cache 0')
-#~ loadPrcFileData('','fullscreen 1')
+# loadPrcFileData('','fullscreen 1')
 import sys,os
 from array import array
 #~ import win32api
