@@ -736,6 +736,7 @@ class GameInSpace(DirectObject,threading.Thread):
         #~ self.PE.stop()
         #~ self.PE.speed=100
         while not self.stopThread and GameState.getInstance().getState()==C_PLAYING:
+        # if True:
             #~ print "here"
             GameState.lock.acquire()
             #~ print "here2"
