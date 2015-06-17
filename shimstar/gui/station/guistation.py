@@ -111,12 +111,12 @@ class GuiStation(DirectObject):
 						compteur+=1
 						statusMission=netMsg[compteur]
 						compteur+=1
-						tempMission=Mission(idMission)
-						tempMission.setStatus(statusMission)
-						ch=User.getInstance().getCurrentCharacter().addMission(tempMission)
+						# tempMission=Mission(idMission)
+						# tempMission.setStatus(statusMission)
+						# ch=User.getInstance().getCurrentCharacter().addMission(tempMission)
 					NetworkMainServer.getInstance().removeMessage(msg)
 					self.usrLoaded=True
-					menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
+					# menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
 		return Task.cont
 		
 	def quitGame(self,):
