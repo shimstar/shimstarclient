@@ -91,11 +91,19 @@ class Bullet(threading.Thread):
         #~ audio3d.detachSound(self.node)
         #~ self.node.setLightOff()
         self.lock.acquire()
+<<<<<<< HEAD
+=======
+
+>>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
         try:
             self.node.detachNode()
             self.node.removeNode()
         except:
+<<<<<<< HEAD
             print "Exception : Bullet remove node"
+=======
+            print "exception : exception in release node in bullet"
+>>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
             self.lock.release()
             self.node = None
 
@@ -126,11 +134,19 @@ class Bullet(threading.Thread):
         dt = globalClock.getRealTime() - self.lastMove
         self.lastMove = globalClock.getRealTime()
         if dt < 1 and dt > -1:
+<<<<<<< HEAD
+=======
+
+>>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
             if self.node != None and self.node.isEmpty() != True:
                 try:
                     self.node.setPos(self.node, Vec3(0, 1 * dt * self.speed, 0))
                 except:
+<<<<<<< HEAD
                     print "Exception : Bullet setPos"
+=======
+                    print "exception in move bullet"
+>>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
         self.lock.release()
 
 
