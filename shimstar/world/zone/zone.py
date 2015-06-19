@@ -9,12 +9,10 @@ from shimstar.user.user import *
 from shimstar.npc.npc import *
 from shimstar.core.constantes import *
 from shimstar.gui.core.inventory import *
-<<<<<<< HEAD
-=======
 
 C_TYPEZONE_SPACE = 1
 C_TYPEZONE_STATION = 2
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
+
 
 
 class Zone(threading.Thread):

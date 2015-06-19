@@ -13,6 +13,7 @@ class shimConfig:
         self.user = ""
         self.pwd = ""
         self.ip = ""
+        self.resolution=""
         self.ambientVolume = 0.3
         self.soundVolume = 0.5
         self.readTutos = []
@@ -32,6 +33,11 @@ class shimConfig:
             s = "/" + self.ressourceDirectory[0:1] + self.ressourceDirectory[2:]
             s = s.replace("\\", "/")
             self.convDirectory = s
+
+            usr = dom.getElementsByTagName('resolution')
+            for u in usr:
+                if u.firstChild != None:
+                    self.resolution = str(u.firstChild.data)
 
             usr = dom.getElementsByTagName('user')
             for u in usr:
@@ -61,6 +67,12 @@ class shimConfig:
     def readTuto(self, id):
         self.readTutos.append(id)
         self.saveConfig()
+
+    def setResolution(self,resolution):
+        self.resolution=resolution
+
+    def getResolution(self):
+        return self.resolution
 
     def getReadTutos(self):
         return self.readTutos
@@ -120,11 +132,13 @@ class shimConfig:
         userXml = docXml.createElement("user")
         passwordXml = docXml.createElement("password")
         ipXml = docXml.createElement("ip")
+        resolutionXml = docXml.createElement("resolution")
         versionXml.appendChild(docXml.createTextNode(str(self.version)))
         dirXml.appendChild(docXml.createTextNode(str(self.ressourceDirectory)))
         userXml.appendChild(docXml.createTextNode(str(self.user)))
         ipXml.appendChild(docXml.createTextNode(str(self.ip)))
         passwordXml.appendChild(docXml.createTextNode(str(self.pwd)))
+        resolutionXml.appendChild(docXml.createTextNode(str(self.resolution)))
         tutosXml = docXml.createElement("tutos")
         for r in self.readTutos:
             tutoXml = docXml.createElement("tuto")
@@ -137,9 +151,10 @@ class shimConfig:
         confXml.appendChild(dirXml)
         confXml.appendChild(ipXml)
         confXml.appendChild(tutosXml)
+        confXml.appendChild(resolutionXml)
         docXml.appendChild(confXml)
-        fileHandle = open(self.getRessourceDirectory() + "/config.xml", 'w')
-        # fileHandle = open ( "./config.xml", 'w' )
+        # fileHandle = open(self.getRessourceDirectory() + "/config.xml", 'w')
+        fileHandle = open ( "./config.xml", 'w' )
         fileHandle.write(docXml.toxml())
         fileHandle.close()
 

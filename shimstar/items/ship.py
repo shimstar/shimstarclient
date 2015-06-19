@@ -151,11 +151,8 @@ class Ship:
         if self.engine != None:
             prcent = float(self.poussee) / float(self.engine.getSpeedMax())
             return float(prcent), self.poussee, self.engine.getSpeedMax()
-<<<<<<< HEAD
-        return 0
-=======
         return 0,0,0
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
+
 
     def setOwner(self, owner):
         self.owner = owner
@@ -245,12 +242,8 @@ class Ship:
 
                         #~ print "ship::move " + self.node.getQuat()
                 except:
-<<<<<<< HEAD
                     print "exception : move in ship"
 
-=======
-                    print "exception in ship move"
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
                 self.lock.release()
             #~ self.node.setPos(self.pointerToGo.getPos())
             self.lastMove = globalClock.getRealTime()
@@ -487,11 +480,8 @@ class Ship:
                 self.textObject.detachNode()
                 self.textObject.removeNode()
         except:
-<<<<<<< HEAD
             print "exception : destroy node in ship"
-=======
-            print "exception in destroy node for ship"
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
+
         self.lock.release()
 
         Ship.lock.acquire()

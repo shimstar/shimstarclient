@@ -5,17 +5,10 @@ import PyCEGUI
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-<<<<<<< HEAD
-from pandac.PandaModules import * 
-from shimstar.gui.shimcegui import * 
-#import shimstar.gui.core.iteminfo
-from shimstar.gui.core.inventory import *
-=======
 from pandac.PandaModules import *
 from shimstar.gui.shimcegui import *
 # import shimstar.gui.core.iteminfo
 # from shimstar.gui.core.inventory import *
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
 from shimstar.gui.station.guistationship import *
 from shimstar.core.shimconfig import *
 from shimstar.user.user import *
@@ -144,17 +137,32 @@ class GuiStation(DirectObject):
         if len(self.resolutionList) == 0:
             info = base.pipe.getDisplayInformation()
             listB = self.CEGUI.WindowManager.getWindow("Options/OptionVideo/Resolution")
+            listOfResolution=[]
             for idx in range(info.getTotalDisplayModes()):
                 width = info.getDisplayModeWidth(idx)
                 height = info.getDisplayModeHeight(idx)
                 bits = info.getDisplayModeBitsPerPixel(idx)
 
                 if bits == 32:
-                    item = PyCEGUI.ListboxTextItem(str(width) + "*" + str(height))
-                    self.resolutionList.append(item)
-                    item.setSelectionColours(PyCEGUI.colour(1, 1, 1, 1))
-                    item.setSelectionBrushImage("TaharezLook", "ListboxSelectionBrush")
-                    listB.addItem(item)
+                    if (str(width) + "*" + str(height)) not in listOfResolution:
+                        item = PyCEGUI.ListboxTextItem(str(width) + "*" + str(height))
+                        self.resolutionList.append(item)
+                        item.setSelectionColours(PyCEGUI.colour(1, 1, 1, 1))
+                        item.setSelectionBrushImage("TaharezLook", "ListboxSelectionBrush")
+                        listB.addItem(item)
+                        listOfResolution.append(str(width) + "*" + str(height))
+
+    def chooseResolution(self):
+        listB = self.CEGUI.WindowManager.getWindow("Options/OptionVideo/Resolution")
+        item = listB.getFirstSelectedItem()
+        if item is not None:
+            shimConfig.getInstance().setResolution(item.getText())
+            shimConfig.getInstance().saveConfig()
+            resolution=item.getText().split("*")
+            wp = WindowProperties()
+            wp.setSize(int(resolution[0]), int(resolution[1])) # there will be more resolutions
+            wp.setFullscreen(True)
+            base.win.requestProperties(wp)
 
     def ButtonClicked(self, windowEventArgs):
         self.buttonSound.play()
@@ -170,6 +178,9 @@ class GuiStation(DirectObject):
             self.loadResolution()
             self.InOptionsVideoAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Options/OptionVideo").moveToFront()
+        elif (windowEventArgs.window.getName() == "Options/OptionVideo/Choose"):
+            self.chooseResolution()
+            self.OutOptionsVideoAnimationInstance.start()
         elif (windowEventArgs.window.getName() == "Station/Menus/Personnel"):
             self.InNPCAnimationInstance.start()
             self.showNPC()
@@ -325,6 +336,8 @@ class GuiStation(DirectObject):
 
         self.CEGUI.WindowManager.getWindow("Options/Video").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                            'ButtonClicked')
+        self.CEGUI.WindowManager.getWindow("Options/OptionVideo/Choose").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
+                                                                           'ButtonClicked')
 
         self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").subscribeEvent(
             PyCEGUI.PushButton.EventClicked, self, 'suppressItem')
@@ -345,6 +358,8 @@ class GuiStation(DirectObject):
         self.CEGUI.WindowManager.getWindow("Station/Vaisseau").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                               self, 'closeClicked')
         self.CEGUI.WindowManager.getWindow("Station/Dialog").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
+                                                                            'closeClicked')
+        self.CEGUI.WindowManager.getWindow("Options/OptionVideo").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
                                                                             'closeClicked')
 
         self.CEGUI.WindowManager.getWindow("Station/Background").subscribeEvent(PyCEGUI.FrameWindow.EventMouseClick,
@@ -408,14 +423,16 @@ class GuiStation(DirectObject):
 
 
     def closeClicked(self, windowEventArgs):
-        if (windowEventArgs.window.getName() == "Inventaire"):
+        if windowEventArgs.window.getName() == "Inventaire":
             self.OutInventaireAnimationInstance.start()
-        elif (windowEventArgs.window.getName() == "Station/Vaisseau"):
+        elif windowEventArgs.window.getName() == "Station/Vaisseau":
             self.OutShipAnimationInstance.start()
-        elif (windowEventArgs.window.getName() == "Station/Personnel"):
+        elif windowEventArgs.window.getName() == "Station/Personnel":
             self.OutNPCAnimationInstance.start()
-        elif (windowEventArgs.window.getName() == "Station/Dialog"):
+        elif windowEventArgs.window.getName() == "Station/Dialog":
             self.OutDialogAnimationInstance.start()
+        elif windowEventArgs.window.getName() == "Options/OptionVideo":
+            self.OutOptionsVideoAnimationInstance.start()
 
     def emptyNPCWindow(self):
         if self.CEGUI.WindowManager.getWindow("Station/Personnel/Container").getContentPane().getChildCount() > 0:

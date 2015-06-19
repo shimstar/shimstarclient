@@ -1,16 +1,11 @@
 from pandac.PandaModules import loadPrcFileData
 
 loadPrcFileData('', 'win-size %i %i' % (1280, 720))
-<<<<<<< HEAD
-# loadPrcFileData('', 'win-size %i %i' % (1920, 1080))
-# ~ loadPrcFileData('', 'state-cache 0')
-# loadPrcFileData('','fullscreen 1')
-# loadPrcFileData('','threading-model Cull/Draw')
-=======
+
 # ~ loadPrcFileData('', 'win-size %i %i' % (1600, 900))
 #~ loadPrcFileData('', 'state-cache 0')
 #~ loadPrcFileData('','fullscreen 1')
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
+
 import sys, os
 from array import array
 #~ import win32api
@@ -45,24 +40,20 @@ class ShimStarClient(DirectObject):
         render.setAntialias(AntialiasAttrib.MAuto)
 
         self.preLoad()
-<<<<<<< HEAD
+        resolution=shimConfig.getInstance().getResolution()
+
+        if resolution is not None and resolution != "":
+            tabResolution = resolution.split("*")
+            wp = WindowProperties()
+            wp.setSize(int(tabResolution[0]), int(tabResolution[1])) # there will be more resolutions
+            wp.setFullscreen(True)
+            base.win.requestProperties(wp)
 
         taskMgr.add(self.dispatch,"dispatch Main",-40)
     #~ while 1:
     #~ self.dispatch()
 
 
-    def run(self):
-        while 1:
-            print "hello"
-
-=======
-        taskMgr.add(self.dispatch, "dispatch Main", -40)
-
-    #~ while 1:
-    #~ self.dispatch()
-
->>>>>>> b5efca133cb488ec5bc3d44f7de126d3fddedf91
     def preLoad(self):
         Explosion.preload()
 
