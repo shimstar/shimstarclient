@@ -39,7 +39,7 @@ class MenuTuto():
 	
 	@staticmethod
 	def getInstance():
-		if MenuTuto.instance==None:
+		if MenuTuto.instance is None:
 			MenuTuto.instance=MenuTuto()
 		return MenuTuto.instance
 		
