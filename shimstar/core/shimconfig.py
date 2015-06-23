@@ -19,11 +19,13 @@ class shimConfig:
         self.readTutos = []
         self.loadXml()
 
+
+
     def loadXml(self):
         if os.path.isfile("config.xml") != False:
             print "shimconfig::getcurrentPath " + str(os.getcwd())
-            fileHandle = open("./config.xml", 'r')
-            fileHandle.close()
+            # fileHandle = open("./config.xml", 'r')
+            # fileHandle.close()
             dom = xml.dom.minidom.parse("./config.xml")
             # ~ print "shimconfig::loadXml " + str(dom.toxml())
             #~ print "shimconfig::loadXml" + str(inspect.getfile(
@@ -33,6 +35,8 @@ class shimConfig:
             s = "/" + self.ressourceDirectory[0:1] + self.ressourceDirectory[2:]
             s = s.replace("\\", "/")
             self.convDirectory = s
+
+            dom = xml.dom.minidom.parse(self.ressourceDirectory + "/config.xml")
 
             usr = dom.getElementsByTagName('resolution')
             for u in usr:

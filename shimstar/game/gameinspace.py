@@ -26,6 +26,7 @@ class GameInSpace(DirectObject, threading.Thread):
     def __init__(self):
         print "GameInSpace::__init__"
         threading.Thread.__init__(self)
+        self.name = "GameInSpace Thread"
         self.Terminated = False
         self.lock = threading.Lock()
         self.volume = 1
@@ -80,9 +81,12 @@ class GameInSpace(DirectObject, threading.Thread):
         self.picker.addCollider(self.pickerNP, self.pq)
         taskMgr.add(self.pickmouse, "pickmouse")
         self.pointToLookAt = Vec3(0, 0, 0)
+        self.started = False
 
         # ~ self.textObject = OnscreenText(text = '0,0,0',pos =(0,0),fg=(1,1,1,1))
 
+    def isStarted(self):
+        return self.started
 
     def enableKey(self, args):
         self.accept("i", self.keyDown, ['i', 1])
@@ -633,6 +637,9 @@ class GameInSpace(DirectObject, threading.Thread):
         self.stopThread = True
         GameState.getInstance().setState(C_QUIT)
 
+    def stop(self):
+        self.stopThread = True
+
     def onClickInfo(self, args):
         print "info!:!"
 
@@ -828,6 +835,7 @@ class GameInSpace(DirectObject, threading.Thread):
         #~ self.PE.start()
         #~ self.PE.stop()
         #~ self.PE.speed=100
+        self.started=True
         while not self.stopThread and GameState.getInstance().getState() == C_PLAYING:
             #~ print "here"
             GameState.lock.acquire()
@@ -1040,3 +1048,5 @@ class GameInSpace(DirectObject, threading.Thread):
                     ship.lock.release()
 
             GameState.lock.release()
+        self.started=False
+        print "le thread GameInSpace s'est termine proprement"
