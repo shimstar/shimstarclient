@@ -15,10 +15,6 @@ class NetworkMainServer(threading.Thread):
 		threading.Thread.__init__(self)
 		self.port=7777
 		self.ip=shimConfig.getInstance().getIp()
-		#~ self.ip="127.0.0.1"
-		#~ self.ip="82.66.133.219"
-		#~ self.ip="62.147.217.96"
-		#~ self.ip="10.85.80.74"
 		self.stopThread=False
 		self.timeout_in_miliseconds=3000  # 3 seconds
 		self.listOfMessage=[] 
@@ -79,6 +75,44 @@ class NetworkMainServer(threading.Thread):
 					msgTab.append(myIterator.getString())
 					msgTab.append(myIterator.getString())
 					msgTab.append(myIterator.getUint32())
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_CURRENT_CHAR_INFO:
+			msgTab.append(myIterator.getUint32())		 #id ship
+			msgTab.append(myIterator.getUint32())   #idtemplate ship
+			msgTab.append(myIterator.getUint32())   #hull
+			lenInv=int(myIterator.getUint32())      #inventory : length
+			msgTab.append(lenInv)
+			for i in range(lenInv):
+				typeItem=int(myIterator.getUint32())      #inventory ; typeitem
+				templateItem=int(myIterator.getUint32())  #inventory ; templateitem
+				idItem=int(myIterator.getUint32())				 #inventory ; id item
+				msgTab.append(typeItem)
+				msgTab.append(templateItem)
+				msgTab.append(idItem)
+				msgTab.append(myIterator.getUint32())    #quantity
+			lenSlot=int(myIterator.getUint32())        #nb slot
+			msgTab.append(lenSlot)
+			for i in range(lenSlot):
+				msgTab.append(myIterator.getUint32())    #idSlot
+				lenTypes=myIterator.getUint32()          #nb types slot
+				msgTab.append(lenTypes)
+				for t in range(lenTypes):
+					msgTab.append(myIterator.getUint32())  #idtype
+				msgTab.append(myIterator.getUint32())    #type item associe au slot
+				msgTab.append(myIterator.getUint32())    #id template item associe au slot
+				msgTab.append(myIterator.getUint32())    #id item associe au slot
+				
+			nbDialog=int(myIterator.getUint32())       #nb dialogues lus
+			msgTab.append(nbDialog)
+			for i in range (nbDialog):
+				msgTab.append(myIterator.getUint32())    #id dialogue lu
+				
+			nbMission=int(myIterator.getUint32())
+			msgTab.append(nbMission)
+			for m in range(nbMission):
+				msgTab.append(myIterator.getUint32())   #mission id
+				msgTab.append(myIterator.getUint32())   #mission status
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_CREATE_USER:

@@ -85,11 +85,12 @@ class NetworkZoneServer(threading.Thread):
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_INCOMING:
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getString())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())		
+			msgTab.append(myIterator.getUint32()) #idnpc
+			msgTab.append(myIterator.getString()) #name
+			msgTab.append(myIterator.getUint32()) #templatenpc
+			msgTab.append(myIterator.getUint32()) #idship
+			msgTab.append(myIterator.getUint32())	#idtemplateship
+			msgTab.append(myIterator.getUint32())	#hullpoints
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NEW_CHAR_SHOT:
@@ -119,9 +120,42 @@ class NetworkZoneServer(threading.Thread):
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_CURRENT_CHAR_INFO:
-			msgTab.append(myIterator.getUint32())		
-			msgTab.append(myIterator.getUint32())
-			msgTab.append(myIterator.getUint32())
+			msgTab.append(myIterator.getUint32())		 #id ship
+			msgTab.append(myIterator.getUint32())   #idtemplate ship
+			msgTab.append(myIterator.getUint32())   #hull
+			lenInv=int(myIterator.getUint32())      #inventory : length
+			msgTab.append(lenInv)
+			for i in range(lenInv):
+				typeItem=int(myIterator.getUint32())      #inventory ; typeitem
+				templateItem=int(myIterator.getUint32())  #inventory ; templateitem
+				idItem=int(myIterator.getUint32())				 #inventory ; id item
+				msgTab.append(typeItem)
+				msgTab.append(templateItem)
+				msgTab.append(idItem)
+				msgTab.append(myIterator.getUint32())    #quantity
+			lenSlot=int(myIterator.getUint32())        #nb slot
+			msgTab.append(lenSlot)
+			for i in range(lenSlot):
+				msgTab.append(myIterator.getUint32())    #idSlot
+				lenTypes=myIterator.getUint32()          #nb types slot
+				msgTab.append(lenTypes)
+				for t in range(lenTypes):
+					msgTab.append(myIterator.getUint32())  #idtype
+				msgTab.append(myIterator.getUint32())    #type item associe au slot
+				msgTab.append(myIterator.getUint32())    #id template item associe au slot
+				msgTab.append(myIterator.getUint32())    #id item associe au slot
+				
+			temp=message(msgID,msgTab)
+			self.listOfMessage.append(temp)
+		elif msgID==C_NETWORK_CHARACTER_ADD_TO_INVENTORY:
+			msgTab=[]
+			typeItem=int(myIterator.getUint32())      #inventory ; typeitem
+			templateItem=int(myIterator.getUint32())  #inventory ; templateitem
+			idItem=int(myIterator.getUint32())				 #inventory ; id item
+			msgTab.append(typeItem)
+			msgTab.append(templateItem)
+			msgTab.append(idItem)
+			msgTab.append(myIterator.getUint32())    #quantity
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_REMOVE_SHOT:
@@ -199,6 +233,7 @@ class NetworkZoneServer(threading.Thread):
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())
 			msgTab.append(myIterator.getStdfloat())
+			msgTab.append(myIterator.getUint32())
 			temp=message(msgID,msgTab)
 			self.listOfMessage.append(temp)
 		elif msgID==C_NETWORK_NPC_UPDATE_POS:

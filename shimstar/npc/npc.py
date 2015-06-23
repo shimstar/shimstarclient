@@ -5,13 +5,13 @@ from direct.stdpy import threading
 class NPC(threading.Thread):
 	lock=threading.Lock()
 	listOfNpc=[]
-	def __init__(self,id,name,template,idShip,idTemplateShip):
+	def __init__(self,id,name,template,idShip,idTemplateShip,hullPoints):
 		threading.Thread.__init__(self)
 		self.id=id
 		self.template=template
 		self.name=name
 		self.faction=0
-		self.ship=Ship(idShip,idTemplateShip)
+		self.ship=Ship(idShip,idTemplateShip,hullPoints)
 		self.ship.setVisible()
 		self.ship.setOwner(self)
 		NPC.listOfNpc.append(self)

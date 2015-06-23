@@ -1,6 +1,8 @@
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.interval.LerpInterval import LerpPosInterval
+from pandac.PandaModules import CollisionTraverser,CollisionNode
+from pandac.PandaModules import CollisionHandlerQueue,CollisionRay
 
 from shimstar.core.shimconfig import *
 from shimstar.core.functions import *
@@ -11,10 +13,10 @@ from shimstar.game.gamestate import *
 from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
 from shimstar.gui.core.menututo import *
+from shimstar.gui.core.inventory import *
 import PyCEGUI
 from shimstar.gui.shimcegui import * 
-#~ from shimstar.gui.game.rocketshipinfo import *
-#~ from shimstar.gui.game.rockettarget import *
+from shimstar.game.particleEngine import *
 
 
 class GameInSpace(DirectObject,threading.Thread):
@@ -23,6 +25,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		print "GameInSpace::__init__"
 		threading.Thread.__init__(self)
 		self.Terminated = False
+		self.volume=1
 		self.CEGUI=ShimCEGUI.getInstance()
 		self.ceGuiRootWindow=None
 		self.stopThread=False
@@ -31,13 +34,20 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.keysDown={}
 		self.historyKey={}
 		self.expTask=[]
+		self.doubleQTicks=0
+		self.doubleDTicks=0
+		self.doubleZTicks=0
+		self.doubleSTicks=0
 		self.target=None
+		self.customIm={}
+		self.startQtyMineral=0
 		self.mousebtn = [0,0,0]
 		self.enableKey(None)
 		base.camera.setPos(0,-600,50)
 		GameState.getInstance().setState(C_PLAYING)
 		self.ticksRenderUI=0
 		self.updateInput=0
+		self.isShooting=False
 		self.listOfExplosion=[]
 		ship=User.getInstance().getCurrentCharacter().getShip()
 		ship.setInvisible()
@@ -45,8 +55,27 @@ class GameInSpace(DirectObject,threading.Thread):
 		alight.setColor(VBase4(0.7, 0.7, 0.7, 1))
 		alnp = render.attachNewNode(alight)
 		render.setLight(alnp)
-		#~ self.textObject = OnscreenText(text = "this is my ship", pos = (-0.95, 0.95), scale = 0.03,fg=(1,1,1,1))
-		#~ print self.textObject
+		self.shooting=False
+		self.mouseToUpdate=False
+		self.speedup=0
+		self.pointerLookingAt = loader.loadModelCopy(shimConfig.getInstance().getConvRessourceDirectory() +  "models/arrow")
+		self.pointerLookingAt.reparentTo(render)
+		self.pointerLookingAt.hide()
+		self.picker = CollisionTraverser()            #Make a traverser
+		base.cTrav  = CollisionTraverser()
+		self.hdlCollider=CollisionHandlerEvent()
+		self.hdlCollider.addInPattern('into-%in')
+		self.hdlCollider.addOutPattern('outof-%in')
+		self.pickerNode=CollisionNode('mouseRay')
+		self.pickerNP=base.camera.attachNewNode(self.pickerNode)
+		self.pickerNode.setFromCollideMask(GeomNode.getDefaultCollideMask())
+		self.pickerRay=CollisionRay()
+		self.pq     = CollisionHandlerQueue()         #Make a handler
+		self.pickerNode.addSolid(self.pickerRay)
+		self.picker.addCollider(self.pickerNP, self.pq)
+		taskMgr.add(self.pickmouse,"pickmouse")
+		self.pointToLookAt=Vec3(0,0,0)
+		
 		
 	def enableKey(self,args):
 		self.accept("i",self.keyDown,['i',1])
@@ -78,6 +107,8 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("t-up",self.keyDown,['t',0])
 		self.accept("n",self.keyDown,['n',1])
 		self.accept("n-up",self.keyDown,['n',0])
+		self.accept("k",self.keyDown,['k',1])
+		self.accept("k-up",self.keyDown,['k',0])
 		self.accept("f12",self.keyDown,['f12',1])
 		self.accept("f12-up",self.keyDown,['f12',0])
 		self.accept("escape",self.quitGame,)
@@ -88,10 +119,24 @@ class GameInSpace(DirectObject,threading.Thread):
 		self.accept("mouse2-up", self.setMouseBtn, [1, 0])
 		self.accept("mouse3", self.setMouseBtn, [2, 1])
 		self.accept("mouse3-up", self.setMouseBtn, [2, 0])
+		self.accept("wheel_up", self.speedUp,[1])
+		self.accept("wheel_down", self.speedUp,[-1])
+		self.ambientSound = base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() +  self.currentZone.getMusic())
+		self.ambientSound.setLoop(True)
+		self.ambientSound.setVolume(shimConfig.getInstance().getAmbientVolume())
+		self.ambientSound.play()
 		#~ self.setupRocketUI()
 		self.setupUI()
 		self.CEGUI.enable() 
 		
+	def speedUp(self,sp):
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		if ship!=None:
+			ship.lock.acquire()
+			if ship.engine!=None:
+				acc=ship.engine.getAcceleration()
+				self.speedup+=acc*sp
+			ship.lock.release()
 		
 	def quitGame(self):
 		#~ self.stopThread=True
@@ -163,10 +208,49 @@ class GameInSpace(DirectObject,threading.Thread):
 
 		return a2d
 		
-	def renderTarget(self):
-		#~ print self.target
+	def setInvisibleInfoTarget(self):
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").setVisible(False)
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(False)
+		
+	def changeTarget(self,obj):
+		#~ self.setInvisibleInfoTarget()
+		#~ if isinstance(obj,Ship):
+			#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
+		#~ elif isinstance(obj,Station):
+			#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(True)
+		#~ elif isinstance(obj,Asteroid):
+			#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").setVisible(True)
+		if isinstance(obj,Station):
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+		elif isinstance(obj,Ship):
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
+		elif isinstance(obj,Asteroid):
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+			self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
+		
+	def renderTarget(self,dt):
 		if self.target!=None and self.target.getNode().isEmpty()!=True:
-			self.target.getLock().acquire()
+			if isinstance(self.target,Ship):
+				self.target.getLock().acquire()
+			#~ print dt
+			###Ecran Info
+				#~ if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
+					#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
+				if dt>0.05:
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(str(self.calcDistance(self.target.node)))
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:ShimstarImageset image:" + self.target.name )
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:" + self.target.name + " image:full_image")
+			###Reticule de suivi de la cible ou point rouge sur le bord
+			elif isinstance(self.target,Station):
+				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()==True:
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
 			pos=self.map3dToAspect2d(render,self.target.getNode().getPos(render))
 			if pos!=None:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==False:
@@ -176,25 +260,71 @@ class GameInSpace(DirectObject,threading.Thread):
 				z2=pos2.d_y.d_offset
 				x=pos.getX()
 				z=pos.getZ()
-				z=C_USER_HEIGHT/2*z*-1
-				x=(x*C_USER_WIDTH/(C_RATIO*2))
+				height=base.win.getYSize()
+				width=base.win.getXSize()
+				ratio=float(width)/float(height)
+				z=height/2*z*-1
+				x=(x*width/(ratio*2))
 				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
 				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setPosition(vec)
-				prctHull=0
-				if self.target!=None:
-					prctHull,currentHull,maxHull=self.target.getPrcentHull()
-				#~ print "gameinspace::rendertarget " + str(prctHull)
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
+				if isinstance(self.target,Ship):
+					prctHull=0
+					if self.target!=None:
+						prctHull,currentHull,maxHull=self.target.getPrcentHull()
+					#~ print "gameinspace::rendertarget " + str(prctHull)
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
 			else:
 				if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
-			self.target.getLock().release()
+					
+				#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:TempImageset image:full_image")
+			if isinstance(self.target,Ship):		
+				self.target.getLock().release()
 		elif self.target!=None and self.target.getNode().isEmpty()==True:
 				self.target=None
 		else:
 			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget")!=None and self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible()==True:
 				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+			if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()==True:
+				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
 	
+	def pickmouse(self,task):
+		if base.mouseWatcherNode.hasMouse():
+			mpos=base.mouseWatcherNode.getMouse()
+			self.pickerRay.setFromLens(base.camNode, mpos.getX(), mpos.getY())
+
+			self.picker.traverse(render)
+			self.pointToLookAt=None
+			objPicked=None
+			if self.pq.getNumEntries() > 0:
+				self.pq.sortEntries() #this is so we get the closest object
+				for p in self.pq.getEntries():
+					nn=p.getIntoNodePath()
+					tabNode=str(nn).split("/")
+					objFromRender=render.find(tabNode[1]).node()
+					className=objFromRender.getTag("classname")
+					if className=="asteroid":
+						objPicked=Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
+						self.pointToLookAt=objPicked.getPos()
+						break
+					elif className=="ship":
+						objPicked=Ship.getShipById(int(objFromRender.getTag("id")))
+						ship=User.getInstance().getCurrentCharacter().getShip()
+						if objPicked.getId()!=ship.getId():
+							self.pointToLookAt=objPicked.getPointerToGo().getPos()
+							break
+						else:
+							objPicked=None
+					elif className=="station":
+						objPicked=Station.getStationById(int(objFromRender.getTag("id")))
+						break
+			if self.mousebtn[2]==1:
+				if objPicked!=None:
+					Follower.getInstance().setTarget(objPicked.getNode())
+			#~ rocketTarget.getInstance().showWindow(newTarget.getShip())
+					self.target=objPicked
+					self.changeTarget(objPicked)
+		return task.cont
 
 	def showShipName(self):
 		Ship.lock.acquire()
@@ -229,6 +359,13 @@ class GameInSpace(DirectObject,threading.Thread):
 					
 		Ship.lock.release()
 		
+	def clickOnHUD(self,args):
+		if args.button==PyCEGUI.MouseButton.LeftButton:
+			self.shooting=True
+			
+	def releaseClickOnHUD(self,args):
+		if args.button==PyCEGUI.MouseButton.LeftButton:
+			self.shooting=False
 		
 	def setupUI(self):
 		self.CEGUI.SchemeManager.create("TaharezLook.scheme") 
@@ -247,14 +384,57 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Missions").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuMissions')
 		self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Quitter").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuQuitter')
+		self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").subscribeEvent(PyCEGUI.Window.EventMouseButtonDown, self, 'clickOnHUD')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").subscribeEvent(PyCEGUI.Window.EventMouseButtonDown, self, 'clickOnHUD')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").subscribeEvent(PyCEGUI.Window.EventMouseButtonDown, self, 'clickOnHUD')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'releaseClickOnHUD')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/info").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickInfo')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickEnterStation')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickMining')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickStopMining')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickStartMining')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/info").subscribeEvent(PyCEGUI.Window.EventMouseButtonUp, self, 'onClickInfo')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'onCloseClicked')
+		#~ customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset", "background/backmenuconnect.jpg", "images")
+		#~ self.customIm = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesettgt", "/ships/ship1.png", "images")
 		self.OutQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		self.InQuitAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		self.OutQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
 		self.InQuitAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("root/Quit"))
+		
+		self.OutMiningAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InMiningAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutMiningAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining"))
+		self.InMiningAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining"))
+		
+		menuInventory.getInstance('inventaire').setParent(self)
+		menuInventory.getInstance('inventaire').setObj(User.getInstance().getCurrentCharacter().getShip())
+		
+		self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+		self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+		self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+		self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+		
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setFont("Brassiere-s")
 		self.CEGUI.WindowManager.getWindow("HUD/Cockpit").show()
 		self.CEGUI.WindowManager.getWindow("Station").hide()
 		self.CEGUI.System.setGUISheet(self.ceGuiRootWindow)
+		
+		customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesetship1", "/ships/ship1.png" , "images")
+		customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+		customImageset.setAutoScalingEnabled(False)
+		self.customIm['ship1']=customImageset 
+		customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesetspiderdrone", "/ships/spiderdrone.png" , "images")
+		customImageset.setNativeResolution(PyCEGUI.Size(64,64))
+		customImageset.setAutoScalingEnabled(False)
+		self.customIm['spiderdrone']=customImageset 
 		#~ self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
 		#~ self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
 		#~ self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
@@ -264,12 +444,64 @@ class GameInSpace(DirectObject,threading.Thread):
 		#~ menuInventory.getInstance('inventaire').setObj(user.instance.getCurrentCharacter().getShip())
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 		#~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("InfoItem"))
-				
-	#~ def setupRocketUI(self):
-		#~ self.context = shimRocketRocket.getInstance().getContext()
-		#~ self.background = self.context.LoadDocument('windows/backgroundgame.rml')
-		#~ self.background.Show()
-		#~ rocketShipInfo.getInstance().showWindow()
+	
+	def onMenuInventaire(self,args):
+		self.InInventaireAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
+	
+	def onClickMining(self,args):
+		self.InMiningAnimationInstance.start()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").hide()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").show()
+		
+	def mining(self,task):
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		inv=ship.getItemInInventory()
+		qty=0
+		for it in inv:
+			if it.getTypeItem()==C_ITEM_MINERAL:
+				qty=it.getQuantity()
+				break
+		qtyMined=qty-self.startQtyMineral
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Current").setText("Minerai recolte : " + str(qtyMined))
+		return task.cont
+		
+	def onClickStartMining(self,args):
+		nm=netMessage(C_NETWORK_START_MINING)
+		nm.addInt(User.getInstance().getId())
+		nm.addInt(self.target.getId())
+		NetworkZoneServer.getInstance().sendMessage(nm)
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").show()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").hide()
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		inv=ship.getItemInInventory()
+		for it in inv:
+			if it.getTypeItem()==C_ITEM_MINERAL:
+				self.startQtyMineral=it.getQuantity()
+				break
+		taskMgr.add(self.mining,"mining")
+		
+	def onClickStopMining(self,args):
+		nm=netMessage(C_NETWORK_STOP_MINING)
+		nm.addInt(User.getInstance().getId())
+		NetworkZoneServer.getInstance().sendMessage(nm)
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Stop").hide()
+		self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining/Start").show()
+		taskMgr.remove("mining")
+	
+	def	onClickEnterStation(self,windowEventArgs):
+		if isinstance(self.target,Station)==True:
+			GameState.getInstance().setNewZone(self.target.getId())
+			User.getInstance().getCurrentCharacter().changeZone()
+		
+	def onCloseClicked(self,windowEventArgs):
+		if windowEventArgs.window.getName()=="HUD/Cockpit/Mining":
+			self.OutMiningAnimationInstance.start()
+			self.onClickStopMining(None)
+		elif windowEventArgs.window.getName()=="Inventaire":
+			self.OutInventaireAnimationInstance.start()
+		else:
+			windowEventArgs.window.hide()
 		
 	def onMenuQuitter(self,args):
 		self.InQuitAnimationInstance.start()
@@ -286,6 +518,10 @@ class GameInSpace(DirectObject,threading.Thread):
 	def onQuiGameConfirmed(self,args):
 		self.stopThread=True
 		GameState.getInstance().setState(C_QUIT)
+	
+	def onClickInfo(self,args):
+		print "info!:!"
+	
 	
 	def evtMouseRootClicked(self,args):
 		if args.button==PyCEGUI.MouseButton.LeftButton:
@@ -309,13 +545,41 @@ class GameInSpace(DirectObject,threading.Thread):
 				del self.keysDown[key]
 				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
 					self.historyKey[key]=0
+				if key=='q':
+					self.historyKey['qq']=0
+				if key=='d':
+					self.historyKey['dd']=0
+				if key=='s':
+					self.historyKey['ss']=0
+				if key=='z':
+					self.historyKey['zz']=0
+				
 		else:
 			if self.keysDown.has_key(key)==False:
 				if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
 					self.historyKey[key]=1
+				if key=='q':
+					dt=globalClock.getRealTime()-self.doubleQTicks
+					if dt<0.3:
+						self.historyKey['qq']=1
+					self.doubleQTicks=globalClock.getRealTime()
+				if key=='d':
+					dt=globalClock.getRealTime()-self.doubleDTicks
+					if dt<0.3:
+						self.historyKey['dd']=1
+					self.doubleDTicks=globalClock.getRealTime()
+				if key=='s':
+					dt=globalClock.getRealTime()-self.doubleSTicks
+					if dt<0.3:
+						self.historyKey['ss']=1
+					self.doubleSTicks=globalClock.getRealTime()
+				if key=='z':
+					dt=globalClock.getRealTime()-self.doubleZTicks
+					if dt<0.3:
+						self.historyKey['zz']=1
+					self.doubleZTicks=globalClock.getRealTime()
+						
 			self.keysDown[key]=value
-	
-
 		
 	@staticmethod
 	def getInstance():
@@ -323,16 +587,20 @@ class GameInSpace(DirectObject,threading.Thread):
 		
 	def destroy(self):
 		GameInstance=None
+		self.ambientSound.stop()
 		for expl in self.listOfExplosion:
 			expl.delete()
 		self.ignoreKey(None)
 		if self.ceGuiRootWindow!=None:
 			self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
+		taskMgr.remove("pickmouse")
+		taskMgr.remove("mining")
 		
 	def calcDistance(self,targetNode):
 		currentDistance=0
 		ship=User.getInstance().getCurrentCharacter().getShip()
-		if ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
+		#~ print "gameinSpace::calcDistance " + str(ship.getNode()) + "/" + str(targetNode)
+		if ship!=None and ship.getNode().isEmpty()==False and targetNode.isEmpty()==False:
 			posShip=ship.getNode().getPos()
 			posItem=targetNode.getPos()
 			dx=posShip.getX()-posItem.getX()
@@ -365,6 +633,7 @@ class GameInSpace(DirectObject,threading.Thread):
 			Follower.getInstance().setTarget(target.getShip().getNode())
 			#~ rocketTarget.getInstance().showWindow(target.getShip())
 			self.target=target.getShip()
+			self.changeTarget(self.target)
 		
 	def seekNearestTarget(self,typeTarget):
 		#~ if typeTarget=="NPC":
@@ -373,7 +642,7 @@ class GameInSpace(DirectObject,threading.Thread):
 		newTarget=None
 		
 		for n in listOfObj:
-			distance=self.calcDistance(n.getShip())
+			distance=self.calcDistance(n.getShip().node)
 			if distance<distanceMax:
 				distanceMax=distance
 				newTarget=n
@@ -381,6 +650,8 @@ class GameInSpace(DirectObject,threading.Thread):
 			Follower.getInstance().setTarget(newTarget.getShip().getNode())
 			#~ rocketTarget.getInstance().showWindow(newTarget.getShip())
 			self.target=newTarget.getShip()
+			self.changeTarget(self.target)
+		#~ print "gameinspace :: seekNearestTArget " + str(self.target)
 		
 	def runNewExplosion(self):
 		tempMsg=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_EXPLOSION)
@@ -426,11 +697,25 @@ class GameInSpace(DirectObject,threading.Thread):
 			return Task.done
 		
 	def run(self):
+		#~ self.setupUI()
+		#~ self.CEGUI.enable() 
 		mt=MenuTuto.getInstance()
 		mt.setCeguiManager(self.CEGUI)
-		mt.displayTuto(C_MENU_TUTO_SPACE)
+		
+		if shimConfig.getInstance().hasReadTuto(C_MENU_TUTO_SPACE)==False:
+			mt.displayTuto(C_MENU_TUTO_SPACE)
+			shimConfig.getInstance().readTuto(C_MENU_TUTO_SPACE)
+		ship=User.getInstance().getCurrentCharacter().getShip()
+		#~ self.PE = ParticleEngine(ship.node, nb=40, ray=30, move = True)
+		#~ self.PE.start()
+		#~ self.PE.stop()
+		#~ self.PE.speed=100
 		while not self.stopThread and GameState.getInstance().getState()==C_PLAYING:
+			#~ print "here"
+			GameState.lock.acquire()
+			#~ print "here2"
 			ship=User.getInstance().getCurrentCharacter().getShip()
+			ship.lock.acquire()
 			if ship!=None:
 				if ship.node.isEmpty()==False:
 					forwardVec=Quat(ship.node.getQuat()).getForward()
@@ -448,35 +733,111 @@ class GameInSpace(DirectObject,threading.Thread):
 					
 					if globalClock.getRealTime()-self.updateInput>0.1:
 						self.updateInput=globalClock.getRealTime()
+						#~ posMouseX=0
+						#~ posMouseY=0
+						#~ if self.mousebtn[2]==1:
+							#~ self.mouseToUpdate=True
+							#~ if base.mouseWatcherNode.hasMouse():
+								#~ posMouseX=-base.mouseWatcherNode.getMouseX()
+								#~ posMouseY=base.mouseWatcherNode.getMouseY()
+								#~ absx=abs(posMouseX)
+								#~ absy=abs(posMouseY)
+								#~ ## Trying to get smooth mouse to accelerating mouse 
+								#~ if absx>=0:
+									#~ posMouseX*=1
+								#~ elif absx>=0.25 and absx<0.5:
+									#~ posMouseX*=3
+								#~ elif absx>=0.5 and absx<0.75:
+									#~ posMouseX*=3
+								#~ elif absx>=0.75:# and absx<0.9:
+									#~ posMouseX*=9
+								#~ elif absx>=0.9:
+									#~ posMouseX*=4
+								#~ if absy>=0:
+									#~ posMouseY*=1
+								#~ elif absy>0.25 and absy<0.5:
+									#~ posMouseY*=3
+								#~ elif absy>=0.5 and absy<0.75:
+									#~ posMouseY*=3
+								#~ elif absy>=0.75:# and absy<0.9:
+									#~ posMouseY*=9
+								#~ elif absy>=0.9:
+									#~ posMouseY*=27
+						
+							#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
+							#~ nm.addUInt(User.getInstance().getId())
+							#~ nm.addFloat(posMouseX)
+							#~ nm.addFloat(posMouseY)
+							#~ NetworkZoneServer.getInstance().sendMessage(nm)
+							#~ self.speedup=0
+						#~ elif self.mouseToUpdate==True:
+							#~ self.mouseToUpdate=False
+							#~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
+							#~ nm.addUInt(User.getInstance().getId())
+							#~ nm.addFloat(posMouseX)
+							#~ nm.addFloat(posMouseY)
+							#~ NetworkZoneServer.getInstance().sendMessage(nm)
+						if len(self.historyKey)>0:
+							nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+							nm.addInt(User.getInstance().getId())
+							nm.addInt(len(self.historyKey))
+							for key in self.historyKey.keys():
+								if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' :
+									nm.addString(key)
+									nm.addInt(self.historyKey[key])
+							#~ NetworkZoneUdp.getInstance().sendMessage(nm)
+							NetworkZoneServer.getInstance().sendMessage(nm)
+							
+							self.historyKey.clear()
+						if self.speedup!=0:
+							nm=netMessage(C_NETWORK_CHARACTER_SPEED)
+							nm.addUInt(User.getInstance().getId())
+							nm.addInt(self.speedup)
+							self.speedup=0
+							NetworkZoneServer.getInstance().sendMessage(nm)
+						
 						if MenuTuto.getInstance().isActiv()==False:
 							
 							if len(self.historyKey)>0:
 								nm=netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-								nm.addInt(User.getInstance().getId())
-								nm.addInt(len(self.historyKey))
+								nm.addUInt(User.getInstance().getId())
+								nm.addUInt(len(self.historyKey))
 								for key in self.historyKey.keys():
-									if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w':
+									if key=='q' or key=='d' or key=='s' or key=='z' or key=='a' or key=='w' or key=='dd' or key=='qq' or key=='ss' or key=='zz' :
 										nm.addString(key)
-										nm.addInt(self.historyKey[key])
+										nm.addUInt(self.historyKey[key])
 								#~ NetworkZoneUdp.getInstance().sendMessage(nm)
 								NetworkZoneServer.getInstance().sendMessage(nm)
 							
 							self.historyKey.clear()
 							
-							if self.mousebtn[0]==1:
-								print "shot"
+							if self.shooting==True:
+							#~ if self.mousebtn[0]==1:
+								#~ print "shot"
 								if ship.shot()==True:
+									self.pointerLookingAt.setPos(ship.getPos())
+									if self.pointToLookAt!=None:
+										self.pointerLookingAt.lookAt(self.pointToLookAt)
+									else:
+										if base.mouseWatcherNode.hasMouse():
+											x=base.mouseWatcherNode.getMouseX()
+											y=base.mouseWatcherNode.getMouseY()
+											t1=Point3()
+											t2=Point3()
+											ret=base.camLens.extrude(Point2(x,y),t1,t2)
+											t2=t2/100
+											t2relative=render.getRelativePoint(camera,t2)   	
+											self.pointerLookingAt.lookAt(t2relative)
 									nm=netMessage(C_NETWORK_CHAR_SHOT)
-									nm.addInt(ship.getOwner().getUserId())
-									nm.addInt(ship.getOwner().getId())
+									nm.addUInt(ship.getOwner().getUserId())
+									nm.addUInt(ship.getOwner().getId())
 									nm.addFloat(ship.getPos().getX())
 									nm.addFloat(ship.getPos().getY())
 									nm.addFloat(ship.getPos().getZ())
-									nm.addFloat(ship.getQuat().getR())
-									nm.addFloat(ship.getQuat().getI())
-									nm.addFloat(ship.getQuat().getJ())
-									nm.addFloat(ship.getQuat().getK())
-									#~ NetworkZoneUdp.getInstance().sendMessage(nm)
+									nm.addFloat(self.pointerLookingAt.getQuat().getR())
+									nm.addFloat(self.pointerLookingAt.getQuat().getI())
+									nm.addFloat(self.pointerLookingAt.getQuat().getJ())
+									nm.addFloat(self.pointerLookingAt.getQuat().getK())
 									NetworkZoneServer.getInstance().sendMessage(nm)
 							
 							if self.keysDown.has_key('t'):
@@ -488,14 +849,19 @@ class GameInSpace(DirectObject,threading.Thread):
 								if (self.keysDown['v']!=0):
 									self.getNextTarget()
 									self.keysDown['v']=0
-									
+							if self.keysDown.has_key('k'):
+								if (self.keysDown['k']!=0):
+									self.volume-=0.1
+									self.keysDown['k']=0
+									self.ambientSound.setVolume(self.volume)
+									print  "self.volume " + str(self.volume)
 							if self.keysDown.has_key('f12'):
 								del self.keysDown['f12']
 								if ship.isHidden()==True:
 									ship.setVisible()
 								else:
 									ship.setInvisible()
-						
+				ship.lock.release()		
 			User.lock.acquire()
 			for usr in User.listOfUser:
 				User.listOfUser[usr].getCurrentCharacter().run()
@@ -514,15 +880,37 @@ class GameInSpace(DirectObject,threading.Thread):
 			
 			self.runNewExplosion()
 			
-			self.renderTarget()
-			
 			dt=globalClock.getRealTime()-self.ticksRenderUI
-			if dt>0.1:
-				if ship!=None:
-					prctHull,currentHull,maxHull=ship.getPrcentHull()
-				self.showShipName()
-				#~ print str(prctHull ) + "/" + str(currentHull)
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setProgress(prctHull)
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setTooltipText(str(currentHull) + "/" + str(maxHull))
-				self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setText("Coque : " + str(prctHull*100) + "%")
+			self.renderTarget(dt)
 			
+			
+			if dt>0.05:
+				md = base.win.getPointer(0)
+				x = md.getX()
+				z = md.getY()				
+				height=base.win.getYSize()
+				width=base.win.getXSize()
+				x=x-(width/2)
+				z=z-(height/2)
+				
+				vec=PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0,x),PyCEGUI.PyCEGUI.UDim(0,z))
+				pos= self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").setPosition(vec)
+				
+				self.ticksRenderUI=globalClock.getRealTime()
+				if ship!=None:
+					ship.lock.acquire()
+					prctHull,currentHull,maxHull=ship.getPrcentHull()
+					self.showShipName()
+				#~ print str(prctHull ) + "/" + str(currentHull)
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setProgress(prctHull)
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setTooltipText(str(currentHull) + "/" + str(maxHull))
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setText("Coque : " + str(prctHull*100) + "%")
+					prctSpeed,currentPoussee,maxSpeed=ship.getPrcentSpeed()
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setProgress(prctSpeed)
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setTooltipText(str(currentPoussee) + "/" + str(maxSpeed))
+					self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LabelSpeed").setText("Vitesse : " + str(prctSpeed*100) + "%")
+					#~ print prctSpeed
+					#~ self.PE.speed=prctSpeed*100*5
+					ship.lock.release()
+			
+			GameState.lock.release()

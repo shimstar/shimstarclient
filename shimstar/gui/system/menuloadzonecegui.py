@@ -35,7 +35,8 @@ class MenuLoadZoneCegui(ShowBase):
 
 		self.labelPlayers=self.CEGUI.WindowManager.getWindow("LabelStatusPlayer")
 		self.btnPlay=self.CEGUI.WindowManager.getWindow("Jouer")
-		
+		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
+		self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
 		taskMgr.add(self.event,"event reader menu loadzone",-40)  
 		self.stateConnexion=0
 		self.btnPlay.setText("[colour='FFFF0000']Chargement...")
@@ -87,13 +88,13 @@ class MenuLoadZoneCegui(ShowBase):
 			Zone.getInstance().start()
 			GameState.getInstance().setState(C_WAITING_ASKING_INFO_NPC)
 			msg=netMessage(C_NETWORK_ASKING_NPC)
-			msg.addInt(User.getInstance().getId())
+			msg.addUInt(User.getInstance().getId())
 			NetworkZoneServer.getInstance().sendMessage(msg)
 			self.InNPCAnimationInstance.start()
 			self.labelZone.setText("[colour='FF00FF00']OK")
 		elif GameState.getInstance().getState()==C_NETWORK_NPC_SENT:
 			msg=netMessage(C_NETWORK_ASKING_CHAR)
-			msg.addInt(User.getInstance().getId())
+			msg.addUInt(User.getInstance().getId())
 			NetworkZoneServer.getInstance().sendMessage(msg)
 			GameState.getInstance().setState(C_WAITING_ASKING_INFO_CHARACTER)
 			self.InPlayerAnimationInstance.start()
@@ -107,6 +108,7 @@ class MenuLoadZoneCegui(ShowBase):
 
 		
 	def play(self,windowEventArgs):
+		self.buttonSound2.play()
 		GameState.getInstance().setState(C_GOPLAY)
 			
 	def destroy(self):

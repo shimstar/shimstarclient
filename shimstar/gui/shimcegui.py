@@ -153,27 +153,37 @@ class ShimCEGUI(object):
 			
 		return ShimCEGUI.instance
 
-	def __init__(self): 
-			# Panda Setup 
-			ceguiCB = PythonCallbackObject(self.renderCallback) 
-			self.cbNode = CallbackNode("CEGUI") 
-			self.cbNode.setDrawCallback(ceguiCB) 
-			render2d.attachNewNode(self.cbNode) 
-			
-			base.accept('window-event', self.windowEvent) 
+	def __init__(self):
+		# Panda Setup
+		ceguiCB = PythonCallbackObject(self.renderCallback)
+		self.cbNode = CallbackNode("CEGUI")
+		self.cbNode.setDrawCallback(ceguiCB)
+		render2d.attachNewNode(self.cbNode)
 
-			# Initialize the OpenGLRenderer 
-			PyCEGUIOpenGLRenderer.OpenGLRenderer.bootstrapSystem() 
+		# Initialize the OpenGLRenderer
+		PyCEGUIOpenGLRenderer.OpenGLRenderer.bootstrapSystem()
+		self.props = WindowProperties()
+		# For convienence
+		self.System = PyCEGUI.System.getSingleton()
+		self.WindowManager = PyCEGUI.WindowManager.getSingleton() 
+		self.SchemeManager = PyCEGUI.SchemeManager.getSingleton() 
+		self.FontManager = PyCEGUI.FontManager.getSingleton() 
+		self.ImageSetManager = PyCEGUI.ImagesetManager.getSingleton() 
+		self.AnimationManager = PyCEGUI.AnimationManager.getSingleton() 
 
-			self.props = WindowProperties() 
-
-			# For convienence 
-			self.System = PyCEGUI.System.getSingleton() 
-			self.WindowManager = PyCEGUI.WindowManager.getSingleton() 
-			self.SchemeManager = PyCEGUI.SchemeManager.getSingleton() 
-			self.FontManager = PyCEGUI.FontManager.getSingleton() 
-			self.ImageSetManager = PyCEGUI.ImagesetManager.getSingleton() 
-			self.AnimationManager = PyCEGUI.AnimationManager.getSingleton() 
+	def enable(self):
+	  base.accept('window-event', self.windowEvent)
+	  self.enableInputHandling()
+	  _renderingEnabled = True
+	  
+	def disable(self):
+	  base.accept('window-event', base.windowEvent)
+	  self.disableInputHandling()
+	  _renderingEnabled = False
+	  
+	def windowEvent(self, window):
+		self.System.notifyDisplaySizeChanged(PyCEGUI.Size(window.getXSize(), window.getYSize()))
+		base.windowEvent(window)
 
 	def __del__(self): 
 			PyCEGUIOpenGLRenderer.OpenGLRenderer.destroySystem() 
@@ -257,13 +267,13 @@ class ShimCEGUI(object):
 					self.props.setCursorHidden(False) 
 					base.win.requestProperties(self.props) 
 
-	def enable(self): 
-			self.enableInputHandling() 
-			_renderingEnabled = True 
+	#~ def enable(self): 
+			#~ self.enableInputHandling() 
+			#~ _renderingEnabled = True 
 
-	def disable(self): 
-			self.disableInputHandling() 
-			_renderingEnabled = False 
+	#~ def disable(self): 
+			#~ self.disableInputHandling() 
+			#~ _renderingEnabled = False 
 
 	def captureKeys(self, key, keyTuple): 
 			cegui_key = keyTuple[0] 
@@ -309,8 +319,8 @@ class ShimCEGUI(object):
 			else: 
 					self.System.injectMouseButtonDown(self.buttons[button]) 
 
-	def windowEvent(self, window): 
-		 self.System.notifyDisplaySizeChanged(PyCEGUI.Size(window.getXSize(), window.getYSize())) 
+	#~ def windowEvent(self, window): 
+		 #~ self.System.notifyDisplaySizeChanged(PyCEGUI.Size(window.getXSize(), window.getYSize())) 
 
 	def renderCallback(self, data): 
 			if self._renderingEnabled: 

@@ -14,6 +14,7 @@ class Bullet(threading.Thread):
 	def __init__(self,id,pos,quat,egg,range,speed,weapon,sound):
 		threading.Thread.__init__(self)
 		self.id=id
+		self.lock=threading.Lock()
 		self.weapon=weapon
 		self.lastMove=globalClock.getRealTime()
 		self.fileToSound=sound
@@ -34,9 +35,7 @@ class Bullet(threading.Thread):
 			self.lastMove=globalClock.getRealTime()
 			self.speed=speed
 			Bullet.listOfBullet[self.id]=self
-		#~ self.initAudio()
-		self.lock=threading.Lock()
-
+		
 	@staticmethod
 	def getBullet(id):
 		if Bullet.listOfBullet.has_key(id)==True:
@@ -51,6 +50,7 @@ class Bullet(threading.Thread):
 	@staticmethod			
 	def removeBullet(id):
 		if Bullet.listOfBullet.has_key(id)==True:
+			#~ Bullet.listOfBullet[id].lock.acquire()
 			Bullet.listOfBullet[id].destroy()
 			del Bullet.listOfBullet[id]
 			
@@ -87,8 +87,11 @@ class Bullet(threading.Thread):
 		#~ audio3d.detachSound(self.bulletSound)
 		#~ audio3d.detachSound(self.node)
 		#~ self.node.setLightOff()
+		self.lock.acquire()
 		self.node.detachNode()
 		self.node.removeNode()
+		self.lock.release()
+		self.node=None
 		
 	def stateBullet(self):
 		"""
@@ -110,13 +113,15 @@ class Bullet(threading.Thread):
 		return distance
 		
 	def move(self):
+		self.lock.acquire()
 		dt=globalClock.getRealTime()-self.lastMove
 		self.lastMove=globalClock.getRealTime()
 		if dt<1 and dt>-1:
-			self.lock.acquire()
+			
 			if self.node!=None and self.node.isEmpty()!=True:
 				self.node.setPos(self.node,Vec3(0,1*dt*self.speed,0))
-			self.lock.release()
+		self.lock.release()
+		
 	def getName(self):
 		return self.name
 		

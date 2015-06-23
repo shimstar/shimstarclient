@@ -19,8 +19,11 @@ class netMessage:
 	def addFloat(self,param):
 		self.msg.addStdfloat(param)
 	
-	def addInt(self,param):
+	def addUInt(self,param):
 		self.msg.addUint32(param)
+		
+	def addInt(self,param):
+		self.msg.addInt32(param)
 		
 	def addString(self,param):
 		self.msg.addString(param)

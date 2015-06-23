@@ -9,6 +9,7 @@ from shimstar.world.zone.asteroidtemplate import *
 from shimstar.core.shimconfig import *
 
 class Asteroid(DirectObject):
+	listOfAsteroid={}
 	def __init__(self,xmlPart):
 		self.pos=(0,0,0)
 		self.hpr=(0,0,0)
@@ -22,6 +23,13 @@ class Asteroid(DirectObject):
 		self.mass=0
 		self.minerals={'id':0}
 		self.loadXml(xmlPart)
+		Asteroid.listOfAsteroid[self.id]=self
+		
+	@staticmethod
+	def getAsteroidById(id):
+		if Asteroid.listOfAsteroid.has_key(id)!=-1:
+			return Asteroid.listOfAsteroid[id]
+		return None
 		
 	def loadXml(self,xmlPart):
 		self.id=int(xmlPart.getElementsByTagName('id')[0].firstChild.data)
@@ -38,15 +46,17 @@ class Asteroid(DirectObject):
 			self.name,self.egg,self.mass,self.text=templateAst.getInfos()
 			self.node=loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() +self.egg)
 			self.node.reparentTo(render)
-			self.node.setName("asteroid" + str(self.id))
+			self.node.setName("asteroid_" + str(self.id))
 			self.node.setPos(self.pos)
 			self.node.setHpr(self.hpr)
 			self.node.setTag("asteroid",str(self.id))
 			self.name="asteroid" + str(self.id)
 			self.node.setShaderAuto()
-			self.node.setTag("name",self.name)
+			self.node.setTag("name",self.name +" kk ")
+			self.node.setTag("classname","asteroid")
+			self.node.setTag("id",str(self.id))
 			self.minerals=templateAst.getMinerals()
-	
+			
 	def getMinerals(self):
 		return self.minerals
 		
@@ -63,6 +73,9 @@ class Asteroid(DirectObject):
 	def destroy(self):
 		self.node.detachNode()
 		self.node.removeNode()
+		if Asteroid.listOfAsteroid.has_key(self.id)!=-1:
+			Asteroid.listOfAsteroid.remove(self.id)
+			del Asteroid.listOfAsteroid[self.id]
 		
 	def getPos(self):
 		return self.node.getPos()

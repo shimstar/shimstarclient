@@ -12,15 +12,18 @@ class shimConfig:
 		self.user=""
 		self.pwd=""
 		self.ip=""
+		self.ambientVolume=0.3
+		self.soundVolume=0.5
+		self.readTutos=[]
 		self.loadXml()
 		
 	def loadXml(self):
 		if os.path.isfile("config.xml")!=False:
-			print "shimconfig::getcurrentPath " + str(os.getcwd())
+			#~ print "shimconfig::getcurrentPath " + str(os.getcwd())
 			fileHandle = open ( "./config.xml", 'r' )
 			fileHandle.close()
 			dom = xml.dom.minidom.parse("./config.xml")
-			print "shimconfig::loadXml " + str(dom.toxml())
+			#~ print "shimconfig::loadXml " + str(dom.toxml())
 			#~ print "shimconfig::loadXml" + str(inspect.getfile(
 			direc=dom.getElementsByTagName('directory')
 			for d in direc:
@@ -48,7 +51,42 @@ class shimConfig:
 			for p in pwd:
 				if p.firstChild!=None:
 					self.pwd=str(p.firstChild.data)
-				
+					
+			tutos=dom.getElementsByTagName('tuto')
+			for t in tutos:
+				if t.firstChild!=None:
+					self.readTutos.append(int(t.firstChild.data))
+			
+	def readTuto(self,id):
+		self.readTutos.append(id)
+		self.saveConfig()
+	
+	def getReadTutos(self):
+		return self.readTutos
+		
+	def getAmbientVolume(self):
+		if self.ambientVolume>0:
+			return self.ambientVolume
+		return 0
+		
+	def getSoundVolume(self):
+		if self.soundVolume>=0:
+			return self.soundVolume
+		return 0
+		
+	def setSoundVolume(self,v):
+		if v>=0:
+			self.soundVolume=v
+		
+	def setAmbientVolume(self,v):
+		if v>=0:
+			self.ambientVolume=v
+		
+	def hasReadTuto(self,id):
+		if id in self.readTutos:
+			return True
+		return False
+			
 	def getConvRessourceDirectory(self):
 		return self.convDirectory
 				
@@ -86,20 +124,28 @@ class shimConfig:
 		userXml.appendChild(docXml.createTextNode(str(self.user)))
 		ipXml.appendChild(docXml.createTextNode(str(self.ip)))
 		passwordXml.appendChild(docXml.createTextNode(str(self.pwd)))
+		tutosXml=docXml.createElement("tutos")
+		for r in self.readTutos:
+			tutoXml=docXml.createElement("tuto")
+			tutoXml.appendChild(docXml.createTextNode(str(r)))
+			tutosXml.appendChild(tutoXml)
+			
 		confXml.appendChild(passwordXml)
 		confXml.appendChild(userXml)
 		confXml.appendChild(versionXml)
 		confXml.appendChild(dirXml)
 		confXml.appendChild(ipXml)
+		confXml.appendChild(tutosXml)
 		docXml.appendChild(confXml)
-		fileHandle = open ( self.getRessourceDirectory() + "/config.xml", 'w' ) 
+		#~ fileHandle = open ( self.getRessourceDirectory() + "/config.xml", 'w' ) 
+		fileHandle = open ( "./config.xml", 'w' ) 
 		fileHandle.write(docXml.toxml())
 		fileHandle.close()
-		
-		
+	
 	@staticmethod
 	def getInstance():
 		if shimConfig.instance==None:
 			shimConfig.instance=shimConfig()
 		
 		return shimConfig.instance
+		

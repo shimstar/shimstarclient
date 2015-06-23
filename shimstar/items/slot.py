@@ -4,15 +4,17 @@ from shimstar.items.weapon import *
 #~ from shimstar.items.reactor import *
 
 class Slot:
-	def __init__(self,xmlPart,id=0):
+	def __init__(self,xmlPart=None,id=0):
 		self.id=id
 		self.location=0
 		self.types=[]
 		self.nb=0
 		self.item=None
-		self.loadXml(xmlPart)
+		if xmlPart!=None:
+			self.loadXml(xmlPart)
 			
 	def loadXml(self,xmlPart):
+		#~ print "Slot::init " + str(xmlPart.toxml())
 		self.id=int(xmlPart.getElementsByTagName('id')[0].firstChild.data)
 		self.location=int(xmlPart.getElementsByTagName('location')[0].firstChild.data)
 		typeString=str(xmlPart.getElementsByTagName('types')[0].firstChild.data)
@@ -32,7 +34,10 @@ class Slot:
 				#~ self.item=mining(0,itXml)
 			#~ else:
 				#~ self.item=ShimstarItem(itTemplate)
-			
+					
+	def appendTypes(self,t):
+		self.types.append(t)
+					
 	def getTypes(self):
 		return self.types
 		
