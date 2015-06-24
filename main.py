@@ -184,7 +184,8 @@ class ShimStarClient(DirectObject):
                     NetworkZoneServer.getInstance().removeMessage(msg)
         elif state == C_QUIT:
             if ((GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted() == False)or GameInSpace.getInstance() is None) and (Zone.getInstance() is None or (Zone.getInstance() is not None and Zone.getInstance().isStarted())) == False:# and GameState.getInstance().getMainNetworkStarted() == False :
-                sys.exit()
+                # sys.exit()
+                base.userExit()
             else:
                 if GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted():
                     if GameInSpace.getInstance() is not None:
