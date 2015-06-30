@@ -39,6 +39,7 @@ class Zone(threading.Thread):
         self.box = None
         self.music = ""
         self.loadXml()
+        self.started = False
 
     @staticmethod
     def getInstance():
@@ -57,14 +58,21 @@ class Zone(threading.Thread):
         self.stopThread = True
 
     def run(self):
+        self.started = True
         while not self.stopThread:
-            self.runUpdatePosChar()
-            self.runNpc()
-            self.runUpdatePosNPC()
-            self.runNewShot()
-            self.runUpdateShot()
-
+            try:
+                self.runUpdatePosChar()
+                self.runNpc()
+                self.runUpdatePosNPC()
+                self.runNewShot()
+                self.runUpdateShot()
+            except:
+                 print "pb thread zone" + str(sys.exc_info()[0])
+        self.started = False
         print "le thread Zone " + str(self.id) + " s'est termine proprement"
+
+    def isStarted(self):
+        return self.started
 
     def runNpc(self):
         self.runNewIncoming()
@@ -441,7 +449,4 @@ class Zone(threading.Thread):
         NPC.lock.release()
 
         Zone.instance = None
-		
-		
-		
 		
