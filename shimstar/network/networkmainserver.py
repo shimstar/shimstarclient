@@ -20,16 +20,19 @@ class NetworkMainServer(threading.Thread):
         self.stopThread = False
         self.timeout_in_miliseconds = 3000  # 3 seconds
         self.listOfMessage = []
-
+        self.name = "NetWorkMainServer thread"
         self.cManager = QueuedConnectionManager()
         self.cReader = QueuedConnectionReader(self.cManager, 0)
         self.cWriter = ConnectionWriter(self.cManager, 0)
+        self.started = False
 
         self.myConnection = self.cManager.openTCPClientConnection(self.ip, self.port, self.timeout_in_miliseconds)
         if self.myConnection:
             self.cReader.addConnection(self.myConnection)  # receive messages from server
             self.myConnection.setNoDelay(True)
 
+    def isStarted(self):
+        return self.started
 
     @staticmethod
     def getInstance():
@@ -45,13 +48,15 @@ class NetworkMainServer(threading.Thread):
             return True
 
     def run(self):
+        # GameState.getInstance().setMainNetworkStarted(True)
+        self.started=True
         while not self.stopThread:
             # ~ print "pwet"
             while self.cReader.dataAvailable():
                 datagram = NetDatagram()  # catch the incoming data in this instance
                 if self.cReader.getData(datagram):
                     self.myProcessDataFunction(datagram)
-
+        self.started=False
         print "le thread NetworkMainServer s'est termine proprement"
 
     def stop(self):
@@ -132,6 +137,8 @@ class NetworkMainServer(threading.Thread):
             portudp2 = myIterator.getUint32()
             if NetworkZoneServer.getInstance() != None:
                 NetworkZoneServer.getInstance().stop()
+                print "MainNEtwork " + GameState.getInstance()
+                GameState.getInstance().setZoneNetworkStarted(False)
                 # ~ print "############# " + str(ip) + '/' + str(port)
             NetworkZoneServer(ip, port)
             GameState.getInstance().setState(C_RECEIVED_INFOZONE)

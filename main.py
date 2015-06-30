@@ -6,7 +6,7 @@ loadPrcFileData('', 'win-size %i %i' % (1280, 720))
 #~ loadPrcFileData('', 'state-cache 0')
 #~ loadPrcFileData('','fullscreen 1')
 
-import sys, os
+import sys, os, time
 from array import array
 #~ import win32api
 import direct.directbase.DirectStart
@@ -25,6 +25,7 @@ from shimstar.gui.system.menuchooseherocegui import *
 from shimstar.gui.system.menuloadzonecegui import *
 from shimstar.gui.game.menudeath import *
 from shimstar.gui.station.guistation import *
+from shimstar.core.shimconfig import *
 
 
 base.win.setCloseRequestEvent("CLOSEF4")
@@ -32,7 +33,7 @@ base.win.setCloseRequestEvent("CLOSEF4")
 
 class ShimStarClient(DirectObject):
     def __init__(self):
-        GameState().setState(0)
+        GameState().getInstance().setState(0)
         NetworkMainServer.getInstance().start()
         self.menu = None
         base.disableMouse()
@@ -60,6 +61,7 @@ class ShimStarClient(DirectObject):
     def dispatch(self, task):
         #~ def dispatch(self):
         state = GameState.getInstance().getState()
+        # print state
         if state == C_INIT:
             if self.menu is not None:
                 if not isinstance(self.menu, MenuConnectCegui):
@@ -92,7 +94,6 @@ class ShimStarClient(DirectObject):
                     self.menu.destroy()
                     self.menu = None
                     self.menu = MenuLoadZoneCegui()
-
             else:
                 GameState.getInstance().setState(C_GOPLAY)
 
@@ -124,6 +125,7 @@ class ShimStarClient(DirectObject):
             msg.addUInt(User.getInstance().getCurrentCharacter().getId())
             #~ msg.addUInt(NetworkZoneUdp.getInstance().port)
             NetworkZoneServer.getInstance().sendMessage(msg)
+
             NetworkZoneServer.getInstance().start()
             #~ NetworkZoneUdp.getInstance().start()
             idZone = User.getInstance().getCurrentCharacter().getIdZone()
@@ -181,7 +183,23 @@ class ShimStarClient(DirectObject):
                     GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
                     NetworkZoneServer.getInstance().removeMessage(msg)
         elif state == C_QUIT:
-            sys.exit()
+            if ((GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted() == False)or GameInSpace.getInstance() is None) and (Zone.getInstance() is None or (Zone.getInstance() is not None and Zone.getInstance().isStarted())) == False:# and GameState.getInstance().getMainNetworkStarted() == False :
+                sys.exit()
+            else:
+                if GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted():
+                    if GameInSpace.getInstance() is not None:
+                        GameInSpace.getInstance().stop()
+
+                if Zone.getInstance() is not None and Zone.getInstance().isStarted():
+                    if Zone.getInstance() is not None:
+                        Zone.getInstance().stop()
+                    if NetworkZoneServer.getInstance() is not None:
+                        NetworkZoneServer.getInstance().stop()
+                if NetworkMainServer.getInstance().isStarted():
+                    if NetworkMainServer.getInstance() is not None:
+                        NetworkMainServer.getInstance().stop()
+                time.sleep(1)
+
         elif state == C_DEATH:
             Zone.getInstance().stop()
             if self.menu is not None:
