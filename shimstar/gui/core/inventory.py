@@ -48,8 +48,8 @@ class menuInventory(DirectObject):
         self.parent = parent
 
     def closeClicked(self, args):
-        self.emptyLootsWindow()
-        self.wndCegui.WindowManager.getWindow("HUD/Cockpit/Loots").hide()
+        self.emptyInvWindow()
+        self.wndCegui.WindowManager.getWindow("Inventaire").hide()
 
     def setItems(self):
         self.emptyInvWindow()

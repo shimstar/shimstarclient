@@ -249,9 +249,15 @@ class GameInSpace(DirectObject, threading.Thread):
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
+        elif isinstance(obj,Junk):
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
 
     def renderTarget(self, dt):
         if self.target != None and self.target.getNode().isEmpty() != True:
+            # print "renderTarget :: " + str(self.target)
+
             if isinstance(self.target, Ship):
                 self.target.getLock().acquire()
                 #~ print dt
@@ -296,8 +302,8 @@ class GameInSpace(DirectObject, threading.Thread):
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
 
                 #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:TempImageset image:full_image")
-            if isinstance(self.target, Ship):
-                self.target.getLock().release()
+            # if isinstance(self.target, Ship):
+            #     self.target.getLock().release()
         elif self.target != None and self.target.getNode().isEmpty() == True:
             self.target = None
         else:
@@ -328,25 +334,35 @@ class GameInSpace(DirectObject, threading.Thread):
                         print "gameinspace::pickMouse : render seems to be empty"
                     if objFromRender != None:
                         className = objFromRender.getTag("classname")
+                        # print "Click on className " + str(className)
                         if className == "asteroid":
                             objPicked = Asteroid.getAsteroidById(int(objFromRender.getTag("id")))
                             self.pointToLookAt = objPicked.getPos()
                             break
                         elif className == "ship":
+                            print "ship pi cked"
                             objPicked = Ship.getShipById(int(objFromRender.getTag("id")))
                             ship = User.getInstance().getCurrentCharacter().getShip()
-                            if ship != None and objPicked != None and objPicked.getId() != ship.getId():
+                            if ship is not None and objPicked is not None and objPicked.getId() != ship.getId():
                                 self.pointToLookAt = objPicked.getPointerToGo().getPos()
+                                print objPicked
                                 break
                             else:
                                 objPicked = None
+
                         elif className == "station":
                             objPicked = Station.getStationById(int(objFromRender.getTag("id")))
                             break
+                        elif className == "junk":
+                            objPicked = Junk.getJunkById(int(objFromRender.getTag("id")))
+
+                            break
+
             if self.mousebtn[2] == 1:
                 if objPicked != None:
                     Follower.getInstance().setTarget(objPicked.getNode())
                     #~ rocketTarget.getInstance().showWindow(newTarget.getShip())
+                    print "picked obj" + str(objPicked)
                     self.target = objPicked
                     self.changeTarget(objPicked)
         return task.cont
@@ -642,6 +658,9 @@ class GameInSpace(DirectObject, threading.Thread):
 
     def onClickInfo(self, args):
         print "info!:!"
+        if isinstance(self.target,Junk):
+            print "info junk"
+
 
 
     def evtMouseRootClicked(self, args):
