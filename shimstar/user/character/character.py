@@ -46,7 +46,7 @@ class Character:
 			self.ship=None
 				
 	def setShip(self,idShip,idTemplate,hullpoints,visible=True):
-		#~ print "character :: setsHip " + str(hullpoints)
+		print "character :: setsHip " + str(hullpoints) + "/" + str(idShip)
 		self.ship=Ship(idShip,idTemplate,hullpoints,visible)
 		self.ship.setOwner(self)
 		print "character:setShip" + str(self.ship)

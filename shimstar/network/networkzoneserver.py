@@ -18,7 +18,7 @@ class NetworkZoneServer(threading.Thread):
         NetworkZoneServer.instance = self
         self.port = port
         self.ip = ip
-        self.name = "NetworkServer"
+        self.name = "NetworkZoneServer"
         self.stopThread = False
         self.timeout_in_miliseconds = 3000  # 3 seconds
         self.listOfMessage = []
@@ -60,7 +60,7 @@ class NetworkZoneServer(threading.Thread):
 
 
         # GameState.getInstance().setZoneNetworkStarted(False)
-        print "le thread NetworkMainServer s'est termine proprement"
+        print "le thread NetworkZoneServer s'est termine proprement"
 
 
     def stop(self):
@@ -72,7 +72,9 @@ class NetworkZoneServer(threading.Thread):
         connexion = netDatagram.getConnection()
         msgID = myIterator.getUint32()
         msgTab = []
-        # ~ print msgID
+        # print "gamestatene =" +str(GameState.getInstance().getState()) + str(GameState.getInstance())
+        # if msgID not in (110,112):
+        # print msgID
         if msgID == C_NETWORK_CONNECT:
             state = myIterator.getUint32()
             msgTab.append(state)
@@ -132,6 +134,7 @@ class NetworkZoneServer(threading.Thread):
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CURRENT_CHAR_INFO:
+            print " receiving C_NETWORK_CURRENT_CHAR_INFO " + str(C_NETWORK_CURRENT_CHAR_INFO)
             msgTab.append(myIterator.getUint32())  #id ship
             msgTab.append(myIterator.getUint32())  #idtemplate ship
             msgTab.append(myIterator.getUint32())  #hull
@@ -187,10 +190,29 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_ADD_JUNK:
+            msgTab = []
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            nbItem = myIterator.getUint32()
+            msgTab.append(nbItem)
+            for i in range(nbItem):
+                msgTab.append(myIterator.getUint32())
+                msgTab.append(myIterator.getUint32())
+                msgTab.append(myIterator.getUint32())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NPC_SENT:
-            GameState.getInstance().setState(C_NETWORK_NPC_SENT)
+            if GameState.getInstance().getState()<=C_NPC_RECEIVED:
+                GameState.getInstance().setState(C_NPC_RECEIVED)
+        elif msgID == C_NETWORK_JUNK_SENT:
+            if GameState.getInstance().getState()<=C_JUNK_RECEIVED:
+                GameState.getInstance().setState(C_JUNK_RECEIVED)
         elif msgID == C_NETWORK_CHAR_SENT:
-            GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
+            if GameState.getInstance().getState()<=C_WAITING_OTHER_CHAR:
+                GameState.getInstance().setState(C_OTHER_CHAR_RECEIVED)
         elif msgID == C_NETWORK_TAKE_DAMAGE_NPC:
             msgTab = []
             msgTab.append(myIterator.getUint32())

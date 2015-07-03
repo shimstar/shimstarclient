@@ -61,7 +61,7 @@ class ShimStarClient(DirectObject):
     def dispatch(self, task):
         #~ def dispatch(self):
         state = GameState.getInstance().getState()
-        # print state
+        # print "main::dispatch state " + str(state) + "/" + str(GameState.getInstance())
         if state == C_INIT:
             if self.menu is not None:
                 if not isinstance(self.menu, MenuConnectCegui):
@@ -132,9 +132,11 @@ class ShimStarClient(DirectObject):
             name, typeZone = Zone.getTinyInfosFromZone(idZone)
             GameState.getInstance().setState(C_WAITING_LOADINGZONE)
         elif state == C_WAITING_ASKING_INFO_CHARACTER:
+            # print "main :: dipatch wiating asking info"
             tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CURRENT_CHAR_INFO)
             if len(tempMsg) > 0:
                 for msg in tempMsg:
+                    print "main::dipatcj " + "received char info"
                     netMsg = msg.getMessage()
                     ch = User.getInstance().getCurrentCharacter()
                     ch.setShip(netMsg[0], netMsg[1], netMsg[2], False)
@@ -199,7 +201,7 @@ class ShimStarClient(DirectObject):
                 if NetworkMainServer.getInstance().isStarted():
                     if NetworkMainServer.getInstance() is not None:
                         NetworkMainServer.getInstance().stop()
-                time.sleep(1)
+                time.sleep(5)
 
         elif state == C_DEATH:
             Zone.getInstance().stop()
