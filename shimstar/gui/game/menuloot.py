@@ -1,6 +1,7 @@
 from shimstar.items.junk import *
 from shimstar.gui.shimcegui import *
 from shimstar.core.constantes import *
+from shimstar.gui.core.iteminfo import *
 
 class MenuLoot:
     instance = None
@@ -107,3 +108,14 @@ class MenuLoot:
                 label.setText(str(self.items[it].getQuantity()))
                 panel.addChildWindow(label)
             numItemI += 1
+
+    def showInfo(self, args):
+        if args.window.getChildCount() > 0:
+            img = args.window.getChildAtIdx(0)
+            item = img.getUserData()
+            menuItemInfo.getInstance().setObj(item)
+
+            self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(args.window.getPosition())
+
+    def hideInfo(self, args):
+        menuItemInfo.getInstance().hide()
