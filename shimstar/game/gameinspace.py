@@ -18,6 +18,7 @@ from shimstar.gui.core.menututo import *
 import PyCEGUI
 from shimstar.gui.shimcegui import *
 # from shimstar.game.particleEngine import *
+from shimstar.gui.game.menuloot import *
 
 
 class GameInSpace(DirectObject, threading.Thread):
@@ -340,7 +341,7 @@ class GameInSpace(DirectObject, threading.Thread):
                             self.pointToLookAt = objPicked.getPos()
                             break
                         elif className == "ship":
-                            print "ship pi cked"
+                            # print "ship pi cked"
                             objPicked = Ship.getShipById(int(objFromRender.getTag("id")))
                             ship = User.getInstance().getCurrentCharacter().getShip()
                             if ship is not None and objPicked is not None and objPicked.getId() != ship.getId():
@@ -362,7 +363,7 @@ class GameInSpace(DirectObject, threading.Thread):
                 if objPicked != None:
                     Follower.getInstance().setTarget(objPicked.getNode())
                     #~ rocketTarget.getInstance().showWindow(newTarget.getShip())
-                    print "picked obj" + str(objPicked)
+                    # print "picked obj" + str(objPicked)
                     self.target = objPicked
                     self.changeTarget(objPicked)
         return task.cont
@@ -657,10 +658,15 @@ class GameInSpace(DirectObject, threading.Thread):
         self.stopThread = True
 
     def onClickInfo(self, args):
-        print "info!:!"
         if isinstance(self.target,Junk):
-            print "info junk"
-
+            ml=MenuLoot.getInstance()
+            if ml.getParent() is None:
+                ml.setParent(self)
+            if ml.getJunk() != self.target :
+                ml.setJunk(self.target)
+                ml.show()
+            else:
+                ml.refresh()
 
 
     def evtMouseRootClicked(self, args):
