@@ -65,7 +65,7 @@ class menuItemInfo(DirectObject):
 
 	def showContainer(self):
 		self.CEGUI.WindowManager.getWindow("InfoItem/Type").setText("Type : Container" )
-		self.CEGUI.WindowManager.getWindow("InfoItem/Encombrement").setText("Espace supplémentaire : " + str(self.obj.getSpace() ))
+		self.CEGUI.WindowManager.getWindow("InfoItem/Encombrement").setText("Espace supplï¿½mentaire : " + str(self.obj.getSpace() ))
 
 	def showEngine(self):
 		self.CEGUI.WindowManager.getWindow("InfoItem/Type").setText("Type : Moteur" )

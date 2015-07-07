@@ -147,6 +147,7 @@ class MenuLoot(DirectObject):
             img.setUserData(self.items[it])
             wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters, self, 'showInfo')
             wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves, self, 'hideInfo')
+            wnd.subscribeEvent(PyCEGUI.Window.EventMouseDoubleClick,self,'dblClick')
             wnd.addChildWindow(img)
             if self.items[it].getTypeItem() == C_ITEM_MINERAL:
                 label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
@@ -158,13 +159,33 @@ class MenuLoot(DirectObject):
                 panel.addChildWindow(label)
             numItemI += 1
 
+    def dblClick(self,args):
+       if args.window.getChildCount() > 0:
+            img = args.window.getChildAtIdx(0)
+            item = img.getUserData()
+            if item is not None:
+                nm = netMessage(C_NETWORK_CHARACTER_ADD_TO_INVENTORY_FROM_JUNK)
+                nm.addInt(User.getInstance().getId())
+                nm.addInt(self.junk.getId())
+                nm.addInt(item.getId())
+                NetworkZoneServer.getInstance().sendMessage(nm)
+
     def showInfo(self, args):
         if args.window.getChildCount() > 0:
             img = args.window.getChildAtIdx(0)
             item = img.getUserData()
             menuItemInfo.getInstance().setObj(item)
+            posX = 0
+            if args.window.getPosition().d_x.d_offset < 300:
+                posX = args.window.getPosition().d_x.d_offset + 100
+            else:
+                posX = args.window.getPosition().d_x.d_offset - 100
+            posY = args.window.getPosition().d_y.d_offset
 
-            self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(args.window.getPosition())
+            offsetX = posX / base.win.getXSize()
+            offsetY = posY / base.win.getYSize()
+
+            self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(PyCEGUI.UVector2(PyCEGUI.UDim(offsetX,0), PyCEGUI.UDim(offsetY,0)))
 
     def hideInfo(self, args):
         menuItemInfo.getInstance().hide()

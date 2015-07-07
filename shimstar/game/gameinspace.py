@@ -872,50 +872,6 @@ class GameInSpace(DirectObject, threading.Thread):
 
                         if globalClock.getRealTime() - self.updateInput > 0.1:
                             self.updateInput = globalClock.getRealTime()
-                            #~ posMouseX=0
-                            #~ posMouseY=0
-                            #~ if self.mousebtn[2]==1:
-                            #~ self.mouseToUpdate=True
-                            #~ if base.mouseWatcherNode.hasMouse():
-                            #~ posMouseX=-base.mouseWatcherNode.getMouseX()
-                            #~ posMouseY=base.mouseWatcherNode.getMouseY()
-                            #~ absx=abs(posMouseX)
-                            #~ absy=abs(posMouseY)
-                            #~ ## Trying to get smooth mouse to accelerating mouse
-                            #~ if absx>=0:
-                            #~ posMouseX*=1
-                            #~ elif absx>=0.25 and absx<0.5:
-                            #~ posMouseX*=3
-                            #~ elif absx>=0.5 and absx<0.75:
-                            #~ posMouseX*=3
-                            #~ elif absx>=0.75:# and absx<0.9:
-                            #~ posMouseX*=9
-                            #~ elif absx>=0.9:
-                            #~ posMouseX*=4
-                            #~ if absy>=0:
-                            #~ posMouseY*=1
-                            #~ elif absy>0.25 and absy<0.5:
-                            #~ posMouseY*=3
-                            #~ elif absy>=0.5 and absy<0.75:
-                            #~ posMouseY*=3
-                            #~ elif absy>=0.75:# and absy<0.9:
-                            #~ posMouseY*=9
-                            #~ elif absy>=0.9:
-                            #~ posMouseY*=27
-
-                            #~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
-                            #~ nm.addUInt(User.getInstance().getId())
-                            #~ nm.addFloat(posMouseX)
-                            #~ nm.addFloat(posMouseY)
-                            #~ NetworkZoneServer.getInstance().sendMessage(nm)
-                            #~ self.speedup=0
-                            #~ elif self.mouseToUpdate==True:
-                            #~ self.mouseToUpdate=False
-                            #~ nm=netMessage(C_NETWORK_CHARACTER_MOUSE)
-                            #~ nm.addUInt(User.getInstance().getId())
-                            #~ nm.addFloat(posMouseX)
-                            #~ nm.addFloat(posMouseY)
-                            #~ NetworkZoneServer.getInstance().sendMessage(nm)
 
                             if len(self.historyKey) > 0:
                                 nm = netMessage(C_NETWORK_CHARACTER_KEYBOARD)
@@ -925,7 +881,6 @@ class GameInSpace(DirectObject, threading.Thread):
                                     if key == 'q' or key == 'd' or key == 's' or key == 'z' or key == 'a' or key == 'w' or key == 'dd' or key == 'qq' or key == 'ss' or key == 'zz' or key == "lcontrol":
                                         nm.addString(key)
                                         nm.addInt(self.historyKey[key])
-                                #~ NetworkZoneUdp.getInstance().sendMessage(nm)
                                 NetworkZoneServer.getInstance().sendMessage(nm)
 
                                 self.historyKey.clear()
@@ -946,7 +901,6 @@ class GameInSpace(DirectObject, threading.Thread):
                                         if key == 'q' or key == 'd' or key == 's' or key == 'z' or key == 'a' or key == 'w' or key == 'dd' or key == 'qq' or key == 'ss' or key == 'zz' or key == "lcontrol":
                                             nm.addString(key)
                                             nm.addUInt(self.historyKey[key])
-                                    #~ NetworkZoneUdp.getInstance().sendMessage(nm)
                                     NetworkZoneServer.getInstance().sendMessage(nm)
 
                                 self.historyKey.clear()
