@@ -168,7 +168,10 @@ class NetworkMainServer(threading.Thread):
         return msgToReturn
 
     def removeMessage(self, msg):
-        self.listOfMessage.remove(msg)
+        try:
+            self.listOfMessage.remove(msg)
+        except:
+            print "networkMainServer::removeMessage : Warning : message not here"
 
     def sendMessage(self, msg):
         # ~ print msg.getMsg()

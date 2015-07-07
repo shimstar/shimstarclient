@@ -28,6 +28,13 @@ class Junk:
     def addItem(self,item):
         self.items[item.getId()]=item
 
+    def removeItemById(self,id):
+        itemToRemove = None
+        if id in self.items:
+            itemToRemove=self.items[id]
+            del self.items[id]
+        return itemToRemove
+
     def removeItem(self,item):
         if item.getId() in self.items:
             del self.items[item.getId()]

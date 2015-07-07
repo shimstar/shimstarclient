@@ -204,6 +204,13 @@ class NetworkZoneServer(threading.Thread):
                 msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_CHARACTER_ADD_TO_INVENTORY_FROM_JUNK:
+            msgTab = []
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NPC_SENT:
             if GameState.getInstance().getState()<=C_NPC_RECEIVED:
                 GameState.getInstance().setState(C_NPC_RECEIVED)

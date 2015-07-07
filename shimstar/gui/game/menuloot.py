@@ -2,14 +2,37 @@ from shimstar.items.junk import *
 from shimstar.gui.shimcegui import *
 from shimstar.core.constantes import *
 from shimstar.gui.core.iteminfo import *
+from shimstar.network.netmessage import *
+from shimstar.network.networkzoneserver import *
+import direct.directbase.DirectStart
+from direct.showbase.DirectObject import DirectObject
+from direct.task import Task
 
-class MenuLoot:
+class MenuLoot(DirectObject):
     instance = None
     def __init__(self):
         self.junk = None
         self.CEGUI = ShimCEGUI.getInstance()
         self.items = []
         self.parent = None
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
+                                                                              self, 'onCloseClicked')
+        self.OutLootAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+        self.InLootAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+        self.OutLootAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots"))
+        self.InLootAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots"))
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots/TakeButton").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
+                                                                           'onTakeClicked')
+
+
+    def onTakeClicked(self,wnd):
+        for idIt in self.items:
+            nm = netMessage(C_NETWORK_CHARACTER_ADD_TO_INVENTORY_FROM_JUNK)
+            nm.addInt(User.getInstance().getId())
+            nm.addInt(self.junk.getId())
+            nm.addInt(idIt)
+            NetworkZoneServer.getInstance().sendMessage(nm)
+
 
     def setParent(self,parent):
         self.parent = parent
@@ -23,6 +46,7 @@ class MenuLoot:
         self.setItems()
 
     def refresh(self):
+        print "MenuLoot :: refresh " + str(self.junk.getItems())
         self.items = self.junk.getItems()
         self.setItems()
         self.show()
@@ -31,8 +55,28 @@ class MenuLoot:
         return self.junk
 
     def show(self):
-        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots").show()
+        # self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots").show()
+        self.InLootAnimationInstance.start()
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots").moveToFront()
+        taskMgr.add(self.event,"event loot",-40)
+
+    def event(self,task):
+        temp=NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_ADD_TO_INVENTORY_FROM_JUNK)
+        if(len(temp)>0):
+            msg=temp[0]
+            netMsg=msg.getMessage()
+            usrID=int(netMsg[0])
+            junkId=int(netMsg[1])
+            itId=int(netMsg[2])
+            itemToTransfert = self.junk.removeItemById(itId)
+            if itemToTransfert is not None :
+                char = User.getInstance().getCurrentCharacter()
+                if char.getShip() is not None:
+                    char.getShip().addItemInInventory(itemToTransfert)
+                self.refresh()
+            NetworkZoneServer.getInstance().removeMessage(msg)
+
+        return task.cont
 
     @staticmethod
     def getInstance():
@@ -50,9 +94,14 @@ class MenuLoot:
                 self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
                 wnd.destroy()
 
-    def closeClicked(self, args):
+    def onCloseClicked(self, args):
         self.emptyLootsWindow()
-        self.wndCegui.WindowManager.getWindow("HUD/Cockpit/Loots").hide()
+        # self.wndCegui.WindowManager.getWindow("HUD/Cockpit/Loots").hide()
+        self.OutLootAnimationInstance.start()
+        taskMgr.remove("event loot")
+
+    def destroy(self):
+        taskMgr.remove("event loot")
 
     def setItems(self):
         self.emptyLootsWindow()
@@ -76,7 +125,7 @@ class MenuLoot:
                 # ~ print self.items
         numItemI = 0
         numItemJ = 0
-        print self.items
+        # print self.items
         for it in self.items:
             #~ print it
             #~ loc=it.getLocation()
