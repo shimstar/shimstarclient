@@ -12,5 +12,8 @@ I use this following library:
 Shimstar is an indie mmo space game. Purpose is to create X-Wing like game, I like dog fighting like this.
 I hope to have missions, sand boxing, and so on....
 
+# Chat 
+
+Join us on https://shimstar.slack.com 
 
 [![Stories in Ready](https://badge.waffle.io/shimstar/shimstarclient.png?label=ready&title=Ready)](http://waffle.io/shimstar/shimstarclient)
