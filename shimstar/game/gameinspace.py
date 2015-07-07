@@ -431,8 +431,7 @@ class GameInSpace(DirectObject, threading.Thread):
                                                                                   'onCancelQuitGame')
         self.CEGUI.WindowManager.getWindow("root/Quit/Quit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                             'onQuiGameConfirmed')
-        #~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Inventaire").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuInventaire')
-        #~ self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Missions").subscribeEvent(PyCEGUI.MenuItem.EventClicked, self, 'onMenuMissions')
+
         self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Quitter").subscribeEvent(
             PyCEGUI.MenuItem.EventClicked, self, 'onMenuQuitter')
         self.CEGUI.WindowManager.getWindow("HUD/Menubar/Menu/AutoPopup/Options").subscribeEvent(
@@ -471,8 +470,7 @@ class GameInSpace(DirectObject, threading.Thread):
                                                                               self, 'onCloseClicked')
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                                 self, 'onCloseClicked')
-        self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
-                                                                        'onCloseClicked')
+
         self.CEGUI.WindowManager.getWindow("Options/Video").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                            'onOptionsVideoClicked')
         self.CEGUI.WindowManager.getWindow("Options/OptionVideo/Choose").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
@@ -494,10 +492,7 @@ class GameInSpace(DirectObject, threading.Thread):
         # menuInventory.getInstance('inventaire').setParent(self)
         # menuInventory.getInstance('inventaire').setObj(User.getInstance().getCurrentCharacter().getShip())
 
-        self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-        self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-        self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
-        self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+
 
         self.OutOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
@@ -525,19 +520,11 @@ class GameInSpace(DirectObject, threading.Thread):
         customImageset.setAutoScalingEnabled(False)
         self.customIm['spiderdrone'] = customImageset
 
-    #~ self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-    #~ self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-    #~ self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
-    #~ self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
-    #~ self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,self,'inventoryCloseClicked')
-    #~ menuInventory.getInstance('inventaire').setParent(self)
-    #~ menuInventory.getInstance('inventaire').setObj(user.instance.getCurrentCharacter().getShip())
-    #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
-    #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit").addChildWindow(self.CEGUI.WindowManager.getWindow("InfoItem"))
-
     def onMenuInventaire(self, args):
-        self.InInventaireAnimationInstance.start()
-        self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
+        invInstance = menuInventory.getInstance('soute')
+        if invInstance.getObj() is None:
+            invInstance.setObj(User.getInstance().getCurrentCharacter().getShip())
+        invInstance.show()
 
     def onClickMining(self, args):
         self.InMiningAnimationInstance.start()
@@ -589,8 +576,6 @@ class GameInSpace(DirectObject, threading.Thread):
         if windowEventArgs.window.getName() == "HUD/Cockpit/Mining":
             self.OutMiningAnimationInstance.start()
             self.onClickStopMining(None)
-        elif windowEventArgs.window.getName() == "Inventaire":
-            self.OutInventaireAnimationInstance.start()
         elif windowEventArgs.window.getName() == "Options/OptionVideo":
             self.OutOptionsVideoAnimationInstance.start()
         else:

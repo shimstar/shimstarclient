@@ -7,7 +7,7 @@ from direct.showbase.DirectObject import DirectObject
 from pandac.PandaModules import *
 from shimstar.gui.shimcegui import *
 from shimstar.user.user import *
-# from shimstar.gui.core.iteminfo import *
+from shimstar.gui.core.iteminfo import *
 
 class menuInventory(DirectObject):
     instances = {'soute': None, 'invstation': None}
@@ -19,6 +19,15 @@ class menuInventory(DirectObject):
         self.items = []
         self.parent = None
         self.CEGUI.WindowManager.getWindow("InfoItem").setMouseInputPropagationEnabled(True)
+        self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+        self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+        self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+        self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+        self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
+                                                                        'onCloseClicked')
+
+    def onCloseClicked(self,wnd):
+        self.OutInventaireAnimationInstance.start()
 
     @staticmethod
     def getInstance(typeInv):
@@ -26,9 +35,18 @@ class menuInventory(DirectObject):
             menuInventory.instances[typeInv] = menuInventory(typeInv)
         return menuInventory.instances[typeInv]
 
+    def show(self):
+        self.refresh()
+        self.InInventaireAnimationInstance.start()
+        self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
+
+    def getObj(self):
+        return self.obj
+
     def setObj(self, obj):
         self.obj = obj
         self.items = self.obj.getItemInInventory()
+        print "inventory :: setObj " + str(self.items)
         self.setItems()
 
     def refresh(self):
