@@ -48,9 +48,9 @@ class GuiStation(DirectObject):
             shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
         self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
 
-    def destroy(self):
-        taskMgr.remove("event reader")
-        self.ambientSound.stop()
+    # def destroy(self):
+    #     taskMgr.remove("event reader")
+    #     self.ambientSound.stop()
 
     def event(self, arg):
         if self.usrLoaded == False:
@@ -285,6 +285,7 @@ class GuiStation(DirectObject):
         self.ignore("escape")
         taskMgr.remove("event reader")
         self.CEGUI.WindowManager.destroyWindow(self.root)
+        self.ambientSound.stop()
 
     def modifyItem(self, winArgs):
         self.OutAddSuppressAnimationInstance.start()

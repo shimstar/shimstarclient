@@ -9,6 +9,7 @@ from shimstar.user.user import *
 from shimstar.npc.npc import *
 from shimstar.core.constantes import *
 from shimstar.gui.core.inventory import *
+from shimstar.items.junk import *
 
 C_TYPEZONE_SPACE = 1
 C_TYPEZONE_STATION = 2
@@ -61,13 +62,19 @@ class Zone(threading.Thread):
         self.started = True
         while not self.stopThread:
             try:
+                self.runNewIncoming()
                 self.runUpdatePosChar()
+                self.runUpdateChar()
                 self.runNpc()
-                self.runUpdatePosNPC()
                 self.runNewShot()
                 self.runUpdateShot()
+                self.runDamageChar()
+                self.runRemoveChar()
+                self.runCharOutgoing()
+                self.runJunk()
             except:
-                 print "pb thread zone" + str(sys.exc_info()[0])
+                print "pb thread zone" + str(sys.exc_info()[0])
+                pass
         self.started = False
         print "le thread Zone " + str(self.id) + " s'est termine proprement"
 
@@ -75,15 +82,32 @@ class Zone(threading.Thread):
         return self.started
 
     def runNpc(self):
-        self.runNewIncoming()
         self.runNewNpc()
         self.runUpdatePosNPC()
-        self.runUpdateChar()
         self.runDamageNpc()
         self.runRemoveNpc()
-        self.runDamageChar()
-        self.runRemoveChar()
-        self.runCharOutgoing()
+
+
+    def runJunk(self):
+        tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_ADD_JUNK)
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                tabMsg = msg.getMessage()
+                id = tabMsg[0]
+                pos=(tabMsg[1],tabMsg[2],tabMsg[3])
+                tempJunk = Junk(id,pos)
+
+                nbItem = tabMsg[4]
+                for i in range(nbItem):
+                    typeItem = tabMsg[5+3*i]
+                    idTemplate = tabMsg[6+3*i]
+                    id = tabMsg[7+3*i]
+                    it = itemFactory.getItemFromTemplateType(idTemplate, typeItem)
+                    it.setId(id)
+                    tempJunk.addItem(it)
+                NetworkZoneServer.getInstance().removeMessage(msg)
+
+
 
     def runUpdateChar(self):
         tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_ADD_TO_INVENTORY)
@@ -248,7 +272,9 @@ class Zone(threading.Thread):
                 netMsg = msg.getMessage()
                 usr = int(netMsg[0])
                 charact = int(netMsg[1])
-                # ~ print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
+                # print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
+                hpr=(netMsg[2], netMsg[3], netMsg[4], netMsg[5])
+                pos = (netMsg[6], netMsg[7], netMsg[8])
                 if usr == User.getInstance().getId():
                     if User.getInstance().getCurrentCharacter().getShip() != None:
                         User.getInstance().getCurrentCharacter().getShip().setHprToGo(

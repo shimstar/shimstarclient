@@ -20,10 +20,17 @@ C_WAITING_LOADINGZONE = 18
 C_WAITING_ASKING_INFO_NPC = 19
 C_WAITING_INFO_NPC = 20
 C_WAITING_INFO_CHARACTER = 21
-C_WAITING_ASKING_INFO_CHARACTER = 22
 C_WAITING_NPC_RECEIVED = 23
-C_WAITING_CHARACTER_RECEIVED = 24
+C_NPC_RECEIVED = 24
+C_WAITING_ASKING_INFO_CHARACTER = 25
+C_WAITING_CHARACTER_RECEIVED = 26
+C_WAITING_OTHER_CHAR=28
+C_OTHER_CHAR_RECEIVED = 29
+C_WAITING_JUNK_SENT = 30
+C_JUNK_RECEIVED = 31
 from direct.stdpy import threading
+import inspect
+
 import inspect
 
 class GameState(threading.Thread):
@@ -46,11 +53,15 @@ class GameState(threading.Thread):
         return self.state
 
     def setState(self, state):
-        print "GameState::setState " + str(state)
+        # print "GameState::setState " + str(state)
         self.state = state
 
     @staticmethod
     def getInstance():
+        # curframe = inspect.currentframe()
+        # calframe = inspect.getouterframes(curframe, 2)
+        # if calframe[1][3] != "dispatch":
+        #     print 'caller name:', calframe[1][3]
         if GameState.instance == None:
             GameState.instance = GameState()
         return GameState.instance

@@ -216,12 +216,6 @@ class Ship:
 
                             diffQuat = Quat(lastQuatServer - oldQuatServer)
                             self.lastDiffQuat = diffQuat
-                            #~ if self.id==417:
-                            #~ print "########################"
-                            #~ print "ship::move " + str(self.node.getPos() ) + " / " + str(self.pointerToGo.getPos())
-                            #~ print "ship::move " + str(self.node.getQuat() ) + " / " + str(self.pointerToGo.getQuat())
-                            #~ print "##############################"
-                            #~ print "ship::move diffQuat " + str(diffQuat) + " / " + str(lastQuatServer) + "/" + str(oldQuatServer) + "/" + str(self.id) + "/" + str(oldQuatServer.getK()) + "/" + str(round(oldQuatServer.getK(),5))
 
                             targetQuat = lastQuatServer + (
                                                           lastQuatServer - oldQuatServer) * self.renderCounter * 1 / C_SENDTICKS * dt
@@ -238,16 +232,13 @@ class Ship:
                             self.oldQuat = Quat(currentQuat)
 
                             self.node.setQuat(finalQuat)
-                        #~ if self.id==417:
 
-                        #~ print "ship::move " + self.node.getQuat()
                 except:
                     print "exception : move in ship"
 
                 self.lock.release()
-            #~ self.node.setPos(self.pointerToGo.getPos())
+
             self.lastMove = globalClock.getRealTime()
-        #~ print "ship::move " + str(self.id) + "/" + str(self.getPos())
 
     def loadTemplate(self):
         self.shipTemplate = ShipTemplate.getTemplate(self.template)
@@ -260,31 +251,6 @@ class Ship:
                     it.setShip(self)
                 if it.getTypeItem() == C_ITEM_ENGINE:
                     self.engine = it
-                #~ self.name=str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
-                #~ self.id=int(xmlPart.getElementsByTagName('idship')[0].firstChild.data)
-                #~ self.hullpoints=int(xmlPart.getElementsByTagName('hullpoints')[0].firstChild.data)
-                #~ self.maxhull=int(xmlPart.getElementsByTagName('maxhullpoints')[0].firstChild.data)
-                #~ self.egg=str(xmlPart.getElementsByTagName('egg')[0].firstChild.data)
-                #~ self.img=str(xmlPart.getElementsByTagName('img')[0].firstChild.data)
-                #~ slotss=xmlPart.getElementsByTagName('slot')
-                #~ for s in slotss:
-                #~ tempSlot=Slot(s)
-                #~ self.slots.append(tempSlot)
-                #~ if tempSlot.getItem()!=None:
-                #~ it=tempSlot.getItem()
-                #~ if it.getTypeItem()==C_ITEM_WEAPON:
-                #~ self.weapons=it
-                #~ it.setShip(self)
-                #~ if it.getTypeItem()==C_ITEM_ENGINE:
-                #~ self.engine=it
-                #~ inventory=xmlPart.getElementsByTagName('inventory')
-                #~ for inv in inventory:
-                #~ items=inv.getElementsByTagName('item')
-                #~ for itXml in items:
-                #~ typeItem=int(itXml.getElementsByTagName('typeitem')[0].firstChild.data)
-                #~ idItem=int(itXml.getElementsByTagName('iditem')[0].firstChild.data)
-                #~ item=itemFactory.getItemFromXml(itXml,typeItem)
-                #~ self.itemInInventory.append(item)
 
         if self.visible == True:
             self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
@@ -302,7 +268,6 @@ class Ship:
         for it in self.itemInInventory:
             if it.getId() == id:
                 return it
-
         return None
 
     def getItemInInventory(self):
@@ -397,7 +362,7 @@ class Ship:
                     break
 
         if alreadyGot == False:
-            newItem = mineral(typeMineral)
+            newItem = Mineral(typeMineral)
             newItem.addMineral(qt)
             newItem.setId(id)
             self.itemInInventory.append(newItem)

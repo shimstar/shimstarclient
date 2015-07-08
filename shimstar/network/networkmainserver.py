@@ -137,7 +137,6 @@ class NetworkMainServer(threading.Thread):
             portudp2 = myIterator.getUint32()
             if NetworkZoneServer.getInstance() != None:
                 NetworkZoneServer.getInstance().stop()
-                print "MainNEtwork " + GameState.getInstance()
                 GameState.getInstance().setZoneNetworkStarted(False)
                 # ~ print "############# " + str(ip) + '/' + str(port)
             NetworkZoneServer(ip, port)
@@ -168,7 +167,10 @@ class NetworkMainServer(threading.Thread):
         return msgToReturn
 
     def removeMessage(self, msg):
-        self.listOfMessage.remove(msg)
+        try:
+            self.listOfMessage.remove(msg)
+        except:
+            print "networkMainServer::removeMessage : Warning : message not here"
 
     def sendMessage(self, msg):
         # ~ print msg.getMsg()
