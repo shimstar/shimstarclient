@@ -13,6 +13,7 @@ class Junk:
         self.node.setTag("classname", "junk")
         self.node.setTag("id", str(self.id))
         self.node.reparentTo(render)
+        self.node.setPos(pos)
         Junk.junkList.append(self)
 
     @staticmethod

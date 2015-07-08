@@ -73,7 +73,7 @@ class Zone(threading.Thread):
                 self.runCharOutgoing()
                 self.runJunk()
             except:
-                # print "pb thread zone" + str(sys.exc_info()[0])
+                print "pb thread zone" + str(sys.exc_info()[0])
                 pass
         self.started = False
         print "le thread Zone " + str(self.id) + " s'est termine proprement"
@@ -98,7 +98,6 @@ class Zone(threading.Thread):
                 tempJunk = Junk(id,pos)
 
                 nbItem = tabMsg[4]
-                print "new junk is coming in zone"  + str(nbItem) + "/" + str(pos)
                 for i in range(nbItem):
                     typeItem = tabMsg[5+3*i]
                     idTemplate = tabMsg[6+3*i]
