@@ -271,6 +271,7 @@ class GameInSpace(DirectObject, threading.Thread):
                         str(self.calcDistance(self.target.node)))
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage",
                                                                                            "set:ShimstarImageset image:" + self.target.name)
+                self.target.getLock().release()
                 #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:" + self.target.name + " image:full_image")
             ###Reticule de suivi de la cible ou point rouge sur le bord
             elif isinstance(self.target, Station):
@@ -745,48 +746,62 @@ class GameInSpace(DirectObject, threading.Thread):
         return currentDistance
 
     def getNextTarget(self):
-        listOfObj = self.currentZone.getListOfNPC()
-        #~ listOfObj+=self.currentZone.getListOfPlayer()
-        actualTarget = Follower.getInstance().getTarget()
+        try:
+            listOfObj = []
+            for n in NPC.listOfNpc:
+                listOfObj.append(n)
+            for j in Junk.junkList:
+                listOfObj.append(j)
 
-        found = False
-        firstObj = None
-        target = None
-        for o in listOfObj:
-            if found == True:
-                target = o
-                break
-            if firstObj == None:
-                firstObj = o
-            if o.getShip().getNode() == actualTarget:
-                found = True
+            actualTarget = Follower.getInstance().getTarget()
 
-        if found == False:
-            target = firstObj
+            found = False
+            firstObj = None
+            target = None
+            for o in listOfObj:
+                if found == True:
+                    target = o
+                    break
+                if firstObj == None:
+                    firstObj = o
+                if isinstance(o,NPC) and o.getShip().getNode() == actualTarget:
+                    found = True
+                elif isinstance(o,Junk) and o.getNode() == actualTarget:
+                    found = True
 
-        if target != None:
-            Follower.getInstance().setTarget(target.getShip().getNode())
-            #~ rocketTarget.getInstance().showWindow(target.getShip())
-            self.target = target.getShip()
-            self.changeTarget(self.target)
+            if found == False:
+                target = firstObj
+
+            if target != None:
+                if isinstance(target,NPC):
+                    Follower.getInstance().setTarget(target.getShip().getNode())
+                    self.target = target.getShip()
+                elif isinstance(target,Junk):
+                    Follower.getInstance().setTarget(target.getNode())
+                    self.target = target
+                self.changeTarget(self.target)
+        except:
+            print sys.exc_info()[0]
 
     def seekNearestTarget(self, typeTarget):
-        #~ if typeTarget=="NPC":
-        listOfObj = self.currentZone.getListOfNPC() + User.getListOfCharacters(True)
-        distanceMax = 10000000
-        newTarget = None
+        try:
+            #~ if typeTarget=="NPC":
+            listOfObj = self.currentZone.getListOfNPC() + User.getListOfCharacters(True)
+            distanceMax = 10000000
+            newTarget = None
 
-        for n in listOfObj:
-            distance = self.calcDistance(n.getShip().node)
-            if distance < distanceMax:
-                distanceMax = distance
-                newTarget = n
-        if newTarget != None:
-            Follower.getInstance().setTarget(newTarget.getShip().getNode())
-            #~ rocketTarget.getInstance().showWindow(newTarget.getShip())
-            self.target = newTarget.getShip()
-            self.changeTarget(self.target)
-        #~ print "gameinspace :: seekNearestTArget " + str(self.target)
+            for n in listOfObj:
+                distance = self.calcDistance(n.getShip().node)
+                if distance < distanceMax:
+                    distanceMax = distance
+                    newTarget = n
+            if newTarget != None:
+                Follower.getInstance().setTarget(newTarget.getShip().getNode())
+                self.target = newTarget.getShip()
+                self.changeTarget(self.target)
+            #~ print "gameinspace :: seekNearestTArget " + str(self.target)
+        except:
+            print "seeknearesttargetr" + sys.exc_info()[0]
 
     def runNewExplosion(self):
         tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_EXPLOSION)
@@ -798,7 +813,7 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.listOfExplosion.append(Explosion(render, pos, 20))
                 self.expTask.append(taskMgr.add(self.runUpdateExplosion, "explosionTask" + str(Explosion.nbExplo - 1)))
                 inProgress = len(self.listOfExplosion) - 1
-                self.expTask[inProgress].fps = 30  #set framerate
+                self.expTask[inProgress].fps  = 30  #set framerate
                 self.expTask[inProgress].obj = self.listOfExplosion[inProgress].getExpPlane()
                 self.expTask[inProgress].textures = self.listOfExplosion[inProgress].getexpTexs()
                 self.expTask[inProgress].timeFps = self.listOfExplosion[inProgress].getTimeFps()
@@ -846,171 +861,174 @@ class GameInSpace(DirectObject, threading.Thread):
         #~ self.PE.stop()
         #~ self.PE.speed=100
         self.started=True
-        while not self.stopThread and GameState.getInstance().getState() == C_PLAYING:
-            #~ print "here"
-            GameState.lock.acquire()
-            #~ print "here2"
-            ship = User.getInstance().getCurrentCharacter().getShip()
-            if ship != None:
-                ship.lock.acquire()
+        try:
+            while not self.stopThread and GameState.getInstance().getState() == C_PLAYING:
+                #~ print "here"
+                GameState.lock.acquire()
+                #~ print "here2"
+                ship = User.getInstance().getCurrentCharacter().getShip()
                 if ship != None:
-                    if ship.node.isEmpty() == False:
+                    ship.lock.acquire()
+                    if ship != None:
+                        if ship.node.isEmpty() == False:
 
-                        forwardVec = Quat(ship.node.getQuat()).getForward()
-                        if ship.isHidden() == True:
-                            if ship.node.isEmpty() == False:
-                                base.camera.setPos((forwardVec * (1.0)) + ship.node.getPos())
-                                base.camera.setHpr(ship.node.getHpr())
-                        else:
-                            if ship.node.isEmpty() == False:
-                                #~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
-                                mvtCam = (((forwardVec * (-200.0)) + ship.node.getPos()) * 0.20) + (
-                                base.camera.getPos() * 0.80)
-                                hprCam = ship.node.getHpr() * 0.2 + base.camera.getHpr() * 0.8
-                                base.camera.setPos(mvtCam)
-                                base.camera.setHpr(hprCam)
+                            forwardVec = Quat(ship.node.getQuat()).getForward()
+                            if ship.isHidden() == True:
+                                if ship.node.isEmpty() == False:
+                                    base.camera.setPos((forwardVec * (1.0)) + ship.node.getPos())
+                                    base.camera.setHpr(ship.node.getHpr())
+                            else:
+                                if ship.node.isEmpty() == False:
+                                    #~ base.camera.setPos((forwardVec*(-200.0))+ ship.node.getPos())
+                                    mvtCam = (((forwardVec * (-200.0)) + ship.node.getPos()) * 0.20) + (
+                                    base.camera.getPos() * 0.80)
+                                    hprCam = ship.node.getHpr() * 0.2 + base.camera.getHpr() * 0.8
+                                    base.camera.setPos(mvtCam)
+                                    base.camera.setHpr(hprCam)
 
-                        if globalClock.getRealTime() - self.updateInput > 0.1:
-                            self.updateInput = globalClock.getRealTime()
-
-                            if len(self.historyKey) > 0:
-                                nm = netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-                                nm.addInt(User.getInstance().getId())
-                                nm.addInt(len(self.historyKey))
-                                for key in self.historyKey.keys():
-                                    if key == 'q' or key == 'd' or key == 's' or key == 'z' or key == 'a' or key == 'w' or key == 'dd' or key == 'qq' or key == 'ss' or key == 'zz' or key == "lcontrol":
-                                        nm.addString(key)
-                                        nm.addInt(self.historyKey[key])
-                                NetworkZoneServer.getInstance().sendMessage(nm)
-
-                                self.historyKey.clear()
-                            if self.speedup != 0:
-                                nm = netMessage(C_NETWORK_CHARACTER_SPEED)
-                                nm.addUInt(User.getInstance().getId())
-                                nm.addInt(self.speedup)
-                                self.speedup = 0
-                                NetworkZoneServer.getInstance().sendMessage(nm)
-
-                            if MenuTuto.getInstance().isActiv() == False:
+                            if globalClock.getRealTime() - self.updateInput > 0.1:
+                                self.updateInput = globalClock.getRealTime()
 
                                 if len(self.historyKey) > 0:
                                     nm = netMessage(C_NETWORK_CHARACTER_KEYBOARD)
-                                    nm.addUInt(User.getInstance().getId())
-                                    nm.addUInt(len(self.historyKey))
+                                    nm.addInt(User.getInstance().getId())
+                                    nm.addInt(len(self.historyKey))
                                     for key in self.historyKey.keys():
                                         if key == 'q' or key == 'd' or key == 's' or key == 'z' or key == 'a' or key == 'w' or key == 'dd' or key == 'qq' or key == 'ss' or key == 'zz' or key == "lcontrol":
                                             nm.addString(key)
-                                            nm.addUInt(self.historyKey[key])
+                                            nm.addInt(self.historyKey[key])
                                     NetworkZoneServer.getInstance().sendMessage(nm)
 
-                                self.historyKey.clear()
+                                    self.historyKey.clear()
+                                if self.speedup != 0:
+                                    nm = netMessage(C_NETWORK_CHARACTER_SPEED)
+                                    nm.addUInt(User.getInstance().getId())
+                                    nm.addInt(self.speedup)
+                                    self.speedup = 0
+                                    NetworkZoneServer.getInstance().sendMessage(nm)
 
-                                if self.shooting:
-                                    #~ if self.mousebtn[0]==1:
-                                    #~ print "shot"
-                                    if ship.shot():
-                                        self.pointerLookingAt.setPos(ship.getPos())
-                                        if self.pointToLookAt is not None:
-                                            self.pointerLookingAt.lookAt(self.pointToLookAt)
-                                        else:
-                                            if base.mouseWatcherNode.hasMouse():
-                                                x = base.mouseWatcherNode.getMouseX()
-                                                y = base.mouseWatcherNode.getMouseY()
-                                                t1 = Point3()
-                                                t2 = Point3()
-                                                ret = base.camLens.extrude(Point2(x, y), t1, t2)
-                                                t2 = t2 / 100
-                                                t2relative = render.getRelativePoint(camera, t2)
-                                                self.pointerLookingAt.lookAt(t2relative)
-                                        nm = netMessage(C_NETWORK_CHAR_SHOT)
-                                        nm.addUInt(ship.getOwner().getUserId())
-                                        nm.addUInt(ship.getOwner().getId())
-                                        nm.addFloat(ship.getPos().getX())
-                                        nm.addFloat(ship.getPos().getY())
-                                        nm.addFloat(ship.getPos().getZ())
-                                        nm.addFloat(self.pointerLookingAt.getQuat().getR())
-                                        nm.addFloat(self.pointerLookingAt.getQuat().getI())
-                                        nm.addFloat(self.pointerLookingAt.getQuat().getJ())
-                                        nm.addFloat(self.pointerLookingAt.getQuat().getK())
+                                if MenuTuto.getInstance().isActiv() == False:
+
+                                    if len(self.historyKey) > 0:
+                                        nm = netMessage(C_NETWORK_CHARACTER_KEYBOARD)
+                                        nm.addUInt(User.getInstance().getId())
+                                        nm.addUInt(len(self.historyKey))
+                                        for key in self.historyKey.keys():
+                                            if key == 'q' or key == 'd' or key == 's' or key == 'z' or key == 'a' or key == 'w' or key == 'dd' or key == 'qq' or key == 'ss' or key == 'zz' or key == "lcontrol":
+                                                nm.addString(key)
+                                                nm.addUInt(self.historyKey[key])
                                         NetworkZoneServer.getInstance().sendMessage(nm)
 
-                                if self.keysDown.has_key('t'):
-                                    if (self.keysDown['t'] != 0):
-                                        self.seekNearestTarget("NPC")
-                                        self.keysDown['t'] = 0
+                                    self.historyKey.clear()
 
-                                if self.keysDown.has_key('v'):
-                                    if (self.keysDown['v'] != 0):
-                                        self.getNextTarget()
-                                        self.keysDown['v'] = 0
-                                if self.keysDown.has_key('k'):
-                                    if (self.keysDown['k'] != 0):
-                                        self.volume -= 0.1
-                                        self.keysDown['k'] = 0
-                                        self.ambientSound.setVolume(self.volume)
-                                        print  "self.volume " + str(self.volume)
-                                if self.keysDown.has_key('f12'):
-                                    del self.keysDown['f12']
-                                    if ship.isHidden() == True:
-                                        ship.setVisible()
-                                    else:
-                                        ship.setInvisible()
-                    ship.lock.release()
-            User.lock.acquire()
-            for usr in User.listOfUser:
-                User.listOfUser[usr].getCurrentCharacter().run()
-            User.lock.release()
+                                    if self.shooting:
+                                        #~ if self.mousebtn[0]==1:
+                                        #~ print "shot"
+                                        if ship.shot():
+                                            self.pointerLookingAt.setPos(ship.getPos())
+                                            if self.pointToLookAt is not None:
+                                                self.pointerLookingAt.lookAt(self.pointToLookAt)
+                                            else:
+                                                if base.mouseWatcherNode.hasMouse():
+                                                    x = base.mouseWatcherNode.getMouseX()
+                                                    y = base.mouseWatcherNode.getMouseY()
+                                                    t1 = Point3()
+                                                    t2 = Point3()
+                                                    ret = base.camLens.extrude(Point2(x, y), t1, t2)
+                                                    t2 = t2 / 100
+                                                    t2relative = render.getRelativePoint(camera, t2)
+                                                    self.pointerLookingAt.lookAt(t2relative)
+                                            nm = netMessage(C_NETWORK_CHAR_SHOT)
+                                            nm.addUInt(ship.getOwner().getUserId())
+                                            nm.addUInt(ship.getOwner().getId())
+                                            nm.addFloat(ship.getPos().getX())
+                                            nm.addFloat(ship.getPos().getY())
+                                            nm.addFloat(ship.getPos().getZ())
+                                            nm.addFloat(self.pointerLookingAt.getQuat().getR())
+                                            nm.addFloat(self.pointerLookingAt.getQuat().getI())
+                                            nm.addFloat(self.pointerLookingAt.getQuat().getJ())
+                                            nm.addFloat(self.pointerLookingAt.getQuat().getK())
+                                            NetworkZoneServer.getInstance().sendMessage(nm)
 
-            NPC.lock.acquire()
-            listOfNpc = NPC.getListOfNpc()
-            for n in listOfNpc:
-                n.run()
-            NPC.lock.release()
+                                    if self.keysDown.has_key('t'):
+                                        if (self.keysDown['t'] != 0):
+                                            self.seekNearestTarget("NPC")
+                                            self.keysDown['t'] = 0
 
-            Bullet.lock.acquire()
-            for b in Bullet.listOfBullet:
-                Bullet.listOfBullet[b].move()
-            Bullet.lock.release()
+                                    if self.keysDown.has_key('v'):
+                                        if (self.keysDown['v'] != 0):
+                                            self.getNextTarget()
+                                            self.keysDown['v'] = 0
+                                    if self.keysDown.has_key('k'):
+                                        if (self.keysDown['k'] != 0):
+                                            self.volume -= 0.1
+                                            self.keysDown['k'] = 0
+                                            self.ambientSound.setVolume(self.volume)
+                                            print  "self.volume " + str(self.volume)
+                                    if self.keysDown.has_key('f12'):
+                                        del self.keysDown['f12']
+                                        if ship.isHidden() == True:
+                                            ship.setVisible()
+                                        else:
+                                            ship.setInvisible()
+                        ship.lock.release()
+                User.lock.acquire()
+                for usr in User.listOfUser:
+                    User.listOfUser[usr].getCurrentCharacter().run()
+                User.lock.release()
 
-            self.runNewExplosion()
+                NPC.lock.acquire()
+                listOfNpc = NPC.getListOfNpc()
+                for n in listOfNpc:
+                    n.run()
+                NPC.lock.release()
 
-            dt = globalClock.getRealTime() - self.ticksRenderUI
-            self.renderTarget(dt)
+                Bullet.lock.acquire()
+                for b in Bullet.listOfBullet:
+                    Bullet.listOfBullet[b].move()
+                Bullet.lock.release()
 
-            if dt > 0.05:
-                md = base.win.getPointer(0)
-                x = md.getX()
-                z = md.getY()
-                height = base.win.getYSize()
-                width = base.win.getXSize()
-                x = x - (width / 2)
-                z = z - (height / 2)
+                self.runNewExplosion()
 
-                vec = PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0, x), PyCEGUI.PyCEGUI.UDim(0, z))
-                pos = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").setPosition(vec)
+                dt = globalClock.getRealTime() - self.ticksRenderUI
+                self.renderTarget(dt)
 
-                self.ticksRenderUI = globalClock.getRealTime()
-                if ship != None:
-                    #~ self.textObject.setText(str(ship.node.getPos()))
-                    ship.lock.acquire()
-                    prctHull, currentHull, maxHull = ship.getPrcentHull()
-                    self.showShipName()
-                    #~ print str(prctHull ) + "/" + str(currentHull)
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setProgress(prctHull)
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setTooltipText(
-                        str(currentHull) + "/" + str(maxHull))
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setText(
-                        "Coque : " + str(prctHull * 100) + "%")
-                    prctSpeed, currentPoussee, maxSpeed = ship.getPrcentSpeed()
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setProgress(prctSpeed)
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setTooltipText(
-                        str(currentPoussee) + "/" + str(maxSpeed))
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LabelSpeed").setText(
-                        "Vitesse : " + str(prctSpeed * 100) + "%")
-                    #~ print prctSpeed
-                    #~ self.PE.speed=prctSpeed*100*5
-                    ship.lock.release()
+                if dt > 0.05:
+                    md = base.win.getPointer(0)
+                    x = md.getX()
+                    z = md.getY()
+                    height = base.win.getYSize()
+                    width = base.win.getXSize()
+                    x = x - (width / 2)
+                    z = z - (height / 2)
 
-            GameState.lock.release()
+                    vec = PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0, x), PyCEGUI.PyCEGUI.UDim(0, z))
+                    pos = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle").setPosition(vec)
+
+                    self.ticksRenderUI = globalClock.getRealTime()
+                    if ship != None:
+                        #~ self.textObject.setText(str(ship.node.getPos()))
+                        ship.lock.acquire()
+                        prctHull, currentHull, maxHull = ship.getPrcentHull()
+                        self.showShipName()
+                        #~ print str(prctHull ) + "/" + str(currentHull)
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setProgress(prctHull)
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/HullBar").setTooltipText(
+                            str(currentHull) + "/" + str(maxHull))
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setText(
+                            "Coque : " + str(prctHull * 100) + "%")
+                        prctSpeed, currentPoussee, maxSpeed = ship.getPrcentSpeed()
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setProgress(prctSpeed)
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setTooltipText(
+                            str(currentPoussee) + "/" + str(maxSpeed))
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LabelSpeed").setText(
+                            "Vitesse : " + str(prctSpeed * 100) + "%")
+                        #~ print prctSpeed
+                        #~ self.PE.speed=prctSpeed*100*5
+                        ship.lock.release()
+
+                GameState.lock.release()
+        except:
+            print "pb thread gameinspace"
         self.started=False
         print "le thread GameInSpace s'est termine proprement"
