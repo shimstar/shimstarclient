@@ -83,6 +83,27 @@ class GameInSpace(DirectObject, threading.Thread):
         taskMgr.add(self.pickmouse, "pickmouse")
         self.pointToLookAt = Vec3(0, 0, 0)
         self.started = False
+        # Create Ambient Light
+        ambientLight = AmbientLight('ambientLight')
+        ambientLight.setColor(Vec4(0.2, 0.2, 0.2, 1))
+        ambientLightNP = render.attachNewNode(ambientLight)
+        render.setLight(ambientLightNP)
+
+        # Directional light 01
+        directionalLight = DirectionalLight('directionalLight')
+        directionalLight.setColor(Vec4(0.2, 0.2, 0.2, 1))
+        directionalLightNP = render.attachNewNode(directionalLight)
+        # This light is facing backwards, towards the camera.
+        directionalLightNP.setHpr(180, -20, 0)
+        render.setLight(directionalLightNP)
+
+        # Directional light 02
+        directionalLight = DirectionalLight('directionalLight')
+        directionalLight.setColor(Vec4(0.5, 0.6, 0.5, 1))
+        directionalLightNP = render.attachNewNode(directionalLight)
+        # This light is facing forwards, away from the camera.
+        directionalLightNP.setHpr(0, -20, 0)
+        render.setLight(directionalLightNP)
 
         # ~ self.textObject = OnscreenText(text = '0,0,0',pos =(0,0),fg=(1,1,1,1))
 
@@ -143,6 +164,7 @@ class GameInSpace(DirectObject, threading.Thread):
         #~ self.setupRocketUI()
         self.setupUI()
         self.CEGUI.enable()
+
 
     def speedUp(self, sp):
         ship = User.getInstance().getCurrentCharacter().getShip()
