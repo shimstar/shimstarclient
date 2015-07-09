@@ -35,6 +35,10 @@ class shimConfig:
             s = "/" + self.ressourceDirectory[0:1] + self.ressourceDirectory[2:]
             s = s.replace("\\", "/")
             self.convDirectory = s
+            ver = dom.getElementsByTagName('version')
+            for v in ver:
+                if v.firstChild != None:
+                    self.version = str(v.firstChild.data)
 
             dom = xml.dom.minidom.parse(self.ressourceDirectory + "/config.xml")
 
@@ -53,10 +57,7 @@ class shimConfig:
                 if i.firstChild != None:
                     self.ip = str(i.firstChild.data)
 
-            ver = dom.getElementsByTagName('version')
-            for v in ver:
-                if v.firstChild != None:
-                    self.version = str(v.firstChild.data)
+
 
             pwd = dom.getElementsByTagName('password')
             for p in pwd:

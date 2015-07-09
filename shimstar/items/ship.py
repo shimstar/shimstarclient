@@ -258,6 +258,7 @@ class Ship:
             self.node.setName("ship_" + str(self.id))
             self.node.setTag("classname", "ship")
             self.node.setTag("id", str(self.id))
+            self.node.setShaderAuto()
             textObject = OnscreenText(text='my text string', parent=self.node)
             print "ship::loadTemplate " + str(self.node) + "/" + str(self.id)
 
@@ -413,6 +414,10 @@ class Ship:
         if self.node == None:
             self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
             self.node.reparentTo(render)
+            self.node.setShaderAuto()
+            self.node.setName("ship_" + str(self.id))
+            self.node.setTag("classname", "ship")
+            self.node.setTag("id", str(self.id))
         self.node.hide()
 
         print "ship::setInvisible " + str(self.id) + "/" + str(self.node)
