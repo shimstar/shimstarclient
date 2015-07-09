@@ -116,7 +116,7 @@ class MenuChooseHeroCegui(DirectObject):
             button.setProperty("HoverImage", "set:TempImageset" + str(ch.getFace()) + " image:full_image")
             button.setProperty("PushedImage", "set:TempImageset" + str(ch.getFace()) + " image:full_image")
             button.setProperty("UnifiedAreaRect", "{{" + str(0.10 + 0.15 * i) + ",0},{0.14,0},{" + str(
-                0.218 + 0.15 * i) + ",0},{0.268,0}}");
+                0.218 + 0.15 * i) + ",0},{0.268,0}}")
             button.setProperty("UnifiedSize", "{{0,128},{0,128}}")
             button.setUserString("name", ch.getName())
             button.setUserString("face", ch.getFace())
@@ -126,7 +126,7 @@ class MenuChooseHeroCegui(DirectObject):
             label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
                                                           "ConnexionBg/group/labelPersohero=" + str(ch.getName()))
             label.setProperty("UnifiedAreaRect",
-                              "{{" + str(0.10 + 0.15 * i) + ",0},{0.80,0},{" + str(0.21 + 0.15 * i) + ",0},{0.96,0}}");
+                              "{{" + str(0.10 + 0.15 * i) + ",0},{0.80,0},{" + str(0.21 + 0.15 * i) + ",0},{0.96,0}}")
             label.setText(ch.getName())
             label.setUserString("name", ch.getName())
             label.setUserString("id", str(ch.getId()))

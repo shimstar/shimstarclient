@@ -6,6 +6,7 @@ class Junk:
     def __init__(self,id,pos=(0,0,0)):
         self.id = id
         self.pos = pos
+        self.name = "junk"
         self.egg = "models/junk.bam"
         self.items={}
         self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
@@ -22,6 +23,9 @@ class Junk:
             if junk.id == id:
                 return junk
         return None
+
+    def getName(self):
+        return self.name
 
     def getNode(self):
         return self.node

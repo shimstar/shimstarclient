@@ -153,7 +153,7 @@ class MenuLoot(DirectObject):
                 label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
                                                               "HUD/Cockpit/Loots/Panel/label" + str(self.items[i].getId()))
                 label.setProperty("UnifiedAreaRect", "{{" + str(0.025 + 0.115 * locI) + ",0},{0.2,0},{" + str(
-                    0.125 + 0.115 * locI) + ",0},{0.3,0}}");
+                    0.125 + 0.115 * locI) + ",0},{0.3,0}}")
                 label.setProperty("Font", "Brassiere-s")
                 label.setText(str(self.items[it].getQuantity()))
                 panel.addChildWindow(label)
