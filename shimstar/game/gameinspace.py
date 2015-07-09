@@ -19,6 +19,7 @@ import PyCEGUI
 from shimstar.gui.shimcegui import *
 # from shimstar.game.particleEngine import *
 from shimstar.gui.game.menuloot import *
+from shimstar.gui.game.menuselecttarget import *
 
 
 class GameInSpace(DirectObject, threading.Thread):
@@ -104,7 +105,7 @@ class GameInSpace(DirectObject, threading.Thread):
         # This light is facing forwards, away from the camera.
         directionalLightNP.setHpr(0, -20, 0)
         render.setLight(directionalLightNP)
-
+        MenuSelectTarget.getInstance().show()
         # ~ self.textObject = OnscreenText(text = '0,0,0',pos =(0,0),fg=(1,1,1,1))
 
     def isStarted(self):
