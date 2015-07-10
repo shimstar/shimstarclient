@@ -72,6 +72,7 @@ class MenuSelectTarget(DirectObject):
 
     def onCheck(self,args):
         if args.window.isSelected():
+            self.checked=[]
             self.checked.append(args.window.getUserString("name"))
             newTarget = args.window.getUserData()
             if isinstance(newTarget,NPC) or isinstance(newTarget,Character):
@@ -83,6 +84,8 @@ class MenuSelectTarget(DirectObject):
         else:
             if args.window.getUserString("name") in self.checked:
                 self.checked.remove(args.window.getUserString("name"))
+                Follower.getInstance().setTarget(None)
+                self.parent.changeTarget(None)
 
     def show(self):
         # self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots").show()

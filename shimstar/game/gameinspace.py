@@ -255,23 +255,29 @@ class GameInSpace(DirectObject, threading.Thread):
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(False)
 
     def changeTarget(self, obj):
+
+        if obj is not None:
+            if isinstance(obj, Station):
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+            elif isinstance(obj, Ship):
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
+            elif isinstance(obj, Asteroid):
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
+            elif isinstance(obj,Junk):
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+        else:
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
         self.target=obj
-        if isinstance(obj, Station):
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
-        elif isinstance(obj, Ship):
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
-        elif isinstance(obj, Asteroid):
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
-        elif isinstance(obj,Junk):
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
-            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
 
     def renderTarget(self, dt):
         if self.target != None and self.target.getNode().isEmpty() != True:
