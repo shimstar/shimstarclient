@@ -56,6 +56,9 @@ class MenuSelectTarget(DirectObject):
                               "{{0.1,0},{" + str(0.05 + 0.17*i )+ ",0},{1.0,0},{" + str(0.21+0.17*i) +",0}}")
                 label.setText(n.getName())
                 label.setFont("Brassiere-s")
+                if isinstance(n,Junk):
+                    if len(n.getItems())==0:
+                        label.setText("[colour='99999900']" + str(n.getName()))
                 self.panel.addChildWindow(label)
                 ck = self.CEGUI.WindowManager.createWindow("TaharezLook/Checkbox","HUD/Cockpit/TargetSelect/Panel/rb=" + str(n.getName() + str(n.getId())))
                 ck.setProperty("UnifiedAreaRect",
