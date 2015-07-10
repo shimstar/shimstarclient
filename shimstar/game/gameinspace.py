@@ -255,7 +255,7 @@ class GameInSpace(DirectObject, threading.Thread):
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(False)
 
     def changeTarget(self, obj):
-        self.target=obj)
+        self.target=obj
         if isinstance(obj, Station):
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
@@ -357,12 +357,12 @@ class GameInSpace(DirectObject, threading.Thread):
                             self.pointToLookAt = objPicked.getPos()
                             break
                         elif className == "ship":
-                            # print "ship pi cked"
+
                             objPicked = Ship.getShipById(int(objFromRender.getTag("id")))
                             ship = User.getInstance().getCurrentCharacter().getShip()
+
                             if ship is not None and objPicked is not None and objPicked.getId() != ship.getId():
                                 self.pointToLookAt = objPicked.getPointerToGo().getPos()
-                                print objPicked
                                 break
                             else:
                                 objPicked = None
@@ -372,7 +372,6 @@ class GameInSpace(DirectObject, threading.Thread):
                             break
                         elif className == "junk":
                             objPicked = Junk.getJunkById(int(objFromRender.getTag("id")))
-
                             break
 
             if self.mousebtn[2] == 1:

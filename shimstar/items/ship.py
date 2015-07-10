@@ -28,7 +28,7 @@ class Ship:
     def __init__(self, id, idTemplate, hullpoints=0, visible=True):
         print "ship::init " + str(id) + "/" + str(idTemplate)
         Ship.lock.acquire()
-        Ship.listOfShip[id] = self
+        Ship.listOfShip[int(id)] = self
         Ship.lock.release()
         self.lock = threading.Lock()
         self.name = ""
@@ -123,7 +123,7 @@ class Ship:
     def getShipById(id):
         Ship.lock.acquire()
         shipToReturn = None
-        if Ship.listOfShip.has_key(id) != True:
+        if Ship.listOfShip.has_key(id) :
             shipToReturn = Ship.listOfShip[id]
         Ship.lock.release()
         return shipToReturn
