@@ -6,6 +6,7 @@ from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from shimstar.items.junk import *
 from shimstar.user.user import *
+from shimstar.gui.game.follower import *
 
 class MenuSelectTarget(DirectObject):
     instance = None
@@ -60,6 +61,7 @@ class MenuSelectTarget(DirectObject):
                 ck.setProperty("UnifiedAreaRect",
                                "{{0.05,0},{" + str(0.05 + 0.17*i) +",0},{0.2,0},{" + str(0.21 + 0.17*i) +",0}}")
                 ck.setUserString("name", n.getName() + str(n.getId()))
+                ck.setUserData(n)
                 if (n.getName()+str(n.getId())) in self.checked:
                     ck.setSelected(True)
                 ck.subscribeEvent(PyCEGUI.Checkbox.EventCheckStateChanged, self,'onCheck')
@@ -71,6 +73,13 @@ class MenuSelectTarget(DirectObject):
     def onCheck(self,args):
         if args.window.isSelected():
             self.checked.append(args.window.getUserString("name"))
+            newTarget = args.window.getUserData()
+            if isinstance(newTarget,NPC) or isinstance(newTarget,Character):
+                self.parent.changeTarget(newTarget.getShip())
+                Follower.getInstance().setTarget(newTarget.getShip().getNode())
+            else:
+                self.parent.changeTarget(newTarget)
+                Follower.getInstance().setTarget(newTarget.getNode())
         else:
             if args.window.getUserString("name") in self.checked:
                 self.checked.remove(args.window.getUserString("name"))

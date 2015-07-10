@@ -106,6 +106,7 @@ class GameInSpace(DirectObject, threading.Thread):
         directionalLightNP.setHpr(0, -20, 0)
         render.setLight(directionalLightNP)
         MenuSelectTarget.getInstance().show()
+        MenuSelectTarget.getInstance().setParent(self)
         # ~ self.textObject = OnscreenText(text = '0,0,0',pos =(0,0),fg=(1,1,1,1))
 
     def isStarted(self):
@@ -254,13 +255,7 @@ class GameInSpace(DirectObject, threading.Thread):
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(False)
 
     def changeTarget(self, obj):
-        #~ self.setInvisibleInfoTarget()
-        #~ if isinstance(obj,Ship):
-        #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
-        #~ elif isinstance(obj,Station):
-        #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(True)
-        #~ elif isinstance(obj,Asteroid):
-        #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").setVisible(True)
+        self.target=obj)
         if isinstance(obj, Station):
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
@@ -284,10 +279,7 @@ class GameInSpace(DirectObject, threading.Thread):
 
             if isinstance(self.target, Ship):
                 self.target.getLock().acquire()
-                #~ print dt
-                ###Ecran Info
-                #~ if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible()!=True:
-                #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(True)
+
                 if dt > 0.05:
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(
@@ -819,9 +811,13 @@ class GameInSpace(DirectObject, threading.Thread):
                     distanceMax = distance
                     newTarget = n
             if newTarget != None:
-                Follower.getInstance().setTarget(newTarget.getShip().getNode())
-                self.target = newTarget.getShip()
-                self.changeTarget(self.target)
+                 if isinstance(newTarget,NPC):
+                    Follower.getInstance().setTarget(newTarget.getShip().getNode())
+                    self.target = newTarget.getShip()
+                 elif isinstance(newTarget,Junk):
+                    Follower.getInstance().setTarget(newTarget.getNode())
+                    self.target = newTarget
+                 self.changeTarget(self.target)
             #~ print "gameinspace :: seekNearestTArget " + str(self.target)
         except:
             print "seeknearesttargetr" + sys.exc_info()[0]
