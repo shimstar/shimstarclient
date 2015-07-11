@@ -483,6 +483,8 @@ class GameInSpace(DirectObject, threading.Thread):
                                                                                       self, 'onClickStartMining')
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/info").subscribeEvent(
             PyCEGUI.Window.EventMouseButtonUp, self, 'onClickInfo')
+        self.CEGUI.WindowManager.getWindow("options").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
+                                                                                  self, 'onCloseClicked')
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                                   self, 'onCloseClicked')
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
@@ -599,6 +601,8 @@ class GameInSpace(DirectObject, threading.Thread):
             self.onClickStopMining(None)
         elif windowEventArgs.window.getName() == "Options/OptionVideo":
             self.OutOptionsVideoAnimationInstance.start()
+        elif windowEventArgs.window.getName() == "Options":
+            self.OutOptionsAnimationInstance.start()
         else:
             windowEventArgs.window.hide()
 
@@ -773,6 +777,9 @@ class GameInSpace(DirectObject, threading.Thread):
                 listOfObj.append(n)
             for j in Junk.junkList:
                 listOfObj.append(j)
+            for u in User.listOfUser:
+                if User.getInstance().getId() != u:
+                    listOfObj.append(User.listOfUser[u].getCurrentCharacter())
 
             actualTarget = Follower.getInstance().getTarget()
 
@@ -795,6 +802,9 @@ class GameInSpace(DirectObject, threading.Thread):
 
             if target != None:
                 if isinstance(target,NPC):
+                    Follower.getInstance().setTarget(target.getShip().getNode())
+                    self.target = target.getShip()
+                elif isinstance(target,Character):
                     Follower.getInstance().setTarget(target.getShip().getNode())
                     self.target = target.getShip()
                 elif isinstance(target,Junk):
