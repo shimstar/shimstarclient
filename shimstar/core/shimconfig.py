@@ -158,8 +158,10 @@ class shimConfig:
         confXml.appendChild(tutosXml)
         confXml.appendChild(resolutionXml)
         docXml.appendChild(confXml)
+        print "shimconfig :: saveConfig " + str(self.ressourceDirectory)
+        fileHandle = open(self.ressourceDirectory + "/config.xml",'w')
         # fileHandle = open(self.getRessourceDirectory() + "/config.xml", 'w')
-        fileHandle = open ( "./config.xml", 'w' )
+        # fileHandle = open ( "./config.xml", 'w' )
         fileHandle.write(docXml.toxml())
         fileHandle.close()
 
