@@ -28,6 +28,7 @@ C_WAITING_OTHER_CHAR=28
 C_OTHER_CHAR_RECEIVED = 29
 C_WAITING_JUNK_SENT = 30
 C_JUNK_RECEIVED = 31
+C_QUIT_MENU = 32
 from direct.stdpy import threading
 import inspect
 
