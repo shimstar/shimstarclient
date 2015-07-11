@@ -85,7 +85,7 @@ class MenuLoadZoneCegui(ShowBase):
 
 
     def quitGame(self, ):
-        GameState.getInstance().setState(C_QUIT)
+        GameState.getInstance().setState(C_QUIT_MENU)
 
     def event(self, arg):
 

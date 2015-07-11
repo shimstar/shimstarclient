@@ -141,7 +141,7 @@ class MenuConnectCegui(ShowBase):
 			self.CEGUI.WindowManager.getWindow("MenuConnect/NewAccount/EditboxLogin").activate()
 		
 	def quitGame(self,):
-		GameState.getInstance().setState(C_QUIT)
+		GameState.getInstance().setState(C_QUIT_MENU)
 
 	def event(self,arg):
 		if(self.stateConnexion==C_MENUCONNECT_WAITING):

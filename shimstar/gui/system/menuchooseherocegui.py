@@ -137,7 +137,7 @@ class MenuChooseHeroCegui(DirectObject):
 
 
     def quitGame(self, ):
-        GameState.getInstance().setState(C_QUIT)
+        GameState.getInstance().setState(C_QUIT_MENU)
 
     def emptyGroupWindow(self):
         if self.panel.getContentPane().getChildCount() > 0:
