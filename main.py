@@ -184,6 +184,8 @@ class ShimStarClient(DirectObject):
                         ship.addSlot(tempSlot)
                     GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
                     NetworkZoneServer.getInstance().removeMessage(msg)
+        elif state == C_QUIT_MENU:
+            base.userExit()
         elif state == C_QUIT:
             if ((GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted() == False)or GameInSpace.getInstance() is None) and (Zone.getInstance() is None or (Zone.getInstance() is not None and Zone.getInstance().isStarted())) == False:# and GameState.getInstance().getMainNetworkStarted() == False :
                 # sys.exit()

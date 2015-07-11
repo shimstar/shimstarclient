@@ -7,6 +7,7 @@ from direct.task import Task
 from shimstar.items.junk import *
 from shimstar.user.user import *
 from shimstar.gui.game.follower import *
+from shimstar.user.character.character import *
 
 class MenuSelectTarget(DirectObject):
     instance = None
@@ -35,41 +36,44 @@ class MenuSelectTarget(DirectObject):
                 wnd.destroy()
 
     def event(self,task):
-        self.panel = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/TargetSelect/Panel")
-        dt = globalClock.getRealTime() - self.lastTicks
-        if dt > 1:
-            self.emptyWindow()
-            self.lastTicks = globalClock.getRealTime()
-            i=0
-            listOfObj = []
-            for n in NPC.getListOfNpc():
-                listOfObj.append(n)
-            for j in Junk.junkList:
-                listOfObj.append(j)
-            for u in User.listOfUser:
-                if User.getInstance().getId() != u:
-                    listOfObj.append(User.listOfUser[u].getCurrentCharacter())
-            for n in listOfObj:
-                label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
-                                                          "HUD/Cockpit/TargetSelect/Panel/labeltgt=" + str(n.getName()+ str(n.getId())))
-                label.setProperty("UnifiedAreaRect",
-                              "{{0.1,0},{" + str(0.05 + 0.17*i )+ ",0},{1.0,0},{" + str(0.21+0.17*i) +",0}}")
-                label.setText(n.getName())
-                label.setFont("Brassiere-s")
-                if isinstance(n,Junk):
-                    if len(n.getItems())==0:
-                        label.setText("[colour='99999900']" + str(n.getName()))
-                self.panel.addChildWindow(label)
-                ck = self.CEGUI.WindowManager.createWindow("TaharezLook/Checkbox","HUD/Cockpit/TargetSelect/Panel/rb=" + str(n.getName() + str(n.getId())))
-                ck.setProperty("UnifiedAreaRect",
-                               "{{0.05,0},{" + str(0.05 + 0.17*i) +",0},{0.2,0},{" + str(0.21 + 0.17*i) +",0}}")
-                ck.setUserString("name", n.getName() + str(n.getId()))
-                ck.setUserData(n)
-                if (n.getName()+str(n.getId())) in self.checked:
-                    ck.setSelected(True)
-                ck.subscribeEvent(PyCEGUI.Checkbox.EventCheckStateChanged, self,'onCheck')
-                self.panel.addChildWindow(ck)
-                i+=1
+        try:
+            self.panel = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/TargetSelect/Panel")
+            dt = globalClock.getRealTime() - self.lastTicks
+            if dt > 1:
+                self.emptyWindow()
+                self.lastTicks = globalClock.getRealTime()
+                i=0
+                listOfObj = []
+                for n in NPC.getListOfNpc():
+                    listOfObj.append(n)
+                for j in Junk.junkList:
+                    listOfObj.append(j)
+                for u in User.listOfUser:
+                    if User.getInstance().getId() != u:
+                        listOfObj.append(User.listOfUser[u].getCurrentCharacter())
+                for n in listOfObj:
+                    label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
+                                                              "HUD/Cockpit/TargetSelect/Panel/labeltgt=" + str(n.getName()+ str(n.getId())))
+                    label.setProperty("UnifiedAreaRect",
+                                  "{{0.1,0},{" + str(0.05 + 0.17*i )+ ",0},{1.0,0},{" + str(0.21+0.17*i) +",0}}")
+                    label.setText(n.getName())
+                    label.setFont("Brassiere-s")
+                    if isinstance(n,Junk):
+                        if len(n.getItems())==0:
+                            label.setText("[colour='99999900']" + str(n.getName()))
+                    self.panel.addChildWindow(label)
+                    ck = self.CEGUI.WindowManager.createWindow("TaharezLook/Checkbox","HUD/Cockpit/TargetSelect/Panel/rb=" + str(n.getName() + str(n.getId())))
+                    ck.setProperty("UnifiedAreaRect",
+                                   "{{0.05,0},{" + str(0.05 + 0.17*i) +",0},{0.2,0},{" + str(0.21 + 0.17*i) +",0}}")
+                    ck.setUserString("name", n.getName() + str(n.getId()))
+                    ck.setUserData(n)
+                    if (n.getName()+str(n.getId())) in self.checked:
+                        ck.setSelected(True)
+                    ck.subscribeEvent(PyCEGUI.Checkbox.EventCheckStateChanged, self,'onCheck')
+                    self.panel.addChildWindow(ck)
+                    i+=1
+        except:
+            print sys.exc_info()[0]
 
         return task.cont
 
@@ -78,7 +82,12 @@ class MenuSelectTarget(DirectObject):
             self.checked=[]
             self.checked.append(args.window.getUserString("name"))
             newTarget = args.window.getUserData()
-            if isinstance(newTarget,NPC) or isinstance(newTarget,Character):
+            print "NEwtarget = = newTarget " + str(newTarget)
+            print "totototo " + str(isinstance(newTarget,Character))
+            if isinstance(newTarget,NPC):
+                self.parent.changeTarget(newTarget.getShip())
+                Follower.getInstance().setTarget(newTarget.getShip().getNode())
+            elif isinstance(newTarget,Character):
                 self.parent.changeTarget(newTarget.getShip())
                 Follower.getInstance().setTarget(newTarget.getShip().getNode())
             else:
