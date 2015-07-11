@@ -483,7 +483,7 @@ class GameInSpace(DirectObject, threading.Thread):
                                                                                       self, 'onClickStartMining')
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/info").subscribeEvent(
             PyCEGUI.Window.EventMouseButtonUp, self, 'onClickInfo')
-        self.CEGUI.WindowManager.getWindow("options").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
+        self.CEGUI.WindowManager.getWindow("Options").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                                   self, 'onCloseClicked')
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                                   self, 'onCloseClicked')
