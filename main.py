@@ -186,10 +186,14 @@ class ShimStarClient(DirectObject):
                     NetworkZoneServer.getInstance().removeMessage(msg)
         elif state == C_QUIT_MENU:
             base.userExit()
+            # return Task.done
         elif state == C_QUIT:
+
             if ((GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted() == False)or GameInSpace.getInstance() is None) and (Zone.getInstance() is None or (Zone.getInstance() is not None and Zone.getInstance().isStarted())) == False:# and GameState.getInstance().getMainNetworkStarted() == False :
                 # sys.exit()
-                base.userExit()
+                # base.userExit()
+                # return Task.done
+                os._exit(0)
             else:
                 if GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted():
                     if GameInSpace.getInstance() is not None:
@@ -198,12 +202,17 @@ class ShimStarClient(DirectObject):
                 if Zone.getInstance() is not None and Zone.getInstance().isStarted():
                     if Zone.getInstance() is not None:
                         Zone.getInstance().stop()
+                        Zone.destroy()
                     if NetworkZoneServer.getInstance() is not None:
                         NetworkZoneServer.getInstance().stop()
+                        # print "trying to join nwzserver"
+                        # NetworkZoneServer.getInstance().join()
+                        # print "joined nwzserver" + str(NetworkZoneServer.getInstance().isAlive())
                 if NetworkMainServer.getInstance().isStarted():
                     if NetworkMainServer.getInstance() is not None:
                         NetworkMainServer.getInstance().stop()
                 time.sleep(5)
+
 
         elif state == C_DEATH:
             Zone.getInstance().stop()
