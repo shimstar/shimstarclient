@@ -74,7 +74,6 @@ class Zone(threading.Thread):
                 self.runJunk()
             except:
                 print "pb thread zone" + str(sys.exc_info()[0])
-                pass
         self.started = False
         print "le thread Zone " + str(self.id) + " s'est termine proprement"
 

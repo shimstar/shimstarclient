@@ -77,27 +77,29 @@ class MenuSelectTarget(DirectObject):
 
         return task.cont
 
+    def setTarget(self,tgt):
+        self.checked=[]
+        self.checked.append(tgt.getName() + str(tgt.getId()))
+
     def onCheck(self,args):
         if args.window.isSelected():
             self.checked=[]
             self.checked.append(args.window.getUserString("name"))
             newTarget = args.window.getUserData()
-            print "NEwtarget = = newTarget " + str(newTarget)
-            print "totototo " + str(isinstance(newTarget,Character))
             if isinstance(newTarget,NPC):
-                self.parent.changeTarget(newTarget.getShip())
+                self.parent.changeTarget(newTarget.getShip(),True,newTarget)
                 Follower.getInstance().setTarget(newTarget.getShip().getNode())
             elif isinstance(newTarget,Character):
-                self.parent.changeTarget(newTarget.getShip())
+                self.parent.changeTarget(newTarget.getShip(),True,newTarget)
                 Follower.getInstance().setTarget(newTarget.getShip().getNode())
             else:
-                self.parent.changeTarget(newTarget)
+                self.parent.changeTarget(newTarget,True,newTarget)
                 Follower.getInstance().setTarget(newTarget.getNode())
         else:
             if args.window.getUserString("name") in self.checked:
                 self.checked.remove(args.window.getUserString("name"))
                 Follower.getInstance().setTarget(None)
-                self.parent.changeTarget(None)
+                self.parent.changeTarget(None,True,None)
 
     def show(self):
         # self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots").show()

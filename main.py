@@ -202,7 +202,7 @@ class ShimStarClient(DirectObject):
                 if Zone.getInstance() is not None and Zone.getInstance().isStarted():
                     if Zone.getInstance() is not None:
                         Zone.getInstance().stop()
-                        Zone.destroy()
+                        Zone.getInstance().destroy()
                     if NetworkZoneServer.getInstance() is not None:
                         NetworkZoneServer.getInstance().stop()
                         # print "trying to join nwzserver"

@@ -254,7 +254,9 @@ class GameInSpace(DirectObject, threading.Thread):
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").setVisible(False)
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station").setVisible(False)
 
-    def changeTarget(self, obj):
+    def changeTarget(self, obj,external=False,newTgt=None):
+        if external==False:
+            MenuSelectTarget.getInstance().setTarget(newTgt)
 
         if obj is not None:
             if isinstance(obj, Station):
@@ -386,7 +388,7 @@ class GameInSpace(DirectObject, threading.Thread):
                     #~ rocketTarget.getInstance().showWindow(newTarget.getShip())
                     # print "picked obj" + str(objPicked)
                     self.target = objPicked
-                    self.changeTarget(objPicked)
+                    self.changeTarget(objPicked,False,objPicked)
         return task.cont
 
     def showShipName(self):
@@ -810,7 +812,7 @@ class GameInSpace(DirectObject, threading.Thread):
                 elif isinstance(target,Junk):
                     Follower.getInstance().setTarget(target.getNode())
                     self.target = target
-                self.changeTarget(self.target)
+                self.changeTarget(self.target,False,target)
         except:
             print sys.exc_info()[0]
 
@@ -833,7 +835,7 @@ class GameInSpace(DirectObject, threading.Thread):
                  elif isinstance(newTarget,Junk):
                     Follower.getInstance().setTarget(newTarget.getNode())
                     self.target = newTarget
-                 self.changeTarget(self.target)
+                 self.changeTarget(self.target,False,newTarget)
             #~ print "gameinspace :: seekNearestTArget " + str(self.target)
         except:
             print "seeknearesttargetr" + sys.exc_info()[0]
