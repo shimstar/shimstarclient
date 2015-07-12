@@ -59,10 +59,10 @@ class Ship:
         self.itemInInventory = []
         self.lastDiffQuat = Quat(0, 0, 0, 0)
         self.oldQuat = Quat(0, 0, 0, 0)
-        self.pointerToGo = loader.loadModelCopy(shimConfig.getInstance().getConvRessourceDirectory() + "models/arrow")
+        self.pointerToGo = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + "models/arrow")
         self.pointerToGo.reparentTo(render)
         self.pointerToGo.hide()
-        self.pointerToGoOld = loader.loadModelCopy(
+        self.pointerToGoOld = loader.loadModel(
             shimConfig.getInstance().getConvRessourceDirectory() + "models/arrow")
         self.pointerToGoOld.reparentTo(render)
         self.pointerToGoOld.hide()

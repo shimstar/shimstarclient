@@ -65,7 +65,7 @@ class GameInSpace(DirectObject, threading.Thread):
         self.shooting = False
         self.mouseToUpdate = False
         self.speedup = 0
-        self.pointerLookingAt = loader.loadModelCopy(
+        self.pointerLookingAt = loader.loadModel(
             shimConfig.getInstance().getConvRessourceDirectory() + "models/arrow")
         self.pointerLookingAt.reparentTo(render)
         self.pointerLookingAt.hide()
