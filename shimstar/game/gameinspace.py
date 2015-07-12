@@ -14,6 +14,7 @@ from shimstar.game.gamestate import *
 from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
 from shimstar.gui.core.menututo import *
+from shimstar.gui.game.menulootsinfo import *
 # from shimstar.gui.core.inventory import *
 import PyCEGUI
 from shimstar.gui.shimcegui import *
@@ -107,6 +108,7 @@ class GameInSpace(DirectObject, threading.Thread):
         render.setLight(directionalLightNP)
         MenuSelectTarget.getInstance().show()
         MenuSelectTarget.getInstance().setParent(self)
+        MenuLootsInfo.getInstance().setParent(self)
         # ~ self.textObject = OnscreenText(text = '0,0,0',pos =(0,0),fg=(1,1,1,1))
 
     def isStarted(self):
@@ -275,6 +277,9 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
+                MenuLootsInfo.getInstance().setTarget(obj)
+                MenuLootsInfo.getInstance().show()
+
         else:
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
