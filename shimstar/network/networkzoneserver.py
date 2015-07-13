@@ -107,6 +107,10 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32())  #hullpoints
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_DESTROY_JUNK:
+            msgTab.append(myIterator.getUint32())  #idjunk
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NEW_CHAR_SHOT:
             msgTab = []
             msgTab.append(myIterator.getUint32())

@@ -106,6 +106,20 @@ class Zone(threading.Thread):
                     tempJunk.addItem(it)
                 NetworkZoneServer.getInstance().removeMessage(msg)
 
+        tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_DESTROY_JUNK)
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                tabMsg = msg.getMessage()
+                id = tabMsg[0]
+                print "blabla"
+                tempJunk = Junk.getJunkById(id)
+                print "blabla" + str(tempJunk)
+                if tempJunk is not None:
+                    print "trying to destroy junk"
+                    tempJunk.destroy()
+                    print "junk destroyed"
+                NetworkZoneServer.getInstance().removeMessage(msg)
+
 
 
     def runUpdateChar(self):

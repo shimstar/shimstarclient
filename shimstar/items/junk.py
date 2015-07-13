@@ -8,6 +8,7 @@ class Junk:
         self.pos = pos
         self.name = "junk"
         self.egg = "models/junk.bam"
+        self.img = "junk"
         self.items={}
         self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
         self.node.setName("junk" + str(self.id))
@@ -59,6 +60,7 @@ class Junk:
             self.node.setPos(pos)
 
     def destroy(self):
-        if self.node is not None and  not self.isEmpty():
+        if self.node is not None and  not self.node.isEmpty():
             self.node.detachNode()
             self.node.removeNode()
+        Junk.junkList.remove(self)

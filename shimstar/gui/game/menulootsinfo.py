@@ -5,6 +5,9 @@ from direct.task import Task
 from shimstar.gui.shimcegui import *
 from shimstar.core.functions import *
 from shimstar.user.user import *
+from shimstar.network.netmessage import *
+from shimstar.network.networkzoneserver import *
+from shimstar.items.junk import *
 
 class MenuLootsInfo(DirectObject):
     instance=None
@@ -28,16 +31,23 @@ class MenuLootsInfo(DirectObject):
         dt = globalClock.getRealTime() - self.lastTicks
         if dt > 1:
             self.lastTicks = globalClock.getRealTime()
-            if self.junk is not None:
-                distance = calcDistance(self.junk.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
-                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Distance").setText(str(distance))
+            if self.junk in Junk.junkList:
+                if self.junk is not None:
+                    distance = calcDistance(self.junk.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
+                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Distance").setText(str(distance))
+            else:
+                self.junk=None
+                self.hide()
         return task.cont
 
     def onOpen(self,args):
         self.parent.onClickInfo(args)
 
-    def onDestroy(self,):
-        pass
+    def onDestroy(self,args):
+        nm = netMessage(C_NETWORK_DESTROY_JUNK)
+        nm.addInt(User.getInstance().getId())
+        nm.addInt(self.junk.getId())
+        NetworkZoneServer.getInstance().sendMessage(nm)
 
     def setParent(self,parent):
         self.parent=parent
