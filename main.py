@@ -214,6 +214,7 @@ class ShimStarClient(DirectObject):
                 time.sleep(5)
 
 
+
         elif state == C_DEATH:
             Zone.getInstance().stop()
             if self.menu is not None:

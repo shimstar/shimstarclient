@@ -759,6 +759,7 @@ class GameInSpace(DirectObject, threading.Thread):
             expl.delete()
         self.ignoreKey(None)
         MenuSelectTarget.getInstance().destroy()
+        MenuLootsInfo.getInstance().destroy()
         if self.ceGuiRootWindow != None:
             self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
         taskMgr.remove("pickmouse")

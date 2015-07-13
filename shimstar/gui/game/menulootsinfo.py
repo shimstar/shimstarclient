@@ -2,7 +2,9 @@ __author__ = 'ogilp'
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-from shimstar.gui import *
+from shimstar.gui.shimcegui import *
+from shimstar.core.functions import *
+from shimstar.user.user import *
 
 class MenuLootsInfo(DirectObject):
     instance=None
@@ -10,22 +12,39 @@ class MenuLootsInfo(DirectObject):
         self.junk = None
         self.CEGUI = ShimCEGUI.getInstance()
         self.parent = None
+        self.lastTicks = 0
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
-                                                                              self, 'onCloseClicked')
+                                                                                         self, 'onCloseClicked')
         self.OutAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
         self.OutAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow"))
         self.InAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow"))
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Open").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
+                                                                            'onOpen')
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Destroy").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
+                                                                            'onDestroy')
 
     def event(self,task):
-
+        dt = globalClock.getRealTime() - self.lastTicks
+        if dt > 1:
+            self.lastTicks = globalClock.getRealTime()
+            if self.junk is not None:
+                distance = calcDistance(self.junk.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Distance").setText(str(distance))
         return task.cont
+
+    def onOpen(self,args):
+        self.parent.onClickInfo(args)
+
+    def onDestroy(self,):
+        pass
 
     def setParent(self,parent):
         self.parent=parent
 
     def setTarget(self,junk):
         self.junk=junk
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Name").setText(self.junk.getName() + str(self.junk.getId()))
 
     def onCloseClicked(self, args):
         self.hide()
