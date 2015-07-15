@@ -16,6 +16,7 @@ from shimstar.world.zone.zone import *
 from shimstar.game.gamestate import *
 # from shimstar.npc.npcinstation import *
 from shimstar.items.itemfactory import *
+from shimstar.gui.station.guistationshop import *
 
 
 class GuiStation(DirectObject):
@@ -493,18 +494,21 @@ class GuiStation(DirectObject):
     def onChooseNpc(self, args):
         self.buttonSound2.play()
         self.InDialogAnimationInstance.start()
-
-        self.CEGUI.WindowManager.getWindow("Station/Dialog").moveToFront()
+        # TODO  :: here is commented load of npc dialog
+        # self.CEGUI.WindowManager.getWindow("Station/Dialog").moveToFront()
         npcChoosed = args.window.getUserData()
-        self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("NormalImage", "set:TempImageset" + str(
-            npcChoosed.getFace()) + " image:full_image")
-        self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("HoverImage", "set:TempImageset" + str(
-            npcChoosed.getFace()) + " image:full_image")
-        self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("PushedImage", "set:TempImageset" + str(
-            npcChoosed.getFace()) + " image:full_image")
-        self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setUserData(npcChoosed)
-        self.OutNPCAnimationInstance.start()
-        self.loadKeywords(npcChoosed)
+        # self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("NormalImage", "set:TempImageset" + str(
+        #     npcChoosed.getFace()) + " image:full_image")
+        # self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("HoverImage", "set:TempImageset" + str(
+        #     npcChoosed.getFace()) + " image:full_image")
+        # self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("PushedImage", "set:TempImageset" + str(
+        #     npcChoosed.getFace()) + " image:full_image")
+        # self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setUserData(npcChoosed)
+        # self.OutNPCAnimationInstance.start()
+        # self.loadKeywords(npcChoosed)
+        if npcChoosed.getTypeNpc()==C_TYPE_NPC_SHOP:
+            GuiStationShop.getInstance(self.root).show()
+
 
     def emptyKeywordsWindow(self):
         if self.CEGUI.WindowManager.getWindow("Station/Dialog/Keywords").getContentPane().getChildCount() > 0:
