@@ -111,13 +111,9 @@ class Zone(threading.Thread):
             for msg in tempMsg:
                 tabMsg = msg.getMessage()
                 id = tabMsg[0]
-                print "blabla"
                 tempJunk = Junk.getJunkById(id)
-                print "blabla" + str(tempJunk)
                 if tempJunk is not None:
-                    print "trying to destroy junk"
                     tempJunk.destroy()
-                    print "junk destroyed"
                 NetworkZoneServer.getInstance().removeMessage(msg)
 
 

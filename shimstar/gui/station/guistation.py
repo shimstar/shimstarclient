@@ -193,6 +193,10 @@ class GuiStation(DirectObject):
         elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
             self.InInventaireAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
+            invInstance = menuInventory.getInstance('invstation')
+            if invInstance.getObj() is None:
+                invInstance.setObj(User.getInstance().getCurrentCharacter().getShip())
+            invInstance.show()
 
     def slotClicked(self, e):
         self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").show()
