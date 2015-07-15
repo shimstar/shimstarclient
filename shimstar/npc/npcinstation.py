@@ -51,15 +51,15 @@ class NPCInStation:
 				self.face=str(p.getElementsByTagName('face')[0].firstChild.data)
 				self.location=int(p.getElementsByTagName('zone')[0].firstChild.data)
 				self.typeNpc=int(p.getElementsByTagName('typenpc')[0].firstChild.data)
-				dialogues=p.getElementsByTagName('iddialogue')
-				for diaXml in dialogues:
-					iddiag=int(diaXml.firstChild.data)
-					self.dialogs.append(dialog(iddiag))
-					
-				missions=p.getElementsByTagName('idmission')
-				for missionsXml in missions:
-					idm=int(missionsXml.firstChild.data)
-					self.missions.append(Mission(idm))
+				# dialogues=p.getElementsByTagName('iddialogue')
+				# for diaXml in dialogues:
+				# 	iddiag=int(diaXml.firstChild.data)
+				# 	self.dialogs.append(dialog(iddiag))
+				#
+				# missions=p.getElementsByTagName('idmission')
+				# for missionsXml in missions:
+				# 	idm=int(missionsXml.firstChild.data)
+				# 	self.missions.append(Mission(idm))
 					
 	def getTypeNpc(self):
 		return self.typeNpc
