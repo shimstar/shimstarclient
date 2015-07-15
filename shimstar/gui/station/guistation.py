@@ -189,7 +189,7 @@ class GuiStation(DirectObject):
         elif (windowEventArgs.window.getName() == "Station/Menus/Vaisseau"):
             self.InShipAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront()
-            self.showFitting()
+            self.emptyWindowSlot()
         elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
             self.InInventaireAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
@@ -209,6 +209,7 @@ class GuiStation(DirectObject):
         ship = User.getInstance().getCurrentCharacter().getShip()
         i = 0
         slots = ship.getSlots()
+
         for s in slots:
             button = self.CEGUI.WindowManager.createWindow("Shimstar/ImageButton",
                                                            "Station/Vaisseau/bckground/Front/slot" + str(s.getId()))
