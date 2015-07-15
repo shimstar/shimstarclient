@@ -16,7 +16,7 @@ from shimstar.world.zone.zone import *
 from shimstar.game.gamestate import *
 # from shimstar.npc.npcinstation import *
 from shimstar.items.itemfactory import *
-
+from shimstar.npc.npcinstation import *
 
 class GuiStation(DirectObject):
     def __init__(self):
