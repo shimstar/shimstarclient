@@ -199,7 +199,9 @@ class GuiStation(DirectObject):
             invInstance.show()
 
     def slotClicked(self, e):
-        self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").show()
+        print "slotclicked"
+        # self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").show()
+        self.InAddSuppressAnimationInstance.start()
         self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").moveToFront()
         self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").setUserData(e.window.getUserData())
         self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Modify").setUserData(e.window.getUserData())

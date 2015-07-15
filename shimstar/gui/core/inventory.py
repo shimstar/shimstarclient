@@ -46,7 +46,6 @@ class menuInventory(DirectObject):
     def setObj(self, obj):
         self.obj = obj
         self.items = self.obj.getItemInInventory()
-        print "inventory :: setObj " + str(self.items)
         self.setItems()
 
     def refresh(self):
