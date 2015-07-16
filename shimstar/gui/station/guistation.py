@@ -493,7 +493,7 @@ class GuiStation(DirectObject):
 
     def onChooseNpc(self, args):
         self.buttonSound2.play()
-        self.InDialogAnimationInstance.start()
+        # self.InDialogAnimationInstance.start()
         # TODO  :: here is commented load of npc dialog
         # self.CEGUI.WindowManager.getWindow("Station/Dialog").moveToFront()
         npcChoosed = args.window.getUserData()
@@ -504,7 +504,7 @@ class GuiStation(DirectObject):
         # self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setProperty("PushedImage", "set:TempImageset" + str(
         #     npcChoosed.getFace()) + " image:full_image")
         # self.CEGUI.WindowManager.getWindow("Station/Dialog/Face").setUserData(npcChoosed)
-        # self.OutNPCAnimationInstance.start()
+        self.OutNPCAnimationInstance.start()
         # self.loadKeywords(npcChoosed)
         if npcChoosed.getTypeNpc()==C_TYPE_NPC_SHOP:
             GuiStationShop.getInstance(self.root).show()
