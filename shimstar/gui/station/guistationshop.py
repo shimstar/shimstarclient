@@ -34,25 +34,20 @@ class GuiStationShop:
     def itemDropped(self,args):
         if args.dragDropItem.getChildCount()>0:
             item = args.dragDropItem.getChildAtIdx(0).getUserData()
+            # print "itemDropped " + str(item)
             if "achat" in args.window.getName():
                 nm = netMessage(C_NETWORK_CHARACTER_SELL_ITEM)
                 nm.addUInt(User.getInstance().getId())
-                # nm.addUInt(User.getInstance().getCurrentCharacter().getId())
                 nm.addUInt(item.getId())
                 NetworkMainServer.getInstance().sendMessage(nm)
                 args.dragDropItem.removeChildWindow(args.dragDropItem.getChildAtIdx(0))
             elif "vente" in args.window.getName():
                 nm = netMessage(C_NETWORK_CHARACTER_BUY_ITEM)
                 nm.addUInt(User.getInstance().getId())
-                # nm.addUInt(User.getInstance().getCurrentCharacter().getId())
-                nm.addUInt(item.getId())
+                nm.addUInt(item.getTemplateId())
                 NetworkMainServer.getInstance().sendMessage(nm)
-                args.dragDropItem.removeChildWindow(args.dragDropItem.getChildAtIdx(0))
-
-
 
     def initAchatWindow(self):
-
         i = 0
         j = 0
         listOfImageSet = {}
