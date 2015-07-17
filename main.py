@@ -188,30 +188,30 @@ class ShimStarClient(DirectObject):
             base.userExit()
             # return Task.done
         elif state == C_QUIT:
+            try:
+                if ((GameInSpace.getInstance() is not None and GameInSpace.getInstance().isStarted() == False)or GameInSpace.getInstance() is None) and (Zone.getInstance() is None or (Zone.getInstance() is not None and Zone.getInstance().isStarted())):# == False:# and GameState.getInstance().getMainNetworkStarted() == False :
+                    # sys.exit()
+                    base.userExit()
+                    # return Task.done
+                    # os._exit(0)
+                else:
+                    if GameInSpace.getInstance() is not None and GameInSpace.getInstance().isStarted():
+                        if GameInSpace.getInstance() is not None:
+                            GameInSpace.getInstance().stop()
+                            GameInSpace.getInstance().destroy()
 
-            if ((GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted() == False)or GameInSpace.getInstance() is None) and (Zone.getInstance() is None or (Zone.getInstance() is not None and Zone.getInstance().isStarted())) == False:# and GameState.getInstance().getMainNetworkStarted() == False :
-                # sys.exit()
-                # base.userExit()
-                # return Task.done
+                    if Zone.getInstance() is not None and Zone.getInstance().isStarted():
+                        if Zone.getInstance() is not None:
+                            Zone.getInstance().stop()
+                            Zone.getInstance().destroy()
+                        if NetworkZoneServer.getInstance() is not None:
+                            NetworkZoneServer.getInstance().stop()
+                    if NetworkMainServer.getInstance().isStarted():
+                        if NetworkMainServer.getInstance() is not None:
+                            NetworkMainServer.getInstance().stop()
+                    time.sleep(5)
+            except:
                 os._exit(0)
-            else:
-                if GameInSpace.getInstance() is not None and GameInspace.getInstance().isStarted():
-                    if GameInSpace.getInstance() is not None:
-                        GameInSpace.getInstance().stop()
-
-                if Zone.getInstance() is not None and Zone.getInstance().isStarted():
-                    if Zone.getInstance() is not None:
-                        Zone.getInstance().stop()
-                        Zone.getInstance().destroy()
-                    if NetworkZoneServer.getInstance() is not None:
-                        NetworkZoneServer.getInstance().stop()
-                        # print "trying to join nwzserver"
-                        # NetworkZoneServer.getInstance().join()
-                        # print "joined nwzserver" + str(NetworkZoneServer.getInstance().isAlive())
-                if NetworkMainServer.getInstance().isStarted():
-                    if NetworkMainServer.getInstance() is not None:
-                        NetworkMainServer.getInstance().stop()
-                time.sleep(5)
 
 
 
