@@ -89,6 +89,15 @@ class Ship:
     def removeItemInInventory(self, item):
         self.itemInInventory.remove(item)
 
+    def removeItemInInventoryById(self, itemId):
+        itemToRemove = None
+        for it in self.itemInInventory:
+            if it.getId() == itemId:
+                itemToRemove = it
+
+        if itemToRemove is not None :
+            self.itemInInventory.remove(itemToRemove)
+
     def getFirstPlaceFreeInInventory(self):
         """
             return the first place free in the inventory. The item have each a number allowing to locate it when the inventory is shown.

@@ -38,6 +38,7 @@ class Bullet(threading.Thread):
             self.lastMove = globalClock.getRealTime()
             self.speed = speed
             Bullet.listOfBullet[self.id] = self
+            self.node.setShaderAuto()
 
     @staticmethod
     def getBullet(id):

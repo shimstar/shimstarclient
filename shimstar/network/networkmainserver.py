@@ -122,6 +122,16 @@ class NetworkMainServer(threading.Thread):
                 msgTab.append(myIterator.getUint32())  # mission status
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_CHARACTER_BUY_ITEM:
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_CHARACTER_SELL_ITEM:
+            msgTab.append(myIterator.getUint32())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_CREATE_USER:
             msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)

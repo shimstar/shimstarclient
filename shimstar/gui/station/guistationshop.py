@@ -1,17 +1,52 @@
 __author__ = 'ogilp'
+import direct.directbase.DirectStart
+from direct.showbase.DirectObject import DirectObject
+from direct.task import Task
 from shimstar.npc.npcinstation import *
 from shimstar.gui.shimcegui import *
 from shimstar.user.user import *
 from shimstar.gui.core.iteminfo import *
 from shimstar.items.templates.itemtemplate import *
 
-class GuiStationShop:
+class GuiStationShop(DirectObject):
     instance = None
     def __init__(self):
         self.npc = None
         self.CEGUI = ShimCEGUI.getInstance()
         self.root = None
         self.setupUI()
+
+    def event(self,task):
+        toUpdate=False
+        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_BUY_ITEM)
+
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                netMsg = msg.getMessage()
+                typeItem = int(netMsg[0])
+                templateId = int(netMsg[1])
+                id = int(netMsg[0])
+                it = itemFactory.getItemFromTemplateType(templateId, typeItem)
+                it.setId(id)
+                User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
+                NetworkMainServer.getInstance().removeMessage(msg)
+                toUpdate=True
+
+        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_SELL_ITEM)
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                netMsg = msg.getMessage()
+                itemId = int(netMsg[0])
+                User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(itemId)
+                NetworkMainServer.getInstance().removeMessage(msg)
+                toUpdate=True
+
+        if toUpdate == True :
+            self.emptyInvWindow()
+            self.initInvWindow()
+            self.initAchatWindow()
+            self.OutTransAnimationInstance.start()
+        return task.cont
 
 
     def emptyInvWindow(self, wndName=""):
@@ -46,6 +81,10 @@ class GuiStationShop:
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getTemplateId())
                 NetworkMainServer.getInstance().sendMessage(nm)
+            self.InAnimationInstance.start()
+            self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
+
+
 
     def initAchatWindow(self):
         i = 0
@@ -103,7 +142,6 @@ class GuiStationShop:
             i = 0
             j = 0
             listOfImageSet = {}
-            print inv
             for sl in range(40):
                 wnd = self.CEGUI.WindowManager.createWindow("DragContainer",
                                                             "Station/Shop/gpventepanel/DragDropSlot" + str(i) + "-" + str(j))
@@ -169,12 +207,17 @@ class GuiStationShop:
         self.InAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
         self.OutAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Shop"))
         self.InAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Shop"))
+        self.OutTransAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+        self.InTransAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+        self.OutTransAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Shop/transaction"))
+        self.InTransAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Shop/transaction"))
 
         self.CEGUI.WindowManager.getWindow("Station/Shop").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                               self, 'onCloseClicked')
 
     def hide(self):
         self.OutAnimationInstance.start()
+        taskMgr.remove("event guishop")
 
     def show(self):
         self.InAnimationInstance.start()
@@ -182,6 +225,7 @@ class GuiStationShop:
         self.emptyInvWindow()
         self.initInvWindow()
         self.initAchatWindow()
+        taskMgr.add(self.event,"event guishop",-40)
 
     def onCloseClicked(self,args):
         self.hide()

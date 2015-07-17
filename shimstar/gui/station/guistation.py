@@ -132,7 +132,7 @@ class GuiStation(DirectObject):
         self.OutQuitAnimationInstance.start()
 
     def onQuiGameConfirmed(self, args):
-        GameState.getInstance().setState(C_QUIT)
+        GameState.getInstance().setState(C_QUIT_MENU)
 
     def loadResolution(self):
         if len(self.resolutionList) == 0:
@@ -294,6 +294,7 @@ class GuiStation(DirectObject):
         taskMgr.remove("event reader")
         self.CEGUI.WindowManager.destroyWindow(self.root)
         self.ambientSound.stop()
+        # GuiStationShop.getInstance().hide()
 
     def modifyItem(self, winArgs):
         self.OutAddSuppressAnimationInstance.start()

@@ -33,17 +33,8 @@ class ShimstarItem(object):
 				self.template=ItemTemplate.getTemplateById(id)
 				self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
 			elif self.typeItem!=C_ITEM_WEAPON and self.typeItem!=C_ITEM_ENGINE:
-			#~ if isinstance(self,Weapon)==False and isinstance(self,Engine)==False:
-			#~ if True:
-				
 				self.template=ItemTemplate.getTemplate(id,self.typeItem)
-				self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
-			#~ print t
-			#~ if isinstance(self.template,WeaponTemplate) or isinstance(self.template,EngineTemplate):
-				#~ self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
-			#~ else:
-				#~ self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()		
-				
+				self.name,self.cost,self.sell,self.energyCost,self.space,self.img,self.location,self.typeItem=self.template.getInfos()
 		
 	def loadXml(self,xmlPart):
 		self.id=int(xmlPart.getElementsByTagName('iditem')[0].firstChild.data)
