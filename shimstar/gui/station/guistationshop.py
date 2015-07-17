@@ -50,19 +50,30 @@ class GuiStationShop(DirectObject):
 
 
     def emptyInvWindow(self, wndName=""):
+        print "emptyWindow"
         if wndName == "":
             wndName = "Station/Shop/gpachatpanel"
         if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
             for itChild in range(self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
                 wnd = self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx(0)
+                for itImg in range(wnd.getChildCount()):
+                    imgWnd = wnd.getChildAtIdx(0)
+                    wnd.removeChildWindow(imgWnd)
+                    self.CEGUI.WindowManager.destroyWindow(imgWnd)
                 self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
+                self.CEGUI.WindowManager.destroyWindow(wnd)
                 wnd.destroy()
 
         wndName = "Station/Shop/gpventepanel"
         if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
             for itChild in range(self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
                 wnd = self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx(0)
+                for itImg in range(wnd.getChildCount()):
+                    imgWnd = wnd.getChildAtIdx(0)
+                    wnd.removeChildWindow(imgWnd)
+                    self.CEGUI.WindowManager.destroyWindow(imgWnd)
                 self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
+                self.CEGUI.WindowManager.destroyWindow(wnd)
                 wnd.destroy()
 
 
@@ -75,7 +86,9 @@ class GuiStationShop(DirectObject):
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getId())
                 NetworkMainServer.getInstance().sendMessage(nm)
-                args.dragDropItem.removeChildWindow(args.dragDropItem.getChildAtIdx(0))
+                wnd=args.dragDropItem.getChildAtIdx(0)
+                args.dragDropItem.removeChildWindow(wnd)
+                self.CEGUI.WindowManager.destroyWindow(wnd)
             elif "vente" in args.window.getName():
                 nm = netMessage(C_NETWORK_CHARACTER_BUY_ITEM)
                 nm.addUInt(User.getInstance().getId())
@@ -144,7 +157,7 @@ class GuiStationShop(DirectObject):
             listOfImageSet = {}
             for sl in range(40):
                 wnd = self.CEGUI.WindowManager.createWindow("DragContainer",
-                                                            "Station/Shop/gpventepanel/DragDropSlot" + str(i) + "-" + str(j))
+                                                            "Station/Shop/gpventepanel/DragDropSlotInv" + str(i) + "-" + str(j))
                 wnd.setProperty("UnifiedAreaRect", "{{0," + str(10 + 70 * i) + "},{0," + str(10 + 70 * j) + "},{0," + str(
                     10 + 64 + 70 * i) + "},{0," + str(10 + 64 + 70 * j) + "}}")
                 wnd.subscribeEvent(PyCEGUI.Window.EventDragDropItemDropped, self, 'itemDropped')
@@ -161,10 +174,10 @@ class GuiStationShop(DirectObject):
                 locI = numItemI % 7
                 locJ = int(numItemI / 7)
                 panel = self.CEGUI.WindowManager.getWindow("Station/Shop/gpventepanel")
-                wnd = self.CEGUI.WindowManager.getWindow("Station/Shop/gpventepanel/DragDropSlot" + str(locI) + "-" + str(locJ))
+                wnd = self.CEGUI.WindowManager.getWindow("Station/Shop/gpventepanel/DragDropSlotInv" + str(locI) + "-" + str(locJ))
 
                 img = self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage",
-                                                            "Station/Shop/gpventepanel/DragDropSlot" + str(locI) + "-" + str(
+                                                            "Station/Shop/gpventepanel/DragDropSlotInv" + str(locI) + "-" + str(
                                                                 locJ) + "/img" + str(locI) + "-" + str(locJ))
                 img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
 
