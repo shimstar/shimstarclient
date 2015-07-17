@@ -336,12 +336,19 @@ class Ship:
         return items
 
     def uninstallItem(self, slot):
-        self.itemInInventory.append(slot.getItem())
-        slot.setItem(None)
-        msg = netMessage(C_NETWORK_CHARACTER_UNINSTALL_SLOT)
-        msg.addUInt(self.owner.userRef.id)
-        msg.addUInt(slot.getId())
-        NetworkMainServer.getInstance().sendMessage(msg)
+        itemUninstalled=slot.getItem()
+        if itemUninstalled is not None:
+            self.itemInInventory.append(slot.getItem())
+
+            slot.setItem(None)
+            msg = netMessage(C_NETWORK_CHARACTER_UNINSTALL_SLOT)
+            msg.addUInt(self.owner.userRef.id)
+            msg.addUInt(slot.getId())
+            NetworkMainServer.getInstance().sendMessage(msg)
+            if itemUninstalled.getTypeItem() == C_ITEM_WEAPON:
+                self.weapons = None
+            if itemUninstalled.getTypeItem() == C_ITEM_ENGINE:
+                self.engine = None
 
     def removeTemplateSlots(self):
         self.slots = []
@@ -361,6 +368,10 @@ class Ship:
                 msg.addUInt(slotToInstall.getId())
                 msg.addUInt(itemToInstall.getId())
                 NetworkMainServer.getInstance().sendMessage(msg)
+                if itemToInstall.getTypeItem() == C_ITEM_WEAPON:
+                    self.weapons = itemToInstall
+                if itemToInstall.getTypeItem() == C_ITEM_ENGINE:
+                    self.engine = itemToInstall
 
     def addMinerals(self, id, typeMineral, qt):
         alreadyGot = False
