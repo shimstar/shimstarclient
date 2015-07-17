@@ -481,3 +481,9 @@ class Ship:
 
     def addSlot(self, s):
         self.slots.append(s)
+        it=s.getItem()
+        if it is not None:
+            if it.getTypeItem() == C_ITEM_WEAPON:
+                self.weapons = it
+            if it.getTypeItem() == C_ITEM_ENGINE:
+                self.engine = it
