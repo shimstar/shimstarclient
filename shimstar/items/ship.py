@@ -363,6 +363,7 @@ class Ship:
             if itemToInstall != None:
                 slotToInstall.setItem(itemToInstall)
                 self.itemInInventory.remove(itemToInstall)
+
                 msg = netMessage(C_NETWORK_CHARACTER_INSTALL_SLOT)
                 msg.addUInt(self.owner.userRef.id)
                 msg.addUInt(slotToInstall.getId())

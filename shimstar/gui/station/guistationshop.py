@@ -25,7 +25,7 @@ class GuiStationShop(DirectObject):
                 netMsg = msg.getMessage()
                 typeItem = int(netMsg[0])
                 templateId = int(netMsg[1])
-                id = int(netMsg[0])
+                id = int(netMsg[2])
                 it = itemFactory.getItemFromTemplateType(templateId, typeItem)
                 it.setId(id)
                 User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
@@ -94,7 +94,7 @@ class GuiStationShop(DirectObject):
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getTemplateId())
                 NetworkMainServer.getInstance().sendMessage(nm)
-            self.InAnimationInstance.start()
+            # self.InTransAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
 
 

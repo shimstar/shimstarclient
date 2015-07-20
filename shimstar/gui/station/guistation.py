@@ -298,7 +298,8 @@ class GuiStation(DirectObject):
 
     def modifyItem(self, winArgs):
         self.OutAddSuppressAnimationInstance.start()
-        self.choix = chooseItemShip(winArgs.window.getUserData(), User.getInstance().getCurrentCharacter().getShip())
+        # self.choix = chooseItemShip(winArgs.window.getUserData(), User.getInstance().getCurrentCharacter().getShip())
+        self.choix = chooseItemShip.getInstance(winArgs.window.getUserData(), User.getInstance().getCurrentCharacter().getShip())
 
     def emptyWindowSlot(self, winArgs=None):
         wndName = "Station/Vaisseau/bckground/Front"

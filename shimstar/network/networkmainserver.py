@@ -147,7 +147,6 @@ class NetworkMainServer(threading.Thread):
             portudp2 = myIterator.getUint32()
             if NetworkZoneServer.getInstance() != None:
                 NetworkZoneServer.getInstance().stop()
-                GameState.getInstance().setZoneNetworkStarted(False)
                 # ~ print "############# " + str(ip) + '/' + str(port)
             NetworkZoneServer(ip, port)
             GameState.getInstance().setState(C_RECEIVED_INFOZONE)

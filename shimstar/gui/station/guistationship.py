@@ -7,6 +7,7 @@ from shimstar.gui.core.iteminfo import *
 
 class chooseItemShip():
     # ~ def __init__(self,slotType,location,ship):
+    instance = None
     def __init__(self, pslot, ship):
         self.ship = ship
         self.slot = pslot
@@ -16,13 +17,31 @@ class chooseItemShip():
         self.OutShipAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InShipAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
         self.OutShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/ChoixItem"))
-        self.CEGUI.WindowManager.getWindow("Station/ChoixItem").moveToFront()
+
         self.InShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/ChoixItem"))
         self.CEGUI.WindowManager.getWindow("Station/ChoixItem").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                                self, 'closeClicked')
         self.InShipAnimationInstance.start()
+        self.CEGUI.WindowManager.getWindow("Station/ChoixItem").moveToFront()
         self.emptyInvWindow()
         self.fillInventory()
+
+    @staticmethod
+    def getInstance(pslot,pship):
+        if chooseItemShip.instance is None:
+            chooseItemShip.instance = chooseItemShip(pslot,pship)
+        else:
+            chooseItemShip.instance.init(pslot,pship)
+
+    def init(self,slot,ship):
+        self.slot = slot
+        self.ship = ship
+        self.location = slot.getLocation()
+        self.listOfImageSet = {}
+        self.emptyInvWindow()
+        self.fillInventory()
+        self.InShipAnimationInstance.start()
+        self.CEGUI.WindowManager.getWindow("Station/ChoixItem").moveToFront()
 
     def fillInventory(self):
         inventory = self.ship.getItemInInventory()
