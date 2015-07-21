@@ -29,6 +29,7 @@ class GuiStationShop(DirectObject):
                 it = itemFactory.getItemFromTemplateType(templateId, typeItem)
                 it.setId(id)
                 User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
+                User.getInstance().getCurrentCharacter().setCoin(int(netMsg[3]))
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate=True
 
@@ -38,6 +39,7 @@ class GuiStationShop(DirectObject):
                 netMsg = msg.getMessage()
                 itemId = int(netMsg[0])
                 User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(itemId)
+                User.getInstance().getCurrentCharacter().setCoin(int(netMsg[1]))
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate=True
 
@@ -209,6 +211,8 @@ class GuiStationShop(DirectObject):
                     label.setText(str(it.getQuantity()))
                     panel.addChildWindow(label)
                 numItemI += 1
+
+        self.CEGUI.WindowManager.getWindow("Station/Shop/solde").setText(str(User.getInstance().getCurrentCharacter().getCoin()) + "    Credit Standard")
 
     def showInfo(self, args):
         if args.window.getChildCount() > 0:
