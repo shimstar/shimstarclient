@@ -1,5 +1,6 @@
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
+from pandac.PandaModules import *
 from pandac.PandaModules import CollisionTraverser, CollisionNode
 import xml.dom.minidom
 import os, sys
@@ -17,6 +18,9 @@ class Asteroid(DirectObject):
         self.hpr = (0, 0, 0)
         self.name = ""
         self.id = 0
+        self.egg = ""
+        self.eggMiddle = ""
+        self.eggFar = ""
         self.className = "asteroid"
         self.scale = 1
         self.node = None
@@ -48,9 +52,19 @@ class Asteroid(DirectObject):
 
         self.hpr = (hprh, hprr, hprp)
         if templateAst != None:
-            self.name, self.egg, self.mass, self.text = templateAst.getInfos()
+            self.name, self.egg, self.mass, self.text, self.eggMiddle, self.eggFar = templateAst.getInfos()
             self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+            # self.node = NodePath(FadeLODNode('lodast' + str(self.id)))
             self.node.reparentTo(render)
+            # lod0 = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
+            # lod0.reparentTo(self.node)
+            # self.node.node().addSwitch(999, 0)
+            # lod0 = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.eggMiddle)
+            # lod0.reparentTo(self.node)
+            # self.node.node().addSwitch(1999, 1000)
+            # lod0 = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.eggFar)
+            # lod0.reparentTo(self.node)
+            # self.node.node().addSwitch(999999, 2000)
             self.node.setName("asteroid_" + str(self.id))
             self.node.setPos(self.pos)
             self.node.setScale(self.scale)
