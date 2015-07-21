@@ -97,6 +97,17 @@ class GuiStationShop(DirectObject):
             # self.InTransAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
 
+    def checkItemOk(self,it):
+        toReturn = False
+        char = User.getInstance().getCurrentCharacter()
+        if char.getCoin() >= it.getCost():
+            toReturn = True
+        else:
+            toReturn = False
+
+
+        return toReturn
+
 
 
     def initAchatWindow(self):
@@ -131,7 +142,10 @@ class GuiStationShop(DirectObject):
             img = self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage",
                                                         "Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(
                                                             locJ) + "/img" + str(locI) + "-" + str(locJ))
-            img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
+            if self.checkItemOk(it):
+                img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
+            else:
+                img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()) +"ko")
 
             img.setMousePassThroughEnabled(True)
             img.setUserData(it)
