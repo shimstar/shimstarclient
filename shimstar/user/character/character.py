@@ -22,7 +22,7 @@ class Character:
         self.visible = False
         self.userRef = userRef  # user obj
         self.readDialogs = []
-        print "character::init" + str(self.id)
+        print "character::init" + str(self.id) + "// idzone =" + str(idZone)
 
     def getCoin(self):
         return self.coin
