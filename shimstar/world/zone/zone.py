@@ -393,12 +393,15 @@ class Zone(threading.Thread):
                 if self.typeZone == C_TYPEZONE_SPACE:
                     self.box = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
                     self.box.setScale(self.scale)
+                    # self.box.setScale(800)
                     self.box.reparentTo(render)
                     self.box.setLightOff()
                     self.box.clearFog()
+
                     asts = z.getElementsByTagName('asteroid')
                     for a in asts:
                         self.listOfAsteroid.append(Asteroid(a))
+                        # break
 
                     stations = z.getElementsByTagName('station')
                     for s in stations:

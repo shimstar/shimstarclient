@@ -60,7 +60,7 @@ class GameInSpace(DirectObject, threading.Thread):
         ship = User.getInstance().getCurrentCharacter().getShip()
         ship.setInvisible()
         alight = AmbientLight('alight')
-        alight.setColor(VBase4(0.7, 0.7, 0.7, 1))
+        alight.setColor(VBase4(0.4, 0.4, 0.4, 1))
         alnp = render.attachNewNode(alight)
         render.setLight(alnp)
         self.shooting = False

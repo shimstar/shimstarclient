@@ -26,7 +26,7 @@ class Ship:
     lock = threading.Lock()
 
     def __init__(self, id, idTemplate, hullpoints=0, visible=True):
-        print "ship::init " + str(id) + "/" + str(idTemplate)
+        # print "ship::init " + str(id) + "/" + str(idTemplate)
         Ship.lock.acquire()
         Ship.listOfShip[int(id)] = self
         Ship.lock.release()
@@ -280,20 +280,6 @@ class Ship:
                 return it
         return None
 
-    def getItemInInventory(self):
-        return self.itemInInventory
-
-    def addItemInInventory(self, item):
-        self.itemInInventory.append(item)
-
-    def removeItemInInventory(self, idItem):
-        itFound = None
-        for it in self.itemInInventory:
-            if it.getId() == idItem:
-                itFound = it
-                break
-        if itFound != None:
-            self.itemInInventory.remove(itFound)
 
     def getFirstPlaceFreeInInventory(self):
         """

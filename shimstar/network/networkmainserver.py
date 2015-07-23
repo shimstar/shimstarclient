@@ -120,6 +120,21 @@ class NetworkMainServer(threading.Thread):
             for m in range(nbMission):
                 msgTab.append(myIterator.getUint32())  # mission id
                 msgTab.append(myIterator.getUint32())  # mission status
+            nbItemInvStation = myIterator.getUint32()
+            msgTab.append(nbItemInvStation)
+            for nis in range(nbItemInvStation):
+                msgTab.append(myIterator.getUint32())
+                msgTab.append(myIterator.getUint32())
+                msgTab.append(myIterator.getUint32())
+                msgTab.append(myIterator.getUint32())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_CHARACTER_STATION2INV:
+            msgTab.append(myIterator.getUint32())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_CHARACTER_INV2STATION:
+            msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CHARACTER_BUY_ITEM:

@@ -8,51 +8,59 @@ from shimstar.user.user import *
 from shimstar.gui.core.iteminfo import *
 from shimstar.items.templates.itemtemplate import *
 
-class GuiStationShop(DirectObject):
+class GuiStationInventory(DirectObject):
     instance = None
     def __init__(self):
         self.npc = None
         self.CEGUI = ShimCEGUI.getInstance()
         self.root = None
         self.setupUI()
+        self.itemInStation=[]
+
+    def setItemInStation(self,listIt):
+        self.itemInStation = listIt
 
     def event(self,task):
-        toUpdate=False
-        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_BUY_ITEM)
-
+        toUpdate = False
+        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_INV2STATION)
         if len(tempMsg) > 0:
             for msg in tempMsg:
                 netMsg = msg.getMessage()
-                typeItem = int(netMsg[0])
-                templateId = int(netMsg[1])
-                id = int(netMsg[2])
-                it = itemFactory.getItemFromTemplateType(templateId, typeItem)
-                it.setId(id)
-                User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
-                User.getInstance().getCurrentCharacter().setCoin(int(netMsg[3]))
+                idItem = int(netMsg[0])
+                ship=User.getInstance().getCurrentCharacter().getShip()
+                item = ship.getItemFromInventory(idItem)
+                if item is not None:
+                    User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(idItem)
+                    self.itemInStation.append(item)
                 NetworkMainServer.getInstance().removeMessage(msg)
-                toUpdate=True
+                toUpdate = True
 
-        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_SELL_ITEM)
+        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_STATION2INV)
         if len(tempMsg) > 0:
             for msg in tempMsg:
                 netMsg = msg.getMessage()
-                itemId = int(netMsg[0])
-                User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(itemId)
-                User.getInstance().getCurrentCharacter().setCoin(int(netMsg[1]))
-                NetworkMainServer.getInstance().removeMessage(msg)
-                toUpdate=True
+                idItem = int(netMsg[0])
+                ship=User.getInstance().getCurrentCharacter().getShip()
+                itToRemove=None
+                for it in self.itemInStation:
+                    if it.getId() == idItem:
+                        itToRemove = it
+                        break
+                if itToRemove is not None:
+                    ship.addItemInInventory(itToRemove)
+                    self.itemInStation.remove(itToRemove)
 
-        if toUpdate == True :
+                NetworkMainServer.getInstance().removeMessage(msg)
+                toUpdate = True
+
+        if toUpdate:
             self.emptyInvWindow()
+            self.initInvStation()
             self.initInvWindow()
-            self.initAchatWindow()
-            self.OutTransAnimationInstance.start()
         return task.cont
 
 
     def emptyInvWindow(self, wndName=""):
-        print "emptyWindow"
         if wndName == "":
             wndName = "Station/Shop/gpachatpanel"
         if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
@@ -83,44 +91,31 @@ class GuiStationShop(DirectObject):
         if args.dragDropItem.getChildCount()>0:
             item = args.dragDropItem.getChildAtIdx(0).getUserData()
             # print "itemDropped " + str(item)
-            if "achat" in args.window.getName():
-                nm = netMessage(C_NETWORK_CHARACTER_SELL_ITEM)
+            if "vente" in args.window.getName():
+                nm = netMessage(C_NETWORK_CHARACTER_STATION2INV)
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getId())
+                nm.addUInt(User.getInstance().getCurrentCharacter().getIdZone())
                 NetworkMainServer.getInstance().sendMessage(nm)
-                wnd=args.dragDropItem.getChildAtIdx(0)
-                args.dragDropItem.removeChildWindow(wnd)
-                self.CEGUI.WindowManager.destroyWindow(wnd)
-            elif "vente" in args.window.getName():
-                nm = netMessage(C_NETWORK_CHARACTER_BUY_ITEM)
+            elif "achat" in args.window.getName():
+                nm = netMessage(C_NETWORK_CHARACTER_INV2STATION)
                 nm.addUInt(User.getInstance().getId())
-                nm.addUInt(item.getTemplateId())
+                nm.addUInt(item.getId())
+                nm.addUInt(User.getInstance().getCurrentCharacter().getIdZone())
                 NetworkMainServer.getInstance().sendMessage(nm)
             # self.InTransAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
 
-    def checkItemOk(self,it):
-        toReturn = False
-        char = User.getInstance().getCurrentCharacter()
-        if char.getCoin() >= it.getCost():
-            toReturn = True
-        else:
-            toReturn = False
+    def initInvStation(self):
+        self.CEGUI.WindowManager.getWindow("Station/Shop/GpAchat").setText("Soute de station")
 
-
-        return toReturn
-
-
-
-    def initAchatWindow(self):
-        self.CEGUI.WindowManager.getWindow("Station/Shop/GpAchat").setText("Marchand")
+        inv=self.itemInStation
         i = 0
         j = 0
         listOfImageSet = {}
-
         for sl in range(40):
             wnd = self.CEGUI.WindowManager.createWindow("DragContainer",
-                                                        "Station/Shop/gpachatpanel/DragDropSlot" + str(i) + "-" + str(j))
+                                                        "Station/Shop/gpachatpanel/DragDropSlotInv" + str(i) + "-" + str(j))
             wnd.setProperty("UnifiedAreaRect", "{{0," + str(10 + 70 * i) + "},{0," + str(10 + 70 * j) + "},{0," + str(
                 10 + 64 + 70 * i) + "},{0," + str(10 + 64 + 70 * j) + "}}")
             wnd.subscribeEvent(PyCEGUI.Window.EventDragDropItemDropped, self, 'itemDropped')
@@ -131,24 +126,18 @@ class GuiStationShop(DirectObject):
             if i > 6:
                 i = 0
                 j += 1
-                # ~ print self.items
         numItemI = 0
         numItemJ = 0
-
-        listOfTemplate=ItemTemplate.getListOfTemplate()
-        for itId in listOfTemplate:
-            it=listOfTemplate[itId]
+        for it in inv:
             locI = numItemI % 7
             locJ = int(numItemI / 7)
             panel = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel")
-            wnd = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(locJ))
+            wnd = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel/DragDropSlotInv" + str(locI) + "-" + str(locJ))
+
             img = self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage",
-                                                        "Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(
+                                                        "Station/Shop/gpachatpanel/DragDropSlotInv" + str(locI) + "-" + str(
                                                             locJ) + "/img" + str(locI) + "-" + str(locJ))
-            if self.checkItemOk(it):
-                img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
-            else:
-                img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()) +"ko")
+            img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
 
             img.setMousePassThroughEnabled(True)
             img.setUserData(it)
@@ -166,7 +155,7 @@ class GuiStationShop(DirectObject):
             numItemI += 1
 
     def initInvWindow(self):
-        self.CEGUI.WindowManager.getWindow("Station/Shop/GpAchat").setText("Inventaire")
+        self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").setText("Soute de vaisseau")
         ship=User.getInstance().getCurrentCharacter().getShip()
         if ship is not None:
             inv=ship.getItemInInventory()
@@ -229,11 +218,11 @@ class GuiStationShop(DirectObject):
 
     @staticmethod
     def getInstance(root):
-        if GuiStationShop.instance is None:
-            GuiStationShop.instance=GuiStationShop()
-            GuiStationShop.instance.root = root
+        if GuiStationInventory.instance is None:
+            GuiStationInventory.instance=GuiStationInventory()
+            GuiStationInventory.instance.root = root
 
-        return GuiStationShop.instance
+        return GuiStationInventory.instance
 
     def setupUI(self):
         self.OutAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
@@ -257,7 +246,7 @@ class GuiStationShop(DirectObject):
         self.CEGUI.WindowManager.getWindow("Station/Shop").moveToFront()
         self.emptyInvWindow()
         self.initInvWindow()
-        self.initAchatWindow()
+        self.initInvStation()
         taskMgr.add(self.event,"event guishop",-40)
 
     def onCloseClicked(self,args):

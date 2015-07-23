@@ -18,6 +18,7 @@ from shimstar.game.gamestate import *
 from shimstar.items.itemfactory import *
 from shimstar.npc.npcinstation import *
 from shimstar.gui.station.guistationshop import *
+from shimstar.gui.station.guistationinventory import *
 
 class GuiStation(DirectObject):
     def __init__(self):
@@ -33,6 +34,7 @@ class GuiStation(DirectObject):
         self.ambientSound.setVolume(shimConfig.getInstance().getAmbientVolume())
         self.ambientSound.play()
         self.listOfImageSet = {}
+        self.inventory = []
         self.CEGUI = ShimCEGUI.getInstance()
         self.name = self.zone.getName()
         self.back = self.zone.getEgg()
@@ -59,6 +61,7 @@ class GuiStation(DirectObject):
             if len(tempMsg) > 0:
                 for msg in tempMsg:
                     netMsg = msg.getMessage()
+                    print netMsg
                     ch = User.getInstance().getCurrentCharacter()
                     ch.setShip(netMsg[0], netMsg[1], netMsg[2], False)
                     nbInv = netMsg[3]
@@ -119,6 +122,20 @@ class GuiStation(DirectObject):
                     # tempMission=Mission(idMission)
                     # tempMission.setStatus(statusMission)
                     # ch=User.getInstance().getCurrentCharacter().addMission(tempMission)
+
+                    nbItemInvStation = netMsg[compteur]
+                    compteur += 1
+                    for invS in range(nbItemInvStation):
+                        typeItem=netMsg[compteur]
+                        template=netMsg[compteur+1]
+                        id=netMsg[compteur+2]
+                        nb=netMsg[compteur+3]
+                        compteur += 4
+                        it = itemFactory.getItemFromTemplateType(template, typeItem)
+                        it.setId(idItem)
+                        it.setNb(nb)
+                        self.inventory.append(it)
+
                     NetworkMainServer.getInstance().removeMessage(msg)
                     self.usrLoaded = True
                 # menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
@@ -192,12 +209,14 @@ class GuiStation(DirectObject):
             self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront()
             self.emptyWindowSlot()
         elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
-            self.InInventaireAnimationInstance.start()
-            self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
-            invInstance = menuInventory.getInstance('invstation')
-            if invInstance.getObj() is None:
-                invInstance.setObj(User.getInstance().getCurrentCharacter().getShip())
-            invInstance.show()
+            GuiStationInventory.getInstance(self.root).setItemInStation(self.inventory)
+            GuiStationInventory.getInstance(self.root).show()
+            # self.InInventaireAnimationInstance.start()
+            # self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
+            # invInstance = menuInventory.getInstance('invstation')
+            # if invInstance.getObj() is None:
+            #     invInstance.setObj(User.getInstance().getCurrentCharacter().getShip())
+            # invInstance.show()
 
     def slotClicked(self, e):
         print "slotclicked"
@@ -406,10 +425,10 @@ class GuiStation(DirectObject):
         self.OutDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
         self.InDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
 
-        self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-        self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-        self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
-        self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+        # self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
+        # self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
+        # self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
+        # self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 
         self.OutOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
@@ -435,7 +454,8 @@ class GuiStation(DirectObject):
 
     def closeClicked(self, windowEventArgs):
         if windowEventArgs.window.getName() == "Inventaire":
-            self.OutInventaireAnimationInstance.start()
+            # self.OutInventaireAnimationInstance.start()
+            GuiStationInventory.getInstance(self.root).hide()
         elif windowEventArgs.window.getName() == "Station/Vaisseau":
             self.OutShipAnimationInstance.start()
         elif windowEventArgs.window.getName() == "Station/Personnel":
