@@ -127,7 +127,7 @@ class GuiStation(DirectObject):
                     for invS in range(nbItemInvStation):
                         typeItem=netMsg[compteur]
                         template=netMsg[compteur+1]
-                        id=netMsg[compteur+2]
+                        idItem=netMsg[compteur+2]
                         nb=netMsg[compteur+3]
                         compteur += 4
                         it = itemFactory.getItemFromTemplateType(template, typeItem)

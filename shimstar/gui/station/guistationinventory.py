@@ -83,7 +83,6 @@ class GuiStationInventory(DirectObject):
     def itemDropped(self,args):
         if args.dragDropItem.getChildCount()>0:
             item = args.dragDropItem.getChildAtIdx(0).getUserData()
-            # print "itemDropped " + str(item)
             if "vente" in args.window.getName():
                 nm = netMessage(C_NETWORK_CHARACTER_STATION2INV)
                 nm.addUInt(User.getInstance().getId())

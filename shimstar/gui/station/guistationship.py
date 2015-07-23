@@ -45,6 +45,8 @@ class chooseItemShip():
 
     def fillInventory(self):
         inventory = self.ship.getItemInInventory()
+        for it in User.getInstance().getCurrentCharacter().getInvStation():
+            inventory.append(it)
         self.slot = self.slot
         types = self.slot.getTypes()
         i = 0

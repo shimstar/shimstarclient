@@ -67,7 +67,7 @@ class NetworkMainServer(threading.Thread):
         connexion = netDatagram.getConnection()
         msgID = myIterator.getUint32()
         msgTab = []
-        print "mainserver msgID:: " + str(msgID)
+        # print "mainserver msgID:: " + str(msgID)
         if msgID == C_NETWORK_CONNECT:
             state = myIterator.getUint32()
             msgTab.append(state)
