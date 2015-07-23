@@ -18,11 +18,42 @@ class Character:
         self.ship = None
         self.idZone = idZone
         self.lastStation = 0
+        self.invStation = []
         self.missions = []
         self.visible = False
         self.userRef = userRef  # user obj
         self.readDialogs = []
         print "character::init" + str(self.id) + "// idzone =" + str(idZone)
+
+    def setInvStation(self,inv):
+        self.invStation = inv
+
+    def getInvStation(self):
+        return self.invStation
+
+    def appendInvStation(self,item):
+        self.invStation.append(item)
+
+    def getItemInInvStation(self,itemId):
+        for it in self.invStation:
+            if it.getId() == itemId:
+                return it
+
+        return None
+
+    def removeItemFromInvstation(self,item):
+        if item in self.invStation:
+            self.invStation.remove(item)
+
+    def removeItemFromInvStationById(self,idItem):
+        itemToRemove = None
+        for it in self.invStation:
+            if it.getId() == idItem:
+                itemToRemove = it
+                break
+
+        if itemToRemove is not None:
+            self.invStation.remove(itemToRemove)
 
     def getCoin(self):
         return self.coin

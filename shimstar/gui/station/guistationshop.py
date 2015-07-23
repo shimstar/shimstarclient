@@ -19,7 +19,7 @@ class GuiStationShop(DirectObject):
     def event(self,task):
         toUpdate=False
         tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_BUY_ITEM)
-
+        inv = 1
         if len(tempMsg) > 0:
             for msg in tempMsg:
                 netMsg = msg.getMessage()
@@ -28,8 +28,13 @@ class GuiStationShop(DirectObject):
                 id = int(netMsg[2])
                 it = itemFactory.getItemFromTemplateType(templateId, typeItem)
                 it.setId(id)
-                User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
+
                 User.getInstance().getCurrentCharacter().setCoin(int(netMsg[3]))
+                inv = int(netMsg[4])
+                if inv == 1:
+                    User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
+                else:
+                    User.getInstance().getCurrentCharacter().appendInvStation(it)
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate=True
 
@@ -38,21 +43,29 @@ class GuiStationShop(DirectObject):
             for msg in tempMsg:
                 netMsg = msg.getMessage()
                 itemId = int(netMsg[0])
-                User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(itemId)
+
                 User.getInstance().getCurrentCharacter().setCoin(int(netMsg[1]))
+                inv = int(netMsg[2])
+                if inv == 1:
+                    User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(itemId)
+                else:
+                    User.getInstance().getCurrentCharacter().removeItemFromInvStationById(itemId)
+
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate=True
 
         if toUpdate == True :
             self.emptyInvWindow()
-            self.initInvWindow()
+            if inv == 1:
+                self.initInvWindow()
+            else:
+                self.initInvWindow(False)
             self.initAchatWindow()
             self.OutTransAnimationInstance.start()
         return task.cont
 
 
     def emptyInvWindow(self, wndName=""):
-        print "emptyWindow"
         if wndName == "":
             wndName = "Station/Shop/gpachatpanel"
         if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
@@ -82,11 +95,15 @@ class GuiStationShop(DirectObject):
     def itemDropped(self,args):
         if args.dragDropItem.getChildCount()>0:
             item = args.dragDropItem.getChildAtIdx(0).getUserData()
-            # print "itemDropped " + str(item)
+            print "itemDropped " + str(item) + str(args.window.getName())
             if "achat" in args.window.getName():
                 nm = netMessage(C_NETWORK_CHARACTER_SELL_ITEM)
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getId())
+                if self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").getText() == "Inventaire soute":
+                    nm.addUInt(1)
+                else:
+                    nm.addUInt(0)
                 NetworkMainServer.getInstance().sendMessage(nm)
                 wnd=args.dragDropItem.getChildAtIdx(0)
                 args.dragDropItem.removeChildWindow(wnd)
@@ -95,6 +112,10 @@ class GuiStationShop(DirectObject):
                 nm = netMessage(C_NETWORK_CHARACTER_BUY_ITEM)
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getTemplateId())
+                if self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").getText() == "Inventaire soute":
+                    nm.addUInt(1)
+                else:
+                    nm.addUInt(0)
                 NetworkMainServer.getInstance().sendMessage(nm)
             # self.InTransAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
@@ -165,11 +186,16 @@ class GuiStationShop(DirectObject):
                 panel.addChildWindow(label)
             numItemI += 1
 
-    def initInvWindow(self):
-        self.CEGUI.WindowManager.getWindow("Station/Shop/GpAchat").setText("Inventaire")
+    def initInvWindow(self,shipInv=True):
+
         ship=User.getInstance().getCurrentCharacter().getShip()
         if ship is not None:
-            inv=ship.getItemInInventory()
+            if shipInv:
+                inv=ship.getItemInInventory()
+                self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").setText("Inventaire soute")
+            else:
+                inv=User.getInstance().getCurrentCharacter().getInvStation()
+                self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").setText("Inventaire Station")
             i = 0
             j = 0
             listOfImageSet = {}
@@ -235,6 +261,18 @@ class GuiStationShop(DirectObject):
 
         return GuiStationShop.instance
 
+    def buttonSwitch(self,windowArgs):
+        if windowArgs.window.getText() == "Inventaire station":
+            windowArgs.window.setText("Soute Vaisseau")
+            self.emptyInvWindow()
+            self.initInvWindow(False)
+            self.initAchatWindow()
+        else:
+            windowArgs.window.setText("Inventaire station")
+            self.emptyInvWindow()
+            self.initInvWindow(True)
+            self.initAchatWindow()
+
     def setupUI(self):
         self.OutAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
@@ -247,6 +285,8 @@ class GuiStationShop(DirectObject):
 
         self.CEGUI.WindowManager.getWindow("Station/Shop").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                               self, 'onCloseClicked')
+        self.CEGUI.WindowManager.getWindow("Station/Shop/switch").subscribeEvent(PyCEGUI.PushButton.EventClicked,
+                                                                                   self, 'buttonSwitch')
 
     def hide(self):
         self.OutAnimationInstance.start()

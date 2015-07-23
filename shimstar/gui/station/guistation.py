@@ -34,7 +34,6 @@ class GuiStation(DirectObject):
         self.ambientSound.setVolume(shimConfig.getInstance().getAmbientVolume())
         self.ambientSound.play()
         self.listOfImageSet = {}
-        self.inventory = []
         self.CEGUI = ShimCEGUI.getInstance()
         self.name = self.zone.getName()
         self.back = self.zone.getEgg()
@@ -134,8 +133,8 @@ class GuiStation(DirectObject):
                         it = itemFactory.getItemFromTemplateType(template, typeItem)
                         it.setId(idItem)
                         it.setNb(nb)
-                        self.inventory.append(it)
-
+                        # self.inventory.append(it)
+                        User.getInstance().getCurrentCharacter().appendInvStation(it)
                     NetworkMainServer.getInstance().removeMessage(msg)
                     self.usrLoaded = True
                 # menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
@@ -209,7 +208,7 @@ class GuiStation(DirectObject):
             self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront()
             self.emptyWindowSlot()
         elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
-            GuiStationInventory.getInstance(self.root).setItemInStation(self.inventory)
+            # GuiStationInventory.getInstance(self.root).setItemInStation(self.inventory)
             GuiStationInventory.getInstance(self.root).show()
             # self.InInventaireAnimationInstance.start()
             # self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
@@ -529,6 +528,7 @@ class GuiStation(DirectObject):
         self.OutNPCAnimationInstance.start()
         # self.loadKeywords(npcChoosed)
         if npcChoosed.getTypeNpc()==C_TYPE_NPC_SHOP:
+            # GuiStationShop.getInstance(self.root).setItemInStation(self.inventory)
             GuiStationShop.getInstance(self.root).show()
 
 

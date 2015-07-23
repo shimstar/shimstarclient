@@ -15,10 +15,6 @@ class GuiStationInventory(DirectObject):
         self.CEGUI = ShimCEGUI.getInstance()
         self.root = None
         self.setupUI()
-        self.itemInStation=[]
-
-    def setItemInStation(self,listIt):
-        self.itemInStation = listIt
 
     def event(self,task):
         toUpdate = False
@@ -31,7 +27,7 @@ class GuiStationInventory(DirectObject):
                 item = ship.getItemFromInventory(idItem)
                 if item is not None:
                     User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(idItem)
-                    self.itemInStation.append(item)
+                    User.getInstance().getCurrentCharacter().appendInvStation(item)
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate = True
 
@@ -41,14 +37,11 @@ class GuiStationInventory(DirectObject):
                 netMsg = msg.getMessage()
                 idItem = int(netMsg[0])
                 ship=User.getInstance().getCurrentCharacter().getShip()
-                itToRemove=None
-                for it in self.itemInStation:
-                    if it.getId() == idItem:
-                        itToRemove = it
-                        break
+                itToRemove=User.getInstance().getCurrentCharacter().getItemInInvStation(idItem)
+
                 if itToRemove is not None:
                     ship.addItemInInventory(itToRemove)
-                    self.itemInStation.remove(itToRemove)
+                    User.getInstance().getCurrentCharacter().removeItemFromInvstation(itToRemove)
 
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate = True
@@ -109,7 +102,7 @@ class GuiStationInventory(DirectObject):
     def initInvStation(self):
         self.CEGUI.WindowManager.getWindow("Station/Shop/GpAchat").setText("Soute de station")
 
-        inv=self.itemInStation
+        inv=User.getInstance().getCurrentCharacter().getInvStation()
         i = 0
         j = 0
         listOfImageSet = {}
