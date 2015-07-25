@@ -8,7 +8,6 @@ from shimstar.items.bullet import *
 class Weapon(ShimstarItem):
 	def __init__(self,templateId=None,xmlPart=None):
 		#~ print "Weapon::init " + str(xmlPart.toxml())
-		print "##########" + str(templateId)
 		self.typeItem=C_ITEM_WEAPON
 		super(Weapon,self).__init__(templateId,C_ITEM_WEAPON,xmlPart)	
 		

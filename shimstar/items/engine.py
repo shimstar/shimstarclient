@@ -6,7 +6,7 @@ from shimstar.items.item import *
 
 class Engine(ShimstarItem):
 	def __init__(self,templateId=None,xmlPart=None):
-		print "Engine::init " + str(templateId)
+		# print "Engine::init " + str(templateId)
 		super(Engine,self).__init__(templateId,C_ITEM_ENGINE,xmlPart)	
 		self.typeItem=C_ITEM_ENGINE
 		self.speedMax=0

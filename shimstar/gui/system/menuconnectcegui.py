@@ -43,8 +43,8 @@ class MenuConnectCegui(ShowBase):
 		taskMgr.add(self.event,"event reader menu connect",-40)  
 		self.stateConnexion=0
 		
-		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press3.ogg")
-		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press1.ogg")
+		self.buttonSound= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
+		self.buttonSound2= base.loader.loadSfx(shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
 		self.buttonSound.setVolume(shimConfig.getInstance().getSoundVolume())
 		self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
 		

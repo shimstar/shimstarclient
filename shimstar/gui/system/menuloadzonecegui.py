@@ -38,7 +38,7 @@ class MenuLoadZoneCegui(ShowBase):
         self.labelPlayers = self.CEGUI.WindowManager.getWindow("LabelStatusPlayer")
         self.btnPlay = self.CEGUI.WindowManager.getWindow("Jouer")
         self.buttonSound2 = base.loader.loadSfx(
-            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press1.ogg")
+            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
         self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
         taskMgr.add(self.event, "event reader menu loadzone", -40)
         self.stateConnexion = 0

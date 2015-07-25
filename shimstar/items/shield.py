@@ -40,6 +40,3 @@ class Shield(ShimstarItem):
     def getTempoLoad(self):
         return self.tempoLoad
 
-
-    def getSpeedMax(self):
-        return self.speedMax
