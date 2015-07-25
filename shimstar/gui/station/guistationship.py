@@ -33,6 +33,12 @@ class chooseItemShip():
         else:
             chooseItemShip.instance.init(pslot,pship)
 
+    @staticmethod
+    def isInstantiated():
+        if chooseItemShip.instance is not None:
+            return True
+        return False
+
     def init(self,slot,ship):
         self.slot = slot
         self.ship = ship
@@ -100,6 +106,7 @@ class chooseItemShip():
     def destroy(self):
         self.emptyInvWindow()
         self.OutShipAnimationInstance.start()
+        chooseItemShip.instance = None
 
 
     def emptyInvWindow(self):

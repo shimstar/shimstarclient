@@ -85,6 +85,12 @@ class MenuLoot(DirectObject):
 
         return MenuLoot.instance
 
+    @staticmethod
+    def isInstantiated():
+        if MenuLoot.instance is not None:
+            return True
+        return False
+
     def emptyLootsWindow(self, wndName=""):
         if wndName == "":
             wndName = "HUD/Cockpit/Loots/Panel"
@@ -102,6 +108,8 @@ class MenuLoot(DirectObject):
 
     def destroy(self):
         taskMgr.remove("event loot")
+        MenuLoot.instance = None
+
 
     def setItems(self):
         self.emptyLootsWindow()

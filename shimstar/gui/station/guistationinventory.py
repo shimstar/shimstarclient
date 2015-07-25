@@ -216,6 +216,12 @@ class GuiStationInventory(DirectObject):
 
         return GuiStationInventory.instance
 
+    @staticmethod
+    def isInstantiated():
+        if GuiStationInventory.instance is not None:
+            return True
+        return False
+
     def setupUI(self):
         self.OutAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
@@ -231,6 +237,10 @@ class GuiStationInventory(DirectObject):
 
     def hide(self):
         self.OutAnimationInstance.start()
+        taskMgr.remove("event guishop")
+
+    def destroy(self):
+        GuiStationInventory.instance = None
         taskMgr.remove("event guishop")
 
     def show(self):

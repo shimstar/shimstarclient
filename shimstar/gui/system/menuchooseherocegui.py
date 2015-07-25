@@ -70,9 +70,9 @@ class MenuChooseHeroCegui(DirectObject):
         self.OutFadeNewHeroAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("ConnexionBg/new"))
         self.InFadeNewHeroAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("ConnexionBg/new"))
         self.buttonSound = base.loader.loadSfx(
-            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
+            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press3.ogg")
         self.buttonSound2 = base.loader.loadSfx(
-            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
+            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press1.ogg")
         self.buttonSound.setVolume(shimConfig.getInstance().getSoundVolume())
         self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
         self.accept("escape", self.quitGame)

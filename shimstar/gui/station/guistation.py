@@ -44,10 +44,10 @@ class GuiStation(DirectObject):
         self.CEGUI.enable()
         GameState.getInstance().setState(C_PLAYING)
         self.buttonSound = base.loader.loadSfx(
-            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press3.ogg")
+            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press3.ogg")
         self.buttonSound.setVolume(shimConfig.getInstance().getSoundVolume())
         self.buttonSound2 = base.loader.loadSfx(
-            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Button_press1.ogg")
+            shimConfig.getInstance().getConvRessourceDirectory() + "sounds/Buttton_press1.ogg")
         self.buttonSound2.setVolume(shimConfig.getInstance().getSoundVolume())
 
     # def destroy(self):
@@ -60,7 +60,6 @@ class GuiStation(DirectObject):
             if len(tempMsg) > 0:
                 for msg in tempMsg:
                     netMsg = msg.getMessage()
-                    print netMsg
                     ch = User.getInstance().getCurrentCharacter()
                     ch.setShip(netMsg[0], netMsg[1], netMsg[2], False)
                     nbInv = netMsg[3]
@@ -310,6 +309,12 @@ class GuiStation(DirectObject):
     def destroy(self):
         self.ignore("escape")
         taskMgr.remove("event reader")
+        if GuiStationInventory.isInstantiated():
+            GuiStationInventory.getInstance(self.root).destroy()
+        if chooseItemShip.isInstantiated():
+            chooseItemShip.getInstance(None,None).destroy()
+        if GuiStationShop.isInstantiated():
+            GuiStationShop.getInstance(self.root).destroy()
         self.CEGUI.WindowManager.destroyWindow(self.root)
         self.ambientSound.stop()
         # GuiStationShop.getInstance().hide()

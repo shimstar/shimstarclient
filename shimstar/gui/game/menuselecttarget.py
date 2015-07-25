@@ -122,6 +122,7 @@ class MenuSelectTarget(DirectObject):
 
     def destroy(self):
         taskMgr.remove("event selecttarget")
+        MenuSelectTarget.instance = None
 
     def getParent(self):
         return self.parent
@@ -132,3 +133,9 @@ class MenuSelectTarget(DirectObject):
             MenuSelectTarget.instance = MenuSelectTarget()
 
         return MenuSelectTarget.instance
+
+    @staticmethod
+    def isInstantiated():
+        if MenuSelectTarget.instance is not None:
+            return True
+        return False

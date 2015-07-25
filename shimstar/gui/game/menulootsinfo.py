@@ -33,8 +33,13 @@ class MenuLootsInfo(DirectObject):
             self.lastTicks = globalClock.getRealTime()
             if self.junk in Junk.junkList:
                 if self.junk is not None:
-                    distance = calcDistance(self.junk.getNode(),User.getInstance().getCurrentCharacter().getShip().getNode())
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Distance").setText(str(distance))
+                    ship = User.getInstance().getCurrentCharacter().getShip()
+                    if ship is not None:
+                        ship.lock.acquire()
+                        if self.junk.getNode().isEmpty() != True and ship.getNode().isEmpty() != True:
+                            distance = calcDistance(self.junk.getNode(),ship.getNode())
+                            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Distance").setText(str(distance))
+                        ship.lock.release()
             else:
                 self.junk=None
                 self.hide()
@@ -70,9 +75,17 @@ class MenuLootsInfo(DirectObject):
 
     def destroy(self):
         taskMgr.remove("event loot")
+        self.junk = None
+        MenuLootsInfo.instance = None
 
     @staticmethod
     def getInstance():
         if MenuLootsInfo.instance is None:
             MenuLootsInfo.instance = MenuLootsInfo()
         return MenuLootsInfo.instance
+
+    @staticmethod
+    def isInstantiated():
+        if MenuLootsInfo.instance is not None:
+            return True
+        return False

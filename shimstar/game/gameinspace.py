@@ -273,6 +273,7 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
+                print "ast " + str(obj.getId())
             elif isinstance(obj,Junk):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
@@ -288,7 +289,6 @@ class GameInSpace(DirectObject, threading.Thread):
 
     def renderTarget(self, dt):
         if self.target != None and self.target.getNode().isEmpty() != True:
-            # print "renderTarget :: " + str(self.target)
 
             if isinstance(self.target, Ship):
                 self.target.getLock().acquire()
@@ -336,6 +336,9 @@ class GameInSpace(DirectObject, threading.Thread):
             #     self.target.getLock().release()
         elif self.target != None and self.target.getNode().isEmpty() == True:
             self.target = None
+            if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == True:
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
+            Follower.getInstance().destroy()
         else:
             if self.CEGUI.WindowManager.getWindow(
                     "HUD/Cockpit/ReticleTarget") != None and self.CEGUI.WindowManager.getWindow(
@@ -758,8 +761,14 @@ class GameInSpace(DirectObject, threading.Thread):
         for expl in self.listOfExplosion:
             expl.delete()
         self.ignoreKey(None)
-        MenuSelectTarget.getInstance().destroy()
-        MenuLootsInfo.getInstance().destroy()
+        if Follower.isInstantiated():
+            Follower.getInstance().destroy()
+        if MenuSelectTarget.isInstantiated():
+            MenuSelectTarget.getInstance().destroy()
+        if MenuLootsInfo.isInstantiated():
+            MenuLootsInfo.getInstance().destroy()
+        if MenuLoot.isInstantiated():
+            MenuLoot.getInstance().destroy()
         if self.ceGuiRootWindow != None:
             self.CEGUI.WindowManager.destroyWindow(self.ceGuiRootWindow)
         taskMgr.remove("pickmouse")
@@ -836,6 +845,9 @@ class GameInSpace(DirectObject, threading.Thread):
                     newTarget = n
             if newTarget != None:
                  if isinstance(newTarget,NPC):
+                    Follower.getInstance().setTarget(newTarget.getShip().getNode())
+                    self.target = newTarget.getShip()
+                 elif isinstance(newTarget,Character):
                     Follower.getInstance().setTarget(newTarget.getShip().getNode())
                     self.target = newTarget.getShip()
                  elif isinstance(newTarget,Junk):

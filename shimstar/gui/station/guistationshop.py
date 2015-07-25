@@ -261,6 +261,12 @@ class GuiStationShop(DirectObject):
 
         return GuiStationShop.instance
 
+    @staticmethod
+    def isInstantiated():
+        if GuiStationShop.instance is not None:
+            return True
+        return False
+
     def buttonSwitch(self,windowArgs):
         if windowArgs.window.getText() == "Inventaire station":
             windowArgs.window.setText("Soute Vaisseau")
@@ -291,6 +297,10 @@ class GuiStationShop(DirectObject):
     def hide(self):
         self.OutAnimationInstance.start()
         taskMgr.remove("event guishop")
+
+    def destroy(self):
+        taskMgr.remove("event guishop")
+        GuiStationShop.instance = None
 
     def show(self):
         self.InAnimationInstance.start()

@@ -40,12 +40,13 @@ class menuItemInfo(DirectObject):
         if menuItemInfo.instance == None:
             menuItemInfo.instance = menuItemInfo()
         return menuItemInfo.instance
-
+# InfoItem/Energie
     def setObj(self, obj):
         self.obj = obj
         self.hideField()
         self.startTicks = globalClock.getRealTime()
         self.showCommons()
+
         if obj.getTypeItem() == C_ITEM_ENERGY:
             self.showEnergy()
         elif obj.getTypeItem() == C_ITEM_WEAPON:
@@ -57,6 +58,12 @@ class menuItemInfo(DirectObject):
             # ~ self.CEGUI.WindowManager.getWindow("InfoItem").show()
         self.InMenuInfoAnimationInstance.start()
         self.CEGUI.WindowManager.getWindow("InfoItem").moveToFront()
+        if isinstance(obj,ItemTemplate):
+            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").show()
+            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Prix de vente : " + str(obj.getCost()))
+        else:
+            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").show()
+            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Prix d'achat : " + str(obj.getSell()))
 
     def showWeapon(self):
         self.CEGUI.WindowManager.getWindow("InfoItem/Info1").setText("Degats : " + str(self.obj.getDamage()))
