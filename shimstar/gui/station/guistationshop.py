@@ -159,32 +159,33 @@ class GuiStationShop(DirectObject):
         listOfTemplate=ItemTemplate.getListOfTemplate()
         for itId in listOfTemplate:
             it=listOfTemplate[itId]
-            locI = numItemI % 7
-            locJ = int(numItemI / 7)
-            panel = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel")
-            wnd = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(locJ))
-            img = self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage",
-                                                        "Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(
-                                                            locJ) + "/img" + str(locI) + "-" + str(locJ))
-            if self.checkItemOk(it):
-                img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
-            else:
-                img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()) +"ko")
+            if it.getTypeItem() in (C_ITEM_ENERGY,C_ITEM_WEAPON,C_ITEM_ENGINE):
+                locI = numItemI % 7
+                locJ = int(numItemI / 7)
+                panel = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel")
+                wnd = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(locJ))
+                img = self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage",
+                                                            "Station/Shop/gpachatpanel/DragDropSlot" + str(locI) + "-" + str(
+                                                                locJ) + "/img" + str(locI) + "-" + str(locJ))
+                if self.checkItemOk(it):
+                    img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()))
+                else:
+                    img.setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(it.getImg()) +"ko")
 
-            img.setMousePassThroughEnabled(True)
-            img.setUserData(it)
-            wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters, self, 'showInfo')
-            wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves, self, 'hideInfo')
-            wnd.addChildWindow(img)
-            if it.getTypeItem() == C_ITEM_MINERAL:
-                label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
-                                                              "Station/Shop/gpachatpanel/label" + str(it.getId()))
-                label.setProperty("UnifiedAreaRect", "{{" + str(0.025 + 0.115 * locI) + ",0},{0.2,0},{" + str(
-                    0.125 + 0.115 * locI) + ",0},{0.3,0}}");
-                label.setProperty("Font", "Brassiere-s")
-                label.setText(str(it.getQuantity()))
-                panel.addChildWindow(label)
-            numItemI += 1
+                img.setMousePassThroughEnabled(True)
+                img.setUserData(it)
+                wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters, self, 'showInfo')
+                wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves, self, 'hideInfo')
+                wnd.addChildWindow(img)
+                # if it.getTypeItem() == C_ITEM_MINERAL:
+                #     label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
+                #                                                   "Station/Shop/gpachatpanel/label" + str(it.getId()))
+                #     label.setProperty("UnifiedAreaRect", "{{" + str(0.025 + 0.115 * locI) + ",0},{0.2,0},{" + str(
+                #         0.125 + 0.115 * locI) + ",0},{0.3,0}}");
+                #     label.setProperty("Font", "Brassiere-s")
+                #     label.setText(str(it.getQuantity()))
+                #     panel.addChildWindow(label)
+                numItemI += 1
 
     def initInvWindow(self,shipInv=True):
 

@@ -69,36 +69,20 @@ class ItemTemplate(object):
     def getSkillsItem(self):
         return self.skillItems
 
-    @staticmethod
-    def loadXml():
-        dom = xml.dom.minidom.parse(shimConfig.getInstance().getRessourceDirectory() + "config\\itemtemplates.xml")
-        it = dom.getElementsByTagName('item')
-        for i in it:
-            typeItem = int(i.getElementsByTagName('typeitem')[0].firstChild.data)
-            ItemTemplate(i)
+
 
     @staticmethod
     def getListOfTemplate():
-        if len(ItemTemplate.listOfTemplate) == 0:
-            ItemTemplate.loadXml()
         return ItemTemplate.listOfTemplate
 
     @staticmethod
     def getTemplateById(idTemplate):
-        if len(ItemTemplate.listOfTemplate) == 0:
-            ItemTemplate.loadXml()
-        ItemTemplate.loadXml()
         for i in ItemTemplate.listOfTemplate:
             if ItemTemplate.listOfTemplate[i].templateId == idTemplate:
                 return ItemTemplate.listOfTemplate[i]
 
     @staticmethod
     def getTemplate(idTemplate, typeItem):
-        if len(ItemTemplate.listOfTemplate) == 0:
-            ItemTemplate.loadXml()
-
-        if ItemTemplate.listOfTemplate.has_key(str(typeItem) + "-" + str(idTemplate)) == False:
-            ItemTemplate.loadXml()
         if ItemTemplate.listOfTemplate.has_key(str(typeItem) + "-" + str(idTemplate)) == True:
             return ItemTemplate.listOfTemplate[str(typeItem) + "-" + str(idTemplate)]
 

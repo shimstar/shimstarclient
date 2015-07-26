@@ -25,6 +25,7 @@ from shimstar.gui.system.menuchooseherocegui import *
 from shimstar.gui.system.menuloadzonecegui import *
 from shimstar.gui.game.menudeath import *
 from shimstar.gui.station.guistation import *
+from shimstar.items.itemfactory import *
 from shimstar.core.shimconfig import *
 
 
@@ -35,6 +36,7 @@ class ShimStarClient(DirectObject):
     def __init__(self):
         GameState().getInstance().setState(0)
         NetworkMainServer.getInstance().start()
+        itemFactory.loadXml()
         self.menu = None
         base.disableMouse()
         base.setFrameRateMeter(True)

@@ -29,12 +29,8 @@ class ReactorTemplate(ItemTemplate):
                 ReactorTemplate(i)
 
 
-    def getHitPoints(self):
-        return self.hitpoints
-
-
-    def getTempoLoad(self):
-        return self.tempoLoad
+    def getEnergy(self):
+        return self.energy
 
 
     @staticmethod
