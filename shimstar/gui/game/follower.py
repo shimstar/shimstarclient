@@ -30,7 +30,7 @@ class Follower(object):
 
     @staticmethod
     def isInstantiated():
-        if MenuSelectTarget.instance is not None:
+        if Follower.instance is not None:
             return True
         return False
 
