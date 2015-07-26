@@ -11,13 +11,12 @@ class Reactor(ShimstarItem):
         self.typeItem = C_ITEM_ENERGY
         self.energy = 0
 
-        self.fileToSound = ""
         self.idTemplate = templateId
         if xmlPart != None:
             self.loadXml(xmlPart)
         else:
             temp = ReactorTemplate.getTemplate(self.idTemplate)
-            self.name, self.hitpoints, self.tempoLoad, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.fileToSound, self.skillsItem = temp.getInfos()
+            self.name, self.energy, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.skillsItem = temp.getInfos()
 
     def loadXml(self, xmlPart):
         self.id = int(xmlPart.getElementsByTagName('iditem')[0].firstChild.data)

@@ -9,6 +9,7 @@ class ItemTemplate(object):
 
     def __init__(self, xmlPart):
         self.skillItems = {}
+        self.sound = ""
         self.templateId = int(xmlPart.getElementsByTagName('templateid')[0].firstChild.data)
         self.name = str(xmlPart.getElementsByTagName('name')[0].firstChild.data)
         self.cost = 0
@@ -35,6 +36,9 @@ class ItemTemplate(object):
             self.skillItems[sk] = lvl
         ItemTemplate.listOfTemplate[str(self.typeItem) + "-" + str(self.templateId)] = self
 
+
+    def getSound(self):
+        return self.sound
 
     def getTemplateId(self):
         return self.templateId

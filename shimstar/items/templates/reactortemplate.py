@@ -16,7 +16,7 @@ class ReactorTemplate(ItemTemplate):
 
 
     def getInfos(self):
-        return self.name, self.energy,self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.sound, self.skillItems
+        return self.name, self.energy,self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.skillItems
 
 
     @staticmethod
