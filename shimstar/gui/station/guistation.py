@@ -133,7 +133,9 @@ class GuiStation(DirectObject):
                         it.setId(idItem)
                         it.setNb(nb)
                         # self.inventory.append(it)
-                        User.getInstance().getCurrentCharacter().appendInvStation(it)
+                        ch.appendInvStation(it)
+                    coin = netMsg[compteur]
+                    ch.setCoin(coin)
                     NetworkMainServer.getInstance().removeMessage(msg)
                     self.usrLoaded = True
                 # menuInventory.getInstance('soute').setObj(User.getInstance().getCurrentCharacter().getShip())
@@ -332,7 +334,7 @@ class GuiStation(DirectObject):
                 self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
                 wnd.destroy()
         ship = User.getInstance().getCurrentCharacter().getShip()
-        menuInventory.getInstance('soute').setObj(ship)
+        # menuInventory.getInstance('soute').setObj(ship)
         self.showFitting()
 
     def suppressItem(self, winArgs):

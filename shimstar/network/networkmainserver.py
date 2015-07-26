@@ -128,6 +128,8 @@ class NetworkMainServer(threading.Thread):
                 msgTab.append(myIterator.getUint32())
                 msgTab.append(myIterator.getUint32())
                 msgTab.append(myIterator.getUint32())
+
+            msgTab.append(myIterator.getUint32()) #coin
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CHARACTER_STATION2INV:
