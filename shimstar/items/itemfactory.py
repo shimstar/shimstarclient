@@ -46,6 +46,7 @@ class itemFactory():
 
     @staticmethod
     def getItemFromTemplateType(templateId, typeItem):
+
         if typeItem == C_ITEM_ENGINE:
             item = Engine(templateId)
         elif typeItem == C_ITEM_WEAPON:
@@ -56,6 +57,7 @@ class itemFactory():
             item = Reactor(templateId)
         else:
             item = ShimstarItem(templateId)
+
         return item
 
     @staticmethod

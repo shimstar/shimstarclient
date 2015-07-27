@@ -126,7 +126,7 @@ class ShimstarItem(object):
 
 
     def getEnergyCost(self):
-        return self.energy
+        return self.energyCost
 
 
     def getCost(self):

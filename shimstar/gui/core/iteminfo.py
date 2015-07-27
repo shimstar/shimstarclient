@@ -59,11 +59,11 @@ class menuItemInfo(DirectObject):
         self.InMenuInfoAnimationInstance.start()
         self.CEGUI.WindowManager.getWindow("InfoItem").moveToFront()
         if isinstance(obj,ItemTemplate):
-            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").show()
-            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Prix de vente : " + str(obj.getCost()))
+            self.CEGUI.WindowManager.getWindow("InfoItem/Prix").show()
+            self.CEGUI.WindowManager.getWindow("InfoItem/Prix").setText("Prix de vente : " + str(obj.getCost()))
         else:
-            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").show()
-            self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Prix d'achat : " + str(obj.getSell()))
+            self.CEGUI.WindowManager.getWindow("InfoItem/Prix").show()
+            self.CEGUI.WindowManager.getWindow("InfoItem/Prix").setText("Prix d'achat : " + str(obj.getSell()))
 
     def showWeapon(self):
         self.CEGUI.WindowManager.getWindow("InfoItem/Info1").setText("Degats : " + str(self.obj.getDamage()))
@@ -72,6 +72,7 @@ class menuItemInfo(DirectObject):
         self.CEGUI.WindowManager.getWindow("InfoItem/Info1").show()
         self.CEGUI.WindowManager.getWindow("InfoItem/Info2").show()
         self.CEGUI.WindowManager.getWindow("InfoItem/Type").setText("Type : Arme")
+        self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Energie : " + str(self.obj.getEnergyCost()))
 
     def showContainer(self):
         self.CEGUI.WindowManager.getWindow("InfoItem/Type").setText("Type : Container")
@@ -84,6 +85,7 @@ class menuItemInfo(DirectObject):
         self.CEGUI.WindowManager.getWindow("InfoItem/Info1").show()
         self.CEGUI.WindowManager.getWindow("InfoItem/Info2").show()
         self.CEGUI.WindowManager.getWindow("InfoItem/Type").setText("Type : Moteur")
+        self.CEGUI.WindowManager.getWindow("InfoItem/Energie").setText("Energie : " + str(self.obj.getEnergyCost()))
 
 
     def showEnergy(self):
