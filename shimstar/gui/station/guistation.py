@@ -123,6 +123,7 @@ class GuiStation(DirectObject):
 
                     nbItemInvStation = netMsg[compteur]
                     compteur += 1
+                    ch.setInvStation([])
                     for invS in range(nbItemInvStation):
                         typeItem=netMsg[compteur]
                         template=netMsg[compteur+1]
