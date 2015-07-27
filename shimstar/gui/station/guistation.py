@@ -185,7 +185,6 @@ class GuiStation(DirectObject):
 
     def ButtonClicked(self, windowEventArgs):
         self.buttonSound.play()
-        print windowEventArgs.window.getName()
         if (windowEventArgs.window.getName() == "Station/Menus/Sortir"):
             GameState.getInstance().setNewZone(self.zone.getExitZone())
             User.getInstance().getCurrentCharacter().changeZone()
@@ -210,18 +209,10 @@ class GuiStation(DirectObject):
             self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront()
             self.emptyWindowSlot()
         elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
-            # GuiStationInventory.getInstance(self.root).setItemInStation(self.inventory)
             GuiStationInventory.getInstance(self.root).show()
-            # self.InInventaireAnimationInstance.start()
-            # self.CEGUI.WindowManager.getWindow("Inventaire").moveToFront()
-            # invInstance = menuInventory.getInstance('invstation')
-            # if invInstance.getObj() is None:
-            #     invInstance.setObj(User.getInstance().getCurrentCharacter().getShip())
-            # invInstance.show()
+
 
     def slotClicked(self, e):
-        print "slotclicked"
-        # self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").show()
         self.InAddSuppressAnimationInstance.start()
         self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").moveToFront()
         self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").setUserData(e.window.getUserData())

@@ -180,6 +180,7 @@ class NetworkMainServer(threading.Thread):
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_DEATH_CHAR_STEP2:
+            print "receiving death char step2"
             msgTab.append(myIterator.getUint32())
             msgTab.append(myIterator.getUint32())
             msgTab.append(myIterator.getUint32())
