@@ -84,6 +84,15 @@ class NetworkMainServer(threading.Thread):
                     msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+
+        elif msgID == C_NETWORK_CHARACTER_ITEM_ENABLED:
+            nbItem = myIterator.getUint32()
+            msgTab.append(nbItem)
+            for i in range (nbItem):
+                msgTab.append(myIterator.getUint32()) # iditem
+                msgTab.append(myIterator.getUint32()) # status item
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CURRENT_CHAR_INFO:
             msgTab.append(myIterator.getUint32())  # id ship
             msgTab.append(myIterator.getUint32())  # idtemplate ship

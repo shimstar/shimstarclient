@@ -18,51 +18,32 @@ class GuiStationFitting(DirectObject):
         self.setupUI()
 
     def event(self,task):
-        # toUpdate=False
-        # tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_BUY_ITEM)
-        # inv = 1
-        # if len(tempMsg) > 0:
-        #     for msg in tempMsg:
-        #         netMsg = msg.getMessage()
-        #         typeItem = int(netMsg[0])
-        #         templateId = int(netMsg[1])
-        #         id = int(netMsg[2])
-        #         it = itemFactory.getItemFromTemplateType(templateId, typeItem)
-        #         it.setId(id)
-        #
-        #         User.getInstance().getCurrentCharacter().setCoin(int(netMsg[3]))
-        #         inv = int(netMsg[4])
-        #         if inv == 1:
-        #             User.getInstance().getCurrentCharacter().getShip().addItemInInventory(it)
-        #         else:
-        #             User.getInstance().getCurrentCharacter().appendInvStation(it)
-        #         NetworkMainServer.getInstance().removeMessage(msg)
-        #         toUpdate=True
-        #
-        # tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_SELL_ITEM)
-        # if len(tempMsg) > 0:
-        #     for msg in tempMsg:
-        #         netMsg = msg.getMessage()
-        #         itemId = int(netMsg[0])
-        #
-        #         User.getInstance().getCurrentCharacter().setCoin(int(netMsg[1]))
-        #         inv = int(netMsg[2])
-        #         if inv == 1:
-        #             User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(itemId)
-        #         else:
-        #             User.getInstance().getCurrentCharacter().removeItemFromInvStationById(itemId)
-        #
-        #         NetworkMainServer.getInstance().removeMessage(msg)
-        #         toUpdate=True
-        #
-        # if toUpdate == True :
-        #     self.emptyInvWindow()
-        #     if inv == 1:
-        #         self.initInvWindow()
-        #     else:
-        #         self.initInvWindow(False)
-        #     self.initAchatWindow()
-        #     self.OutTransAnimationInstance.start()
+        toUpdate=False
+        tempMsg = NetworkMainServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_ITEM_ENABLED)
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                netMsg = msg.getMessage()
+                nbItem = int(netMsg[0])
+                print "nbItem " + str(nbItem)
+                compteur=1
+                for iterateur in range(nbItem):
+                    idItem=int(netMsg[compteur])
+                    compteur+=1
+                    status = True if int(netMsg[compteur])==1 else False
+                    compteur+=1
+                    ship=User.getInstance().getCurrentCharacter().getShip()
+                    if ship is not None:
+                        for s in ship.getSlots():
+                            it = s.getItem()
+                            if it is not None:
+                                if it.getId() == idItem:
+                                    it.setEnabled(status)
+                                    toUpdate=True
+                                    break
+                NetworkMainServer.getInstance().removeMessage(msg)
+
+        if toUpdate == True :
+            self.emptyWindowSlot()
         return task.cont
 
     def modifyItem(self, winArgs):
@@ -108,12 +89,6 @@ class GuiStationFitting(DirectObject):
             if s.getItem() != None:
                 itemSlotted.append(s.getItem())
                 ko = "" if s.getItem().isEnabled() else "ko"
-                # if self.listOfImageSet.has_key("TempImageset" + s.getItem().getImg()) == False:
-                #     customImageset = self.CEGUI.ImageSetManager.createFromImageFile(
-                #         "TempImageset" + s.getItem().getImg(), "/items/" + s.getItem().getImg() + ko + ".png", "images")
-                #     customImageset.setNativeResolution(PyCEGUI.Size(64, 64))
-                #     customImageset.setAutoScalingEnabled(False)
-                #     self.listOfImageSet["TempImageset" + s.getItem().getImg()] = customImageset
                 button.setProperty("NormalImage", "set:ShimstarImageset image:" + s.getItem().getImg() + ko )
                 button.setProperty("HoverImage", "set:ShimstarImageset image:" + s.getItem().getImg() + ko )
                 button.setProperty("PushedImage", "set:ShimstarImageset image:" + s.getItem().getImg() + ko )
