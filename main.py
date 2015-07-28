@@ -179,10 +179,14 @@ class ShimStarClient(DirectObject):
                         compteur += 1
                         idItem = netMsg[compteur]
                         compteur += 1
+                        enabledItem= True if netMsg[compteur] == 1 else False
+                        compteur += 1
                         if idItem != 0:
                             it = itemFactory.getItemFromTemplateType(templateItem, typeItem)
                             it.setId(idItem)
+                            it.setEnabled(enabledItem)
                             tempSlot.setItem(it)
+
                         ship.addSlot(tempSlot)
                     GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)
                     NetworkZoneServer.getInstance().removeMessage(msg)

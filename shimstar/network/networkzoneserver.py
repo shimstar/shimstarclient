@@ -163,6 +163,7 @@ class NetworkZoneServer(threading.Thread):
                 msgTab.append(myIterator.getUint32())  #type item associe au slot
                 msgTab.append(myIterator.getUint32())  #id template item associe au slot
                 msgTab.append(myIterator.getUint32())  #id item associe au slot
+                msgTab.append(myIterator.getUint32()) # enabled
 
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)

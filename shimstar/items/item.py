@@ -27,6 +27,7 @@ class ShimstarItem(object):
         self.id = id
         self.container = 0
         self.typeContainer = ""
+        self.enabled = True
 
         self.nb = 1
         if xmlPart != None:
@@ -39,6 +40,12 @@ class ShimstarItem(object):
                 self.template = ItemTemplate.getTemplate(id, self.typeItem)
                 self.name, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.typeItem = self.template.getInfos()
 
+
+    def isEnabled(self):
+        return self.enabled
+
+    def setEnabled(self,enabled):
+        self.enabled=enabled
 
     def loadXml(self, xmlPart):
         self.id = int(xmlPart.getElementsByTagName('iditem')[0].firstChild.data)

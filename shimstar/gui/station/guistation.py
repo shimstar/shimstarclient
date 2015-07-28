@@ -19,6 +19,7 @@ from shimstar.items.itemfactory import *
 from shimstar.npc.npcinstation import *
 from shimstar.gui.station.guistationshop import *
 from shimstar.gui.station.guistationinventory import *
+from shimstar.gui.station.guistationfitting import *
 
 class GuiStation(DirectObject):
     def __init__(self):
@@ -99,10 +100,14 @@ class GuiStation(DirectObject):
                         compteur += 1
                         idItem = netMsg[compteur]
                         compteur += 1
+                        enabledItem = True if netMsg[compteur]==1 else False
+                        compteur += 1
                         if idItem != 0:
                             it = itemFactory.getItemFromTemplateType(templateItem, typeItem)
                             it.setId(idItem)
+                            it.setEnabled(enabledItem)
                             tempSlot.setItem(it)
+
                         ship.addSlot(tempSlot)
                     nbDialog = netMsg[compteur]
                     compteur += 1
@@ -205,100 +210,9 @@ class GuiStation(DirectObject):
             self.OutDialogAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Personnel").moveToFront()
         elif (windowEventArgs.window.getName() == "Station/Menus/Vaisseau"):
-            self.InShipAnimationInstance.start()
-            self.CEGUI.WindowManager.getWindow("Station/Vaisseau").moveToFront()
-            self.emptyWindowSlot()
+            GuiStationFitting.getInstance(self.root).show()
         elif (windowEventArgs.window.getName() == "Station/Menus/Inventaire"):
             GuiStationInventory.getInstance(self.root).show()
-
-
-    def slotClicked(self, e):
-        self.InAddSuppressAnimationInstance.start()
-        self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem").moveToFront()
-        self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").setUserData(e.window.getUserData())
-        self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Modify").setUserData(e.window.getUserData())
-
-
-    def showFitting(self):
-        ship = User.getInstance().getCurrentCharacter().getShip()
-        i = 0
-        slots = ship.getSlots()
-
-        for s in slots:
-            button = self.CEGUI.WindowManager.createWindow("Shimstar/ImageButton",
-                                                           "Station/Vaisseau/bckground/Front/slot" + str(s.getId()))
-
-            if self.listOfImageSet.has_key("TempImagesetslot1") == False:
-                customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImagesetslot1",
-                                                                                "/windows/slot1.png", "images")
-                customImageset.setNativeResolution(PyCEGUI.Size(64, 64))
-                customImageset.setAutoScalingEnabled(False)
-                self.listOfImageSet["TempImagesetslot1"] = customImageset
-
-            if s.getItem() != None:
-                if self.listOfImageSet.has_key("TempImageset" + s.getItem().getImg()) == False:
-                    customImageset = self.CEGUI.ImageSetManager.createFromImageFile(
-                        "TempImageset" + s.getItem().getImg(), "/items/" + s.getItem().getImg() + ".png", "images")
-                    customImageset.setNativeResolution(PyCEGUI.Size(64, 64))
-                    customImageset.setAutoScalingEnabled(False)
-                    self.listOfImageSet["TempImageset" + s.getItem().getImg()] = customImageset
-                button.setProperty("NormalImage", "set:TempImageset" + s.getItem().getImg() + " image:full_image")
-                button.setProperty("HoverImage", "set:TempImageset" + s.getItem().getImg() + " image:full_image")
-                button.setProperty("PushedImage", "set:TempImageset" + s.getItem().getImg() + " image:full_image")
-                button.subscribeEvent(PyCEGUI.Window.EventMouseEnters, self, 'showInfo')
-                button.subscribeEvent(PyCEGUI.Window.EventMouseLeaves, self, 'hideInfo')
-            else:
-                button.setProperty("NormalImage", "set:TempImagesetslot1 image:full_image")
-                button.setProperty("HoverImage", "set:TempImagesetslot1 image:full_image")
-                button.setProperty("PushedImage", "set:TempImagesetslot1 image:full_image")
-
-            button.setProperty("UnifiedAreaRect", "{{" + str(0.10 + 0.15 * i) + ",0},{0.14,0},{" + str(
-                0.218 + 0.15 * i) + ",0},{0.268,0}}");
-            button.setProperty("UnifiedSize", "{{0,64},{0,64}}")
-            button.setUserData(s)
-            button.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'slotClicked')
-
-            self.CEGUI.WindowManager.getWindow("Station/Vaisseau/bckground/Front").addChildWindow(button)
-
-            tp = s.getTypes()
-
-            lblType = ""
-            for t in tp:
-                if t == C_ITEM_ENGINE:
-                    lblType += "M"
-                elif t == C_ITEM_WEAPON:
-                    lblType += "A"
-                elif t == C_ITEM_ENERGY:
-                    lblType += "J"
-                elif t == C_ITEM_CONTAINER:
-                    lblType += "C"
-                elif t == C_ITEM_ELECTRO:
-                    lblType += "E"
-                elif t == C_ITEM_RADAR:
-                    lblType += "R"
-                elif t == C_ITEM_MINING:
-                    lblType += "G"
-            label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
-                                                          "Station/Vaisseau/bckground/Front/slotlabel" + str(s.getId()))
-            #~ label.setProperty("UnifiedAreaRect", "{{" + str(0.10+0.15*i) + ",0},{0.30,0},{" + str(0.31+0.15*i) + ",0},{0.65,0}}");
-            label.setProperty("UnifiedAreaRect",
-                              "{{" + str(0.08 + 0.15 * i) + ",0},{0.28,0},{" + str(0.2 + 0.15 * i) + ",0},{0.35,0}}");
-            label.setText(lblType)
-            label.setUserData(s)
-            label.setFont("Brassiere-s")
-            #~ label.subscribeEvent(PyCEGUI.PushButton.EventClicked, self, 'onChooseNpc')
-            self.CEGUI.WindowManager.getWindow("Station/Vaisseau/bckground/Front").addChildWindow(label)
-            i += 1
-
-    def showInfo(self, args):
-        item = args.window.getUserData().getItem()
-        pos = args.window.getPosition()
-        pos.d_x.d_scale = pos.d_x.d_scale + 0.1
-        menuItemInfo.getInstance().setObj(item)
-        self.CEGUI.WindowManager.getWindow("InfoItem").setPosition(pos)
-
-    def hideInfo(self, args):
-        menuItemInfo.getInstance().hide()
 
     def destroy(self):
         self.ignore("escape")
@@ -309,31 +223,11 @@ class GuiStation(DirectObject):
             chooseItemShip.getInstance(None,None).destroy()
         if GuiStationShop.isInstantiated():
             GuiStationShop.getInstance(self.root).destroy()
+        if GuiStationFitting.isInstantiated():
+            GuiStationFitting.getInstance(self.root).destroy()
         self.CEGUI.WindowManager.destroyWindow(self.root)
         self.ambientSound.stop()
         # GuiStationShop.getInstance().hide()
-
-    def modifyItem(self, winArgs):
-        self.OutAddSuppressAnimationInstance.start()
-        # self.choix = chooseItemShip(winArgs.window.getUserData(), User.getInstance().getCurrentCharacter().getShip())
-        self.choix = chooseItemShip.getInstance(winArgs.window.getUserData(), User.getInstance().getCurrentCharacter().getShip())
-
-    def emptyWindowSlot(self, winArgs=None):
-        wndName = "Station/Vaisseau/bckground/Front"
-        if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
-            for itChild in range(self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
-                wnd = self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx(0)
-                self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
-                wnd.destroy()
-        ship = User.getInstance().getCurrentCharacter().getShip()
-        # menuInventory.getInstance('soute').setObj(ship)
-        self.showFitting()
-
-    def suppressItem(self, winArgs):
-        sl = winArgs.window.getUserData()
-        User.getInstance().getCurrentCharacter().getShip().uninstallItem(sl)
-        self.OutAddSuppressAnimationInstance.start()
-        self.emptyWindowSlot()
 
     def setupUI(self):
         #  Chargement des sch?s
@@ -367,12 +261,7 @@ class GuiStation(DirectObject):
         self.CEGUI.WindowManager.getWindow("Options/OptionVideo/Choose").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                            'ButtonClicked')
 
-        self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Suppress").subscribeEvent(
-            PyCEGUI.PushButton.EventClicked, self, 'suppressItem')
-        self.CEGUI.WindowManager.getWindow("Station/Addsuppress/Modify").subscribeEvent(PyCEGUI.PushButton.EventClicked,
-                                                                                        self, 'modifyItem')
-        self.CEGUI.WindowManager.getWindow("Station/ChoixItem").subscribeEvent(PyCEGUI.Window.EventHidden, self,
-                                                                               'emptyWindowSlot')
+
 
         self.CEGUI.WindowManager.getWindow("root/Quit/CancelQuit").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                                   'onCancelQuitGame')
@@ -383,8 +272,7 @@ class GuiStation(DirectObject):
                                                                                self, 'closeClicked')
         self.CEGUI.WindowManager.getWindow("Inventaire").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
                                                                         'closeClicked')
-        self.CEGUI.WindowManager.getWindow("Station/Vaisseau").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
-                                                                              self, 'closeClicked')
+
         self.CEGUI.WindowManager.getWindow("Station/Dialog").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
                                                                             'closeClicked')
         self.CEGUI.WindowManager.getWindow("Options/OptionVideo").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked, self,
@@ -413,20 +301,12 @@ class GuiStation(DirectObject):
         self.OutNPCAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Personnel"))
         self.InNPCAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Personnel"))
 
-        self.OutShipAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-        self.InShipAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-        self.OutShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Vaisseau"))
-        self.InShipAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Vaisseau"))
+
 
         self.OutDialogAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InDialogAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
         self.OutDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
         self.InDialogAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Station/Dialog"))
-
-        # self.OutInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-        # self.InInventaireAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-        # self.OutInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
-        # self.InInventaireAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Inventaire"))
 
         self.OutOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InOptionsAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
@@ -438,25 +318,13 @@ class GuiStation(DirectObject):
         self.OutOptionsVideoAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Options/OptionVideo"))
         self.InOptionsVideoAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("Options/OptionVideo"))
 
-        self.OutAddSuppressAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
-        self.InAddSuppressAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
-        self.OutAddSuppressAnimationInstance.setTargetWindow(
-            self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem"))
-        self.InAddSuppressAnimationInstance.setTargetWindow(
-            self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem"))
-
 
     def backgroundClicked(self, evt):
         self.CEGUI.WindowManager.getWindow("Station/Background").moveToBack()
 
 
     def closeClicked(self, windowEventArgs):
-        if windowEventArgs.window.getName() == "Inventaire":
-            # self.OutInventaireAnimationInstance.start()
-            GuiStationInventory.getInstance(self.root).hide()
-        elif windowEventArgs.window.getName() == "Station/Vaisseau":
-            self.OutShipAnimationInstance.start()
-        elif windowEventArgs.window.getName() == "Station/Personnel":
+        if windowEventArgs.window.getName() == "Station/Personnel":
             self.OutNPCAnimationInstance.start()
         elif windowEventArgs.window.getName() == "Station/Dialog":
             self.OutDialogAnimationInstance.start()
@@ -741,7 +609,7 @@ class GuiStation(DirectObject):
         self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
         self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
 
-    def endMission(self, wa):
+    def endMission(self, windowEventArgs):
         missionId = windowEventArgs.window.getUserString("mission")
         msg = netMessage(C_NETWORK_CHARACTER_END_MISSION)
         msg.addUInt(User.getInstance().getId())
@@ -750,4 +618,3 @@ class GuiStation(DirectObject):
         self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionAccept").hide()
         self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionCancel").hide()
         self.CEGUI.WindowManager.getWindow("Station/Dialog/MissionEnd").hide()
-		
