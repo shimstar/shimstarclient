@@ -24,7 +24,6 @@ class GuiStationFitting(DirectObject):
             for msg in tempMsg:
                 netMsg = msg.getMessage()
                 nbItem = int(netMsg[0])
-                print "nbItem " + str(nbItem)
                 compteur=1
                 for iterateur in range(nbItem):
                     idItem=int(netMsg[compteur])
@@ -204,7 +203,8 @@ class GuiStationFitting(DirectObject):
             self.CEGUI.WindowManager.getWindow("Station/Addsuppressitem"))
 
     def hide(self):
-        self.OutAnimationInstance.start()
+        self.OutShipAnimationInstance.start()
+        self.OutAddSuppressAnimationInstance.start()
         taskMgr.remove("event guifitting")
 
     def destroy(self):

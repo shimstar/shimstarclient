@@ -57,12 +57,12 @@ class chooseItemShip():
         types = self.slot.getTypes()
         i = 0
         j = 0
-        # ~ print "types = " + str(types) + "/" + str(self.slot.getId())
+        print "types = " + str(types) + "/" + str(self.slot.getId())
         for inv in inventory:
             suitable = False
-            for ty in types:
-                if inv.getTypeItem() == int(ty):
-                    suitable = True
+            if inv.getTypeItem() in types:
+                suitable = True
+
             if suitable == True:
                 img = "items/" + inv.getImg() + ".png"
                 self.loadImage(img)

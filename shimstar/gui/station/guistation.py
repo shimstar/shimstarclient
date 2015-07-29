@@ -107,7 +107,6 @@ class GuiStation(DirectObject):
                             it.setId(idItem)
                             it.setEnabled(enabledItem)
                             tempSlot.setItem(it)
-
                         ship.addSlot(tempSlot)
                     nbDialog = netMsg[compteur]
                     compteur += 1
