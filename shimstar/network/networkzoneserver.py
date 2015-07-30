@@ -300,6 +300,12 @@ class NetworkZoneServer(threading.Thread):
                 msgTab.append(myIterator.getStdfloat())
                 msgTab.append(myIterator.getStdfloat())
                 msgTab.append(myIterator.getStdfloat())
+                msgTab.append(myIterator.getUint32()) #hitpoints
+                nbShield = myIterator.getUint32()
+                for itShield in range (nbShield):
+                    msgTab.append(myIterator.getUint32())
+                    msgTab.append(myIterator.getUint32())
+
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_POS_SHOT:

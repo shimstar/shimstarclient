@@ -495,6 +495,9 @@ class Ship:
     def getHullPoints(self):
         return self.hullpoints
 
+    def setHullPoints(self,hp):
+        self.hullpoints = hp
+
     def addSlot(self, s):
         self.slots.append(s)
         it=s.getItem()

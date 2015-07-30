@@ -291,7 +291,7 @@ class Zone(threading.Thread):
                             (netMsg[2], netMsg[3], netMsg[4], netMsg[5]))
                         shipChar.setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
                         shipChar.setPoussee(netMsg[9])
-                        shipChar.setHitPoints(netMsg[10])
+                        shipChar.setHullPoints(netMsg[10])
                         nbShield = netMsg[11]
                         for itShield in range (nbShield):
                             idShield = netMsg[12 + itShield]
@@ -309,7 +309,7 @@ class Zone(threading.Thread):
                             if shipChar is not None:
                                 shipChar.setHprToGo((netMsg[2], netMsg[3], netMsg[4], netMsg[5]))
                                 shipChar.setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
-                                shipChar.setHitPoints(netMsg[9])
+                                shipChar.setHullPoints(netMsg[9])
                                 nbShield = netMsg[11]
                                 for itShield in range (nbShield):
                                     idShield = netMsg[12 + itShield]
@@ -328,19 +328,41 @@ class Zone(threading.Thread):
                 netMsg = msg.getMessage()
                 nbNpc = int(netMsg[0])
                 for itNbNpc in range(nbNpc):
-                    npcId = int(netMsg[1 + itNbNpc * 8])
+                    compteur = 1
+                    npcId = int(netMsg[compteur])
+                    compteur += 1
                     for n in self.npc:
                         if npcId == n.getId():
-                            #~ NPC.lock.acquire()
-                            #~ print "npc pos " + str((netMsg[5],netMsg[6],netMsg[7]))
-                            n.ship.setHprToGo((
-                            netMsg[2 + itNbNpc * 8], netMsg[3 + itNbNpc * 8], netMsg[4 + itNbNpc * 8],
-                            netMsg[5 + itNbNpc * 8]))
-                            n.ship.setPosToGo(
-                                (netMsg[6 + itNbNpc * 8], netMsg[7 + itNbNpc * 8], netMsg[8 + itNbNpc * 8]))
-                        #~ print "zone::runUpdatePosNPC pos Npc " + str(npcId) + "  :: " + str((netMsg[6+itNbNpc*8],netMsg[7+itNbNpc*8],netMsg[8+itNbNpc*8]))
-                        #~ NPC.lock.release()
-                #~ NetworkZoneUdp.getInstance().removeMessage(msg)
+                            R = netMsg[compteur]
+                            compteur += 1
+                            I = netMsg[compteur]
+                            compteur += 1
+                            J = netMsg[compteur]
+                            compteur += 1
+                            K = netMsg[compteur]
+                            compteur += 1
+                            n.ship.setHprToGo((R,I,J,K))
+                            x = netMsg[compteur]
+                            compteur += 1
+                            y = netMsg[compteur]
+                            compteur += 1
+                            z = netMsg[compteur]
+                            compteur += 1
+                            n.ship.setPosToGo((x,y,z))
+                            hp = netMsg[compteur]
+                            n.ship.setHullPoints
+                            compteur += 1
+                            nbShield = netMsg[compteur]
+                            compteur += 1
+                            for itShield in range (nbShield):
+                                idShield = netMsg[compteur]
+                                compteur += 1
+                                hpShield = netMsg[compteur]
+                                compteur += 1
+                                itShield = n.ship.getItemSlotted(idShield)
+                                if itShield is not None:
+                                    itShield.setHitPoints(hpShield)
+
                 NetworkZoneServer.getInstance().removeMessage(msg)
 
     def runNewShot(self):
