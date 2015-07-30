@@ -11,6 +11,7 @@ class Shield(ShimstarItem):
         super(Shield, self).__init__(templateId, C_ITEM_SHIELD, xmlPart)
         self.typeItem = C_ITEM_SHIELD
         self.hitpoints = 0
+        self.maxHitpoints = 0
 
         self.tempoLoad = 0
         self.fileToSound = ""
@@ -19,7 +20,7 @@ class Shield(ShimstarItem):
             self.loadXml(xmlPart)
         else:
             temp = ShieldTemplate.getTemplate(self.idTemplate)
-            self.name, self.hitpoints, self.tempoLoad, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.fileToSound, self.skillsItem = temp.getInfos()
+            self.name, self.maxHitpoints, self.tempoLoad, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.fileToSound, self.skillsItem = temp.getInfos()
 
 
     def loadXml(self, xmlPart):
@@ -39,4 +40,10 @@ class Shield(ShimstarItem):
 
     def getTempoLoad(self):
         return self.tempoLoad
+
+    def setHitPoints(self,hp):
+        self.hitpoints = hp
+
+    def getMaxHitpoints(self):
+        return self.maxHitpoints
 

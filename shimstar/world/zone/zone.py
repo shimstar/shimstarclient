@@ -285,19 +285,38 @@ class Zone(threading.Thread):
                 hpr=(netMsg[2], netMsg[3], netMsg[4], netMsg[5])
                 pos = (netMsg[6], netMsg[7], netMsg[8])
                 if usr == User.getInstance().getId():
-                    if User.getInstance().getCurrentCharacter().getShip() != None:
-                        User.getInstance().getCurrentCharacter().getShip().setHprToGo(
+                    shipChar = User.getInstance().getCurrentCharacter().getShip()
+                    if shipChar is not None:
+                        shipChar.setHprToGo(
                             (netMsg[2], netMsg[3], netMsg[4], netMsg[5]))
-                        User.getInstance().getCurrentCharacter().getShip().setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
-                        User.getInstance().getCurrentCharacter().getShip().setPoussee(netMsg[9])
+                        shipChar.setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
+                        shipChar.setPoussee(netMsg[9])
+                        shipChar.setHitPoints(netMsg[10])
+                        nbShield = netMsg[11]
+                        for itShield in range (nbShield):
+                            idShield = netMsg[12 + itShield]
+                            hpShield = netMsg[13 + itShield]
+                            itShield = shipChar.getItemSlotted(idShield)
+                            if itShield is not None:
+                                itShield.setHitPoints(hpShield)
+
                 else:
                     tempUser = User.getUserById(usr)
                     if tempUser != None:
                         ch = tempUser.getCharacterById(charact)
                         if ch != None:
-                            if ch.getShip() != None:
-                                ch.getShip().setHprToGo((netMsg[2], netMsg[3], netMsg[4], netMsg[5]))
-                                ch.getShip().setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
+                            shipChar = ch.getShip()
+                            if shipChar is not None:
+                                shipChar.setHprToGo((netMsg[2], netMsg[3], netMsg[4], netMsg[5]))
+                                shipChar.setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
+                                shipChar.setHitPoints(netMsg[9])
+                                nbShield = netMsg[11]
+                                for itShield in range (nbShield):
+                                    idShield = netMsg[12 + itShield]
+                                    hpShield = netMsg[13 + itShield]
+                                    itShield = shipChar.getItemSlotted(idShield)
+                                    if itShield is not None:
+                                        itShield.setHitPoints(hpShield)
                 NetworkZoneServer.getInstance().removeMessage(msg)
 
     def runUpdatePosNPC(self):

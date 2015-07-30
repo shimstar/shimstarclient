@@ -274,6 +274,15 @@ class Ship:
     def getId(self):
         return self.id
 
+    def getItemSlotted(self,idItem):
+        for s in self.slots:
+            it = s.getItem()
+            if it is not None:
+                if it.getId() == idItem:
+                    return it
+
+        return None
+
     def getItemFromInventory(self, id):
         for it in self.itemInInventory:
             if it.getId() == id:
