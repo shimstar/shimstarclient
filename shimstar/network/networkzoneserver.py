@@ -44,7 +44,6 @@ class NetworkZoneServer(threading.Thread):
             return True
 
     def run(self):
-
         # GameState.getInstance().setZoneNetworkStarted(True)
 
         while not self.stopThread:
