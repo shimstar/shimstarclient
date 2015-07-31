@@ -124,6 +124,8 @@ class GuiStationFitting(DirectObject):
                     lblType += "R"
                 elif t == C_ITEM_MINING:
                     lblType += "G"
+                elif t == C_ITEM_SHIELD:
+                    lblType += "S"
             label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
                                                           "Station/Vaisseau/bckground/Front/slotlabel" + str(s.getId()))
             #~ label.setProperty("UnifiedAreaRect", "{{" + str(0.10+0.15*i) + ",0},{0.30,0},{" + str(0.31+0.15*i) + ",0},{0.65,0}}");
