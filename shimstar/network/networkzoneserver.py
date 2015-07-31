@@ -282,9 +282,11 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32()) #poussee
             msgTab.append(myIterator.getUint32()) #hitpoints
             nbShield = myIterator.getUint32()
+            msgTab.append(nbShield)
             for i in range (nbShield):
                 msgTab.append(myIterator.getUint32()) #idShield
                 msgTab.append(myIterator.getUint32()) #hitpoints shield
+            # print msgTab
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NPC_UPDATE_POS:
@@ -300,8 +302,10 @@ class NetworkZoneServer(threading.Thread):
                 msgTab.append(myIterator.getStdfloat())
                 msgTab.append(myIterator.getStdfloat())
                 msgTab.append(myIterator.getStdfloat())
-                msgTab.append(myIterator.getUint32()) #hitpoints
+                hp = myIterator.getUint32()
+                msgTab.append(hp) #hitpoints
                 nbShield = myIterator.getUint32()
+                msgTab.append(nbShield)
                 for itShield in range (nbShield):
                     msgTab.append(myIterator.getUint32())
                     msgTab.append(myIterator.getUint32())
