@@ -480,6 +480,20 @@ class Ship:
         prcent = float(self.hullpoints) / float(self.maxhull)
         return float(prcent), self.hullpoints, self.maxhull
 
+
+    def getPrcentShield(self):
+        listOfShield = self.hasItems(C_ITEM_SHIELD)
+        shHP = 0
+        shHPMax = 0
+        prcent = 0
+        for n in listOfShield :
+            shHP += n.getHitPoints()
+            shHPMax += n.getMaxHitpoints()
+        if shHPMax>0:
+            prcent = float(self.shHP) / float(self.shHPMax)
+
+        return float(prcent), self.shHP, self.shHPMax
+
     def getMaxHullPoints(self):
         return self.maxhull
 
@@ -506,3 +520,13 @@ class Ship:
                 self.weapons = it
             if it.getTypeItem() == C_ITEM_ENGINE:
                 self.engine = it
+
+    def hasItems(self,typeItem):
+        listOfItem = []
+        for s in self.slots:
+            it = s.getItem()
+            if it is not None:
+                if it.getTypeItem() == typeItem:
+                    listOfItem.append(it)
+
+        return listOfItem

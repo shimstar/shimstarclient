@@ -322,11 +322,24 @@ class GameInSpace(DirectObject, threading.Thread):
                 vec = PyCEGUI.PyCEGUI.UVector2(PyCEGUI.PyCEGUI.UDim(0, x), PyCEGUI.PyCEGUI.UDim(0, z))
                 pos = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setPosition(vec)
                 if isinstance(self.target, Ship):
-                    prctHull = 0
+                    maxHull = 0
+                    maxShield = 0
+
                     if self.target != None:
                         prctHull, currentHull, maxHull = self.target.getPrcentHull()
+                        prctShield, currentShield, maxShield = self.target.getPrcentShield()
                     #~ print "gameinspace::rendertarget " + str(prctHull)
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
+                    if maxHull > 0:
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
+                    else:
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+                    if maxShield > 0:
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyShieldBar").show()
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyShieldBar").setProgress(prctShield)
+                    else:
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyShieldBar").hide()
+
             else:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == True:
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
@@ -552,6 +565,14 @@ class GameInSpace(DirectObject, threading.Thread):
         customImageset.setNativeResolution(PyCEGUI.Size(64, 64))
         customImageset.setAutoScalingEnabled(False)
         self.customIm['spiderdrone'] = customImageset
+
+        ship = User.getInstance().getCurrentCharacter().getShip()
+        if ship is not None:
+            nbShield = ship.hasItems(C_ITEM_SHIELD)
+            if len(nbShield)>0:
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ShieldBar").show()
+            else:
+                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ShieldBar").hide()
 
     def onMenuInventaire(self, args):
         invInstance = menuInventory.getInstance('soute')
@@ -1072,6 +1093,13 @@ class GameInSpace(DirectObject, threading.Thread):
                             str(currentHull) + "/" + str(maxHull))
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/hullLabel").setText(
                             "Coque : " + str(prctHull * 100) + "%")
+
+                        prctShield, currentShield, maxShield = ship.getPrcentShield()
+                        if maxShield > 0:
+                            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ShieldBar").setProgress(prctShield)
+                            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ShieldBar").setTooltipText(
+                                str(currentShield) + "/" + str(maxShield))
+
                         prctSpeed, currentPoussee, maxSpeed = ship.getPrcentSpeed()
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setProgress(prctSpeed)
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/speedBar").setTooltipText(
