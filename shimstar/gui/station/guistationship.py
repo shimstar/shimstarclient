@@ -57,20 +57,18 @@ class chooseItemShip():
         types = self.slot.getTypes()
         i = 0
         j = 0
-        print "types = " + str(types) + "/" + str(self.slot.getId())
+
         for inv in inventory:
             suitable = False
             if inv.getTypeItem() in types:
                 suitable = True
-
+            img = inv.getImg()
             if suitable == True:
-                img = "items/" + inv.getImg() + ".png"
-                self.loadImage(img)
                 button = self.CEGUI.WindowManager.createWindow("Shimstar/ImageButton",
                                                                "Station/Vaisseau/ChoixItem/button" + str(i) + "-" + str(j))
-                button.setProperty("NormalImage", "set:" + img + " image:full_image")
-                button.setProperty("HoverImage", "set:" + img + " image:full_image")
-                button.setProperty("PushedImage", "set:" + img + " image:full_image")
+                button.setProperty("NormalImage", "set:ShimstarImageset image:" + str(img) )
+                button.setProperty("HoverImage", "set:ShimstarImageset image:" + str(img) )
+                button.setProperty("PushedImage", "set:ShimstarImageset image:" + str(img) )
                 button.setArea(PyCEGUI.UDim(0, 10 + 80 * i), PyCEGUI.UDim(0, 10), PyCEGUI.UDim(0, 64), PyCEGUI.UDim(0, 64))
                 button.setUserString("slot", str(C_SLOT_FRONT))
                 button.setUserString("nb", str(i))
@@ -96,12 +94,6 @@ class chooseItemShip():
             self.ship.installItem(windowArg.window.getUserData(), self.slot)
         self.destroy()
 
-    def loadImage(self, img):
-        if self.listOfImageSet.has_key(img) == False:
-            customImageset = self.CEGUI.ImageSetManager.createFromImageFile(img, img, "images")
-            customImageset.setNativeResolution(PyCEGUI.Size(64, 64))
-            customImageset.setAutoScalingEnabled(False)
-            self.listOfImageSet[img] = customImageset
 
     def destroy(self):
         self.emptyInvWindow()
