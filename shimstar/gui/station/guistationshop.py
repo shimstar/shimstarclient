@@ -159,7 +159,7 @@ class GuiStationShop(DirectObject):
         listOfTemplate=ItemTemplate.getListOfTemplate()
         for itId in listOfTemplate:
             it=listOfTemplate[itId]
-            if it.getTypeItem() in (C_ITEM_ENERGY,C_ITEM_WEAPON,C_ITEM_ENGINE):
+            if it.getTypeItem() in (C_ITEM_ENERGY,C_ITEM_WEAPON,C_ITEM_ENGINE,C_ITEM_SHIELD):
                 locI = numItemI % 7
                 locJ = int(numItemI / 7)
                 panel = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel")
@@ -176,6 +176,7 @@ class GuiStationShop(DirectObject):
                 img.setUserData(it)
                 wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters, self, 'showInfo')
                 wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves, self, 'hideInfo')
+                wnd.subscribeEvent(PyCEGUI.Window.EventMouseDoubleClick,self,'dblClick')
                 wnd.addChildWindow(img)
                 # if it.getTypeItem() == C_ITEM_MINERAL:
                 #     label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
@@ -230,6 +231,7 @@ class GuiStationShop(DirectObject):
                 img.setUserData(it)
                 wnd.subscribeEvent(PyCEGUI.Window.EventMouseEnters, self, 'showInfo')
                 wnd.subscribeEvent(PyCEGUI.Window.EventMouseLeaves, self, 'hideInfo')
+                wnd.subscribeEvent(PyCEGUI.Window.EventMouseDoubleClick,self,'dblClick')
                 wnd.addChildWindow(img)
                 if it.getTypeItem() == C_ITEM_MINERAL:
                     label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
@@ -242,6 +244,33 @@ class GuiStationShop(DirectObject):
                 numItemI += 1
 
         self.CEGUI.WindowManager.getWindow("Station/Shop/solde").setText(str(User.getInstance().getCurrentCharacter().getCoin()) + "    Credit Standard")
+
+    def dblClick(self, args):
+        if args.window.getChildCount()>0:
+            item = args.window.getChildAtIdx(0).getUserData()
+            if "vente" in args.window.getName():
+                nm = netMessage(C_NETWORK_CHARACTER_SELL_ITEM)
+                nm.addUInt(User.getInstance().getId())
+                nm.addUInt(item.getId())
+                if self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").getText() == "Inventaire soute":
+                    nm.addUInt(1)
+                else:
+                    nm.addUInt(0)
+                NetworkMainServer.getInstance().sendMessage(nm)
+                # wnd=args.window.getChildAtIdx(0)
+                # args.window.removeChildWindow(wnd)
+                # self.CEGUI.WindowManager.destroyWindow(wnd)
+            elif "achat" in args.window.getName():
+                nm = netMessage(C_NETWORK_CHARACTER_BUY_ITEM)
+                nm.addUInt(User.getInstance().getId())
+                nm.addUInt(item.getTemplateId())
+                if self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").getText() == "Inventaire soute":
+                    nm.addUInt(1)
+                else:
+                    nm.addUInt(0)
+                NetworkMainServer.getInstance().sendMessage(nm)
+            # self.InTransAnimationInstance.start()
+            self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
 
     def showInfo(self, args):
         if args.window.getChildCount() > 0:
