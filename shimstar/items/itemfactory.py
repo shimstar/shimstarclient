@@ -5,6 +5,7 @@ from shimstar.items.item import *
 from shimstar.core.constantes import *
 from shimstar.items.mineral import *
 from shimstar.items.reactor import *
+from shimstar.items.shield import *
 
 class itemFactory():
     def __init__(self):
@@ -24,6 +25,8 @@ class itemFactory():
                     WeaponTemplate(i)
                 elif typeItem == C_ITEM_ENGINE:
                     EngineTemplate(i)
+                elif typeItem == C_ITEM_SHIELD:
+                    ShieldTemplate(i)
                 # elif typeItem == C_ITEM_MINERAL:
                 #     Min(i)
                 else:
@@ -40,6 +43,8 @@ class itemFactory():
             item = Mineral(templateId)
         elif item.getTypeItem() == C_ITEM_ENERGY:
             item = Reactor(templateId)
+        elif item.getTypeItem() == C_ITEM_SHIELD:
+            item = Shield(templateId)
         #~ elif item.getTypeItem()==C_ITEM_MINING:
         #~ item=Mining(templateId)
         return item
@@ -55,6 +60,8 @@ class itemFactory():
             item = Mineral(templateId)
         elif typeItem == C_ITEM_ENERGY:
             item = Reactor(templateId)
+        elif typeItem == C_ITEM_SHIELD:
+            item = Shield(templateId)
         else:
             item = ShimstarItem(templateId)
 
@@ -73,6 +80,8 @@ class itemFactory():
             item = Mineral(0, xmlPart)
         elif typeItem == C_ITEM_ENERGY:
             item = Reactor(0, xmlPart)
+        elif typeItem == C_ITEM_SHIELD:
+            item = Shield(0,xmlPart)
         else:
             item = ShimstarItem(0, xmlPart)
 

@@ -10,9 +10,8 @@ class ShieldTemplate(ItemTemplate):
 
     def __init__(self, xmlPart):
         super(ShieldTemplate, self).__init__(xmlPart)
-
-        self.hitpoints =  int(xmlPart.getElementsByTagName('hitpoints')[0].firstChild.data)
-        self.tempoLoad = int(xmlPart.getElementsByTagName('tempoload')[0].firstChild.data)
+        self.hitpoints =  int(xmlPart.getElementsByTagName('hp')[0].firstChild.data)
+        self.tempoLoad = int(xmlPart.getElementsByTagName('tempo')[0].firstChild.data)
         ShieldTemplate.listOfTemplate[self.templateId] = self
 
 
