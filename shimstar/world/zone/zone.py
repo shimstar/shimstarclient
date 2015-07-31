@@ -68,7 +68,6 @@ class Zone(threading.Thread):
                 self.runNpc()
                 self.runNewShot()
                 self.runUpdateShot()
-                self.runDamageChar()
                 self.runRemoveChar()
                 self.runCharOutgoing()
                 self.runJunk()
@@ -83,7 +82,6 @@ class Zone(threading.Thread):
     def runNpc(self):
         self.runNewNpc()
         self.runUpdatePosNPC()
-        self.runDamageNpc()
         self.runRemoveNpc()
 
 
@@ -115,8 +113,6 @@ class Zone(threading.Thread):
                 if tempJunk is not None:
                     tempJunk.destroy()
                 NetworkZoneServer.getInstance().removeMessage(msg)
-
-
 
     def runUpdateChar(self):
         tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHARACTER_ADD_TO_INVENTORY)
@@ -193,31 +189,6 @@ class Zone(threading.Thread):
                 NetworkZoneServer.getInstance().removeMessage(msg)
                 print "zone!!runNewIncoming listOfuser" + str(User.listOfUser)
 
-    def runDamageNpc(self):
-        tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_TAKE_DAMAGE_NPC)
-
-        if len(tempMsg) > 0:
-            for msg in tempMsg:
-                netMsg = msg.getMessage()
-                idNpc = int(netMsg[0])
-                damage = int(netMsg[1])
-                for n in self.npc:
-                    if n.getId() == idNpc:
-                        n.takeDamage(damage)
-                NetworkZoneServer.getInstance().removeMessage(msg)
-
-    def runDamageChar(self):
-        tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_TAKE_DAMAGE_CHAR)
-
-        if len(tempMsg) > 0:
-            for msg in tempMsg:
-                netMsg = msg.getMessage()
-                idChar = int(netMsg[0])
-                damage = int(netMsg[1])
-                for u in User.listOfUser:
-                    if User.listOfUser[u].getCurrentCharacter().getId() == idChar:
-                        User.listOfUser[u].getCurrentCharacter().takeDamage(damage)
-                NetworkZoneServer.getInstance().removeMessage(msg)
 
     def runRemoveChar(self):
         tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_REMOVE_CHAR)
