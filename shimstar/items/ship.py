@@ -489,10 +489,10 @@ class Ship:
         for n in listOfShield :
             shHP += n.getHitPoints()
             shHPMax += n.getMaxHitpoints()
-        if shHPMax>0:
-            prcent = float(self.shHP) / float(self.shHPMax)
 
-        return float(prcent), self.shHP, self.shHPMax
+        if shHPMax>0:
+            prcent = float(shHP) / float(shHPMax)
+        return float(prcent), shHP, shHPMax
 
     def getMaxHullPoints(self):
         return self.maxhull
