@@ -302,7 +302,6 @@ class Zone(threading.Thread):
                 netMsg = msg.getMessage()
                 usr = int(netMsg[0])
                 charact = int(netMsg[1])
-                # print "zone::runUpdatePosChar " + str(usr) +" / " + str(User.listOfUser) + " / " + str(User.getInstance().getId())
                 hpr=(netMsg[2], netMsg[3], netMsg[4], netMsg[5])
                 pos = (netMsg[6], netMsg[7], netMsg[8])
                 if usr == User.getInstance().getId():
@@ -330,7 +329,7 @@ class Zone(threading.Thread):
                             if shipChar is not None:
                                 shipChar.setHprToGo((netMsg[2], netMsg[3], netMsg[4], netMsg[5]))
                                 shipChar.setPosToGo((netMsg[6], netMsg[7], netMsg[8]))
-                                shipChar.setHullPoints(netMsg[9])
+                                shipChar.setHullPoints(netMsg[10])
                                 nbShield = netMsg[11]
                                 for itShield in range (nbShield):
                                     idShield = netMsg[12 + itShield]
