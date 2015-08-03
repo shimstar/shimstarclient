@@ -19,6 +19,7 @@ class MenuSelectTarget(DirectObject):
         self.parent = None
         self.listOfUser = []
         self.lastTicks = 0
+        self.toUpdate = False
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/TargetSelect").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                               self, 'onCloseClicked')
         self.OutAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
@@ -39,7 +40,8 @@ class MenuSelectTarget(DirectObject):
         try:
             self.panel = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/TargetSelect/Panel")
             dt = globalClock.getRealTime() - self.lastTicks
-            if dt > 1:
+            if dt > 1 or self.toUpdate:
+                self.toUpdate = False
                 self.emptyWindow()
                 self.lastTicks = globalClock.getRealTime()
                 i=0
@@ -80,8 +82,10 @@ class MenuSelectTarget(DirectObject):
     def setTarget(self,tgt):
         self.checked=[]
         self.checked.append(tgt.getName() + str(tgt.getId()))
+        self.toUpdate = True
 
     def onCheck(self,args):
+        self.toUpdate = True
         if args.window.isSelected():
             self.checked=[]
             self.checked.append(args.window.getUserString("name"))
