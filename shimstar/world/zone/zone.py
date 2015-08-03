@@ -175,16 +175,66 @@ class Zone(threading.Thread):
                 User.lock.acquire()
                 userId = tabMsg[0]
                 userFound = User.getUserById(userId)
+                char = None
                 if userFound != None:
                     if userFound.getCharacterById(tabMsg[2]) == None:
                         tempUser.addCharacter(tabMsg[2], tabMsg[3], tabMsg[4], tabMsg[5])
                         tempUser.chooseCharacter(tabMsg[2])
                         tempUser.getCurrentCharacter().setShip(tabMsg[6], tabMsg[7], tabMsg[8])
+                        char = tempUser.getCurrentCharacter()
                 else:
                     tempUser = User(tabMsg[0], tabMsg[1])
                     tempUser.addCharacter(tabMsg[2], tabMsg[3], tabMsg[4], tabMsg[5])
                     tempUser.chooseCharacter(tabMsg[2])
                     tempUser.getCurrentCharacter().setShip(tabMsg[6], tabMsg[7], tabMsg[8])
+                    char = tempUser.getCurrentCharacter()
+
+                if char is not None:
+                    nbInv = tabMsg[9]
+                    ship = char.getShip()
+                    compteur = 10
+                    for i in range(nbInv):
+                        typeItem = tabMsg[compteur]
+                        compteur += 1
+                        templateId = tabMsg[compteur]
+                        compteur += 1
+                        idItem = tabMsg[compteur]
+                        compteur += 1
+                        it = itemFactory.getItemFromTemplateType(templateId, typeItem)
+                        it.setId(idItem)
+                        quantity = tabMsg[compteur]
+                        compteur += 1
+                        if typeItem == C_ITEM_MINERAL:
+                            it.setQuantity(quantity)
+                        ship.addItemInInventory(it)
+
+                    nbSlot = tabMsg[compteur]
+                    ship.removeTemplateSlots()
+                    compteur += 1
+                    for n in range(nbSlot):
+                        idSlot = tabMsg[compteur]
+                        tempSlot = Slot(None, idSlot)
+                        compteur += 1
+                        nbTypes = tabMsg[compteur]
+                        compteur += 1
+                        for t in range(nbTypes):
+                            idType = tabMsg[compteur]
+                            compteur += 1
+                            tempSlot.appendTypes(idType)
+                        typeItem = tabMsg[compteur]
+                        compteur += 1
+                        templateItem = tabMsg[compteur]
+                        compteur += 1
+                        idItem = tabMsg[compteur]
+                        compteur += 1
+                        enabledItem = True if tabMsg[compteur]==1 else False
+                        compteur += 1
+                        if idItem != 0:
+                            it = itemFactory.getItemFromTemplateType(templateItem, typeItem)
+                            it.setId(idItem)
+                            it.setEnabled(enabledItem)
+                            tempSlot.setItem(it)
+                        ship.addSlot(tempSlot)
                 User.lock.release()
                 NetworkZoneServer.getInstance().removeMessage(msg)
                 print "zone!!runNewIncoming listOfuser" + str(User.listOfUser)

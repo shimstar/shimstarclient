@@ -95,6 +95,26 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32())  # idship
             msgTab.append(myIterator.getUint32())  # templateship
             msgTab.append(myIterator.getUint32())  # hullpoints
+            nbInv = myIterator.getUint32()         # nb item in inv
+            msgTab.append(nbInv)
+            for itInv in range (nbInv):
+                msgTab.append(myIterator.getUint32())  # typeItem
+                msgTab.append(myIterator.getUint32())  # templateId
+                msgTab.append(myIterator.getUint32())  # id
+                msgTab.append(myIterator.getUint32())  # nb
+
+            nbSlot = myIterator.getUint32()        # nb Slot
+            msgTab.append(nbSlot)
+            for itSlot in range(nbSlot):
+                msgTab.append(myIterator.getUint32()) #idSlot
+                nbTypeItem = myIterator.getUint32()   #nbTypeItem
+                msgTab.append(nbTypeItem)
+                for itType in range (nbTypeItem):
+                    msgTab.append(myIterator.getUint32())
+                msgTab.append(myIterator.getUint32()) # typeItem
+                msgTab.append(myIterator.getUint32()) # templateId
+                msgTab.append(myIterator.getUint32()) # id
+                msgTab.append(myIterator.getUint32()) # Enabled/disabled
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NPC_INCOMING:
@@ -249,19 +269,6 @@ class NetworkZoneServer(threading.Thread):
         elif msgID == C_NETWORK_DEATH_CHAR:
             msgTab = []
             msgTab.append(myIterator.getUint32())
-            temp = message(msgID, msgTab)
-            self.listOfMessage.append(temp)
-        elif msgID == C_NETWORK_CHAR_INCOMING:
-            msgTab = []
-            msgTab.append(myIterator.getString())
-            msgTab.append(myIterator.getUint32())
-            msgTab.append(myIterator.getStdfloat())
-            msgTab.append(myIterator.getStdfloat())
-            msgTab.append(myIterator.getStdfloat())
-            msgTab.append(myIterator.getStdfloat())
-            msgTab.append(myIterator.getStdfloat())
-            msgTab.append(myIterator.getStdfloat())
-            msgTab.append(myIterator.getStdfloat())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_REMOVE_NPC:
