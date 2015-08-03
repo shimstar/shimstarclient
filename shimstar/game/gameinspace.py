@@ -15,12 +15,12 @@ from shimstar.game.explosion import *
 from shimstar.gui.game.follower import *
 from shimstar.gui.core.menututo import *
 from shimstar.gui.game.menulootsinfo import *
-# from shimstar.gui.core.inventory import *
 import PyCEGUI
 from shimstar.gui.shimcegui import *
 # from shimstar.game.particleEngine import *
 from shimstar.gui.game.menuloot import *
 from shimstar.gui.game.menuselecttarget import *
+from shimstar.game.shieldstrike import *
 
 
 class GameInSpace(DirectObject, threading.Thread):
@@ -328,7 +328,7 @@ class GameInSpace(DirectObject, threading.Thread):
                     if self.target != None:
                         prctHull, currentHull, maxHull = self.target.getPrcentHull()
                         prctShield, currentShield, maxShield = self.target.getPrcentShield()
-                    #~ print "gameinspace::rendertarget " + str(prctHull)
+
                     if maxHull > 0:
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").setProgress(prctHull)
@@ -885,7 +885,7 @@ class GameInSpace(DirectObject, threading.Thread):
         if len(tempMsg) > 0:
             for msg in tempMsg:
                 netMsg = msg.getMessage()
-                pos = (netMsg[0], netMsg[1], netMsg[2])
+                pos = Vec3(netMsg[0], netMsg[1], netMsg[2])
                 self.listOfExplosion.append(Explosion(render, pos, 20))
                 self.expTask.append(taskMgr.add(self.runUpdateExplosion, "explosionTask" + str(Explosion.nbExplo - 1)))
                 inProgress = len(self.listOfExplosion) - 1
@@ -893,6 +893,15 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.expTask[inProgress].obj = self.listOfExplosion[inProgress].getExpPlane()
                 self.expTask[inProgress].textures = self.listOfExplosion[inProgress].getexpTexs()
                 self.expTask[inProgress].timeFps = self.listOfExplosion[inProgress].getTimeFps()
+            NetworkZoneServer.getInstance().removeMessage(msg)
+
+        tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_EXPLOSION_SHIELD)
+
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                netMsg = msg.getMessage()
+                pos = (netMsg[0], netMsg[1], netMsg[2])
+                ShieldStrike (pos)
             NetworkZoneServer.getInstance().removeMessage(msg)
 
     def runUpdateExplosion(self, task):
