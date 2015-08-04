@@ -207,7 +207,7 @@ class GuiStation(DirectObject):
         elif (windowEventArgs.window.getName() == "Station/Menus/Personnel"):
             self.InNPCAnimationInstance.start()
             self.showNPC()
-            self.OutDialogAnimationInstance.start()
+            # self.OutDialogAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Personnel").moveToFront()
         elif (windowEventArgs.window.getName() == "Station/Menus/Vaisseau"):
             GuiStationFitting.getInstance(self.root).show()
