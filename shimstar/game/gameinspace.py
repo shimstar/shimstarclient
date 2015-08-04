@@ -20,8 +20,6 @@ from shimstar.gui.shimcegui import *
 # from shimstar.game.particleEngine import *
 from shimstar.gui.game.menuloot import *
 from shimstar.gui.game.menuselecttarget import *
-from shimstar.game.shieldstrike import *
-
 
 class GameInSpace(DirectObject, threading.Thread):
     instance = None
@@ -886,7 +884,7 @@ class GameInSpace(DirectObject, threading.Thread):
             for msg in tempMsg:
                 netMsg = msg.getMessage()
                 pos = Vec3(netMsg[0], netMsg[1], netMsg[2])
-                self.listOfExplosion.append(Explosion(render, pos, 20))
+                self.listOfExplosion.append(Explosion(render, pos, 20,"explosion"))
                 self.expTask.append(taskMgr.add(self.runUpdateExplosion, "explosionTask" + str(Explosion.nbExplo - 1)))
                 inProgress = len(self.listOfExplosion) - 1
                 self.expTask[inProgress].fps  = 30  #set framerate
@@ -901,7 +899,13 @@ class GameInSpace(DirectObject, threading.Thread):
             for msg in tempMsg:
                 netMsg = msg.getMessage()
                 pos = (netMsg[0], netMsg[1], netMsg[2])
-                ShieldStrike (pos)
+                self.listOfExplosion.append(Explosion(render, pos, 20,"shield"))
+                self.expTask.append(taskMgr.add(self.runUpdateExplosion, "explosionTask" + str(Explosion.nbExplo - 1)))
+                inProgress = len(self.listOfExplosion) - 1
+                self.expTask[inProgress].fps  = 30  #set framerate
+                self.expTask[inProgress].obj = self.listOfExplosion[inProgress].getExpPlane()
+                self.expTask[inProgress].textures = self.listOfExplosion[inProgress].getexpTexs()
+                self.expTask[inProgress].timeFps = self.listOfExplosion[inProgress].getTimeFps()
             NetworkZoneServer.getInstance().removeMessage(msg)
 
     def runUpdateExplosion(self, task):
@@ -1118,6 +1122,7 @@ class GameInSpace(DirectObject, threading.Thread):
                         #~ print prctSpeed
                         #~ self.PE.speed=prctSpeed*100*5
                         ship.lock.release()
+                        # print ship.getPos()
 
                 GameState.lock.release()
         except:
