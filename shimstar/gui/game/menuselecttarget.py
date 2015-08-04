@@ -120,6 +120,7 @@ class MenuSelectTarget(DirectObject):
     def hide(self):
         self.OutAnimationInstance.start()
         taskMgr.remove("event selecttarget")
+        self.emptyWindow()
 
     def setParent(self,parent):
         self.parent = parent
@@ -127,6 +128,7 @@ class MenuSelectTarget(DirectObject):
     def destroy(self):
         taskMgr.remove("event selecttarget")
         MenuSelectTarget.instance = None
+        self.emptyWindow()
 
     def getParent(self):
         return self.parent
