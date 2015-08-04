@@ -159,7 +159,7 @@ class GuiStationShop(DirectObject):
         listOfTemplate=ItemTemplate.getListOfTemplate()
         for itId in listOfTemplate:
             it=listOfTemplate[itId]
-            if it.getTypeItem() in (C_ITEM_ENERGY,C_ITEM_WEAPON,C_ITEM_ENGINE,C_ITEM_SHIELD):
+            if it.getTypeItem() in (C_ITEM_ENERGY,C_ITEM_WEAPON,C_ITEM_ENGINE,C_ITEM_SHIELD,C_ITEM_MINING):
                 locI = numItemI % 7
                 locJ = int(numItemI / 7)
                 panel = self.CEGUI.WindowManager.getWindow("Station/Shop/gpachatpanel")
