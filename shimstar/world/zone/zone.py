@@ -518,9 +518,10 @@ class Zone(threading.Thread):
             sta.destroy()
         for worm in self.listOfWormHole:
             worm.destroy()
+
         for npc in self.npc:
             npc.destroy()
-        for j in self.junks:
+        for j in Junk.junkList:
             j.destroy()
         if self.box != None:
             self.box.detachNode()
