@@ -143,11 +143,15 @@ class NetworkMainServer(threading.Thread):
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CHARACTER_STATION2INV:
-            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32()) #iditem
+            msgTab.append(myIterator.getUint32()) #qty
+            print "oooo"
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CHARACTER_INV2STATION:
-            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32()) #iditem
+            msgTab.append(myIterator.getUint32()) #qty
+            print "kkkk"
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CHARACTER_BUY_ITEM:

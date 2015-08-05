@@ -25,6 +25,7 @@ class GuiStationInventory(DirectObject):
                 idItem = int(netMsg[0])
                 ship=User.getInstance().getCurrentCharacter().getShip()
                 item = ship.getItemFromInventory(idItem)
+
                 if item is not None:
                     User.getInstance().getCurrentCharacter().getShip().removeItemInInventoryById(idItem)
                     User.getInstance().getCurrentCharacter().appendInvStation(item)
@@ -42,7 +43,6 @@ class GuiStationInventory(DirectObject):
                 if itToRemove is not None:
                     ship.addItemInInventory(itToRemove)
                     User.getInstance().getCurrentCharacter().removeItemFromInvstation(itToRemove)
-
                 NetworkMainServer.getInstance().removeMessage(msg)
                 toUpdate = True
 
@@ -59,26 +59,27 @@ class GuiStationInventory(DirectObject):
         if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
             for itChild in range(self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
                 wnd = self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx(0)
-                for itImg in range(wnd.getChildCount()):
-                    imgWnd = wnd.getChildAtIdx(0)
-                    wnd.removeChildWindow(imgWnd)
-                    self.CEGUI.WindowManager.destroyWindow(imgWnd)
+                if "Drag" in wnd.getName():
+                    for itImg in range(wnd.getChildCount()):
+                        imgWnd = wnd.getChildAtIdx(itImg)
+                        wnd.removeChildWindow(imgWnd)
+                        self.CEGUI.WindowManager.destroyWindow(imgWnd)
                 self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
-                self.CEGUI.WindowManager.destroyWindow(wnd)
+                # self.CEGUI.WindowManager.destroyWindow(wnd)
                 wnd.destroy()
-
         wndName = "Station/Shop/gpventepanel"
         if self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount() > 0:
             for itChild in range(self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildCount()):
                 wnd = self.CEGUI.WindowManager.getWindow(wndName).getContentPane().getChildAtIdx(0)
-                for itImg in range(wnd.getChildCount()):
-                    imgWnd = wnd.getChildAtIdx(0)
-                    wnd.removeChildWindow(imgWnd)
-                    self.CEGUI.WindowManager.destroyWindow(imgWnd)
-                self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
-                self.CEGUI.WindowManager.destroyWindow(wnd)
-                wnd.destroy()
 
+                if "Drag" in wnd.getName():
+                    for itImg in range(wnd.getChildCount()):
+                        imgWnd = wnd.getChildAtIdx(itImg)
+                        wnd.removeChildWindow(imgWnd)
+                        self.CEGUI.WindowManager.destroyWindow(imgWnd)
+                self.CEGUI.WindowManager.getWindow(wndName).getContentPane().removeChildWindow(wnd)
+                # self.CEGUI.WindowManager.destroyWindow(wnd)
+                wnd.destroy()
 
     def itemDropped(self,args):
         if args.dragDropItem.getChildCount()>0:
@@ -88,12 +89,20 @@ class GuiStationInventory(DirectObject):
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getId())
                 nm.addUInt(User.getInstance().getCurrentCharacter().getIdZone())
+                if isinstance(item,Mineral):
+                    nm.addUInt(item.getQuantity())
+                else:
+                    nm.addUInt(1)
                 NetworkMainServer.getInstance().sendMessage(nm)
             elif "achat" in args.window.getName():
                 nm = netMessage(C_NETWORK_CHARACTER_INV2STATION)
                 nm.addUInt(User.getInstance().getId())
                 nm.addUInt(item.getId())
                 nm.addUInt(User.getInstance().getCurrentCharacter().getIdZone())
+                if isinstance(item,Mineral):
+                    nm.addUInt(item.getQuantity())
+                else:
+                    nm.addUInt(1)
                 NetworkMainServer.getInstance().sendMessage(nm)
             # self.InTransAnimationInstance.start()
             self.CEGUI.WindowManager.getWindow("Station/Shop/transaction").moveToFront()
@@ -198,7 +207,6 @@ class GuiStationInventory(DirectObject):
         self.CEGUI.WindowManager.getWindow("Station/Shop/solde").setText(str(User.getInstance().getCurrentCharacter().getCoin()) + "    Credit Standard")
 
     def showInfo(self, args):
-        print "showInfo " + str(args)
         if args.window.getChildCount() > 0:
             img = args.window.getChildAtIdx(0)
             item = img.getUserData()

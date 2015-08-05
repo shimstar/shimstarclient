@@ -137,7 +137,8 @@ class GuiStation(DirectObject):
                         compteur += 4
                         it = itemFactory.getItemFromTemplateType(template, typeItem)
                         it.setId(idItem)
-                        it.setNb(nb)
+                        if isinstance (it, Mineral):
+                            it.setQuantity(nb)
                         # self.inventory.append(it)
                         ch.appendInvStation(it)
                     coin = netMsg[compteur]
