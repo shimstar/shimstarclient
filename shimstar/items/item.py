@@ -36,7 +36,7 @@ class ShimstarItem(object):
             if self.typeItem == 0:
                 self.template = ItemTemplate.getTemplateById(id)
                 self.name, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.typeItem = self.template.getInfos()
-            elif self.typeItem not in (C_ITEM_ENERGY,C_ITEM_SHIELD,C_ITEM_WEAPON,C_ITEM_ENGINE):
+            elif self.typeItem not in (C_ITEM_ENERGY,C_ITEM_SHIELD,C_ITEM_WEAPON,C_ITEM_ENGINE,C_ITEM_MINING):
                 self.template = ItemTemplate.getTemplate(id, self.typeItem)
                 self.name, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.typeItem = self.template.getInfos()
 

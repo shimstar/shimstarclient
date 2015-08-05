@@ -10,10 +10,10 @@ class MiningTemplate(ItemTemplate):
 
     def __init__(self, xmlPart):
         super(MiningTemplate, self).__init__(xmlPart)
-        self.vitesse = float(xmlPart.getElementsByTagName('vitesse')[0].firstChild.data)
-        self.perf = float(xmlPart.getElementsByTagName('perf')[0].firstChild.data)
+
+
         self.nb = int(xmlPart.getElementsByTagName('nbextract')[0].firstChild.data)
-        self.range = int(xmlPart.getElementsByTagName('range')[0].firstChild.data)
+        self.distance = int(xmlPart.getElementsByTagName('range')[0].firstChild.data)
         self.minerals = []
         minerals = xmlPart.getElementsByTagName('mineraltomine')
         for m in minerals:
@@ -22,7 +22,7 @@ class MiningTemplate(ItemTemplate):
 
 
     def getInfos(self):
-        return self.name, self.range, self.vitesse, self.perf, self.nb, self.minerals, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.skillItems
+        return self.name, self.distance, self.nb, self.minerals, self.cost, self.sell, self.energyCost, self.space, self.img, self.location, self.skillItems
 
     @staticmethod
     def loadXml():
@@ -33,20 +33,15 @@ class MiningTemplate(ItemTemplate):
             if typeitem == C_ITEM_MINING:
                 MiningTemplate(i)
 
-    def getVitesse(self):
-        return self.vitesse
 
     def getNb(self):
         return self.nb
 
-    def getPerf(self):
-        return self.perf
-
     def getMinerals(self):
         return self.minerals
 
-    def getRange(self):
-        return self.range
+    def getDistance(self):
+        return self.distance
 
     @staticmethod
     def getTemplate(idTemplate):

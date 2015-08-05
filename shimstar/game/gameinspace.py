@@ -338,6 +338,20 @@ class GameInSpace(DirectObject, threading.Thread):
                     else:
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyShieldBar").hide()
 
+                elif isinstance(self.target,Asteroid):
+                    distance = self.calcDistance(self.target.getNode())
+                    maxDistance = -100
+                    currentShip = User.getInstance().getCurrentCharacter().getShip()
+                    if currentShip is not None :
+                        listOfMining = currentShip.hasItems(C_ITEM_MINING)
+                        for min in listOfMining:
+                            maxDistance = min.getDistance()
+
+                    if distance > maxDistance:
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").setProperty("BackgroundImage", "set:ShimstarImageset image:ReticleMiningKO" )
+                    else:
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").setProperty("BackgroundImage", "set:ShimstarImageset image:ReticleMining" )
+
             else:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == True:
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
