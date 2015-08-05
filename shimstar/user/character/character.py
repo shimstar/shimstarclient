@@ -142,6 +142,13 @@ class Character:
     def isCurrent(self):
         return self.current
 
+    def getInvStationWithout(self,typeWithout):
+        invToReturn = []
+        for inv in self.invStation:
+            if inv.getTypeItem() not in typeWithout:
+                invToReturn.append(inv)
+        return invToReturn
+
     def changeZone(self, death=False):
         if GameState.getInstance().getNewZone() != 0:
             self.idZone = GameState.getInstance().getNewZone()

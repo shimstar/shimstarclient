@@ -512,6 +512,14 @@ class Ship:
     def setHullPoints(self,hp):
         self.hullpoints = hp
 
+    def getItemInInventoryWithout(self,typeWithout):
+        invToReturn = []
+        for inv in self.itemInInventory:
+            if inv.getTypeItem() not in typeWithout:
+                invToReturn.append(inv)
+
+        return invToReturn
+
     def addSlot(self, s):
         self.slots.append(s)
         it=s.getItem()

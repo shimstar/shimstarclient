@@ -193,10 +193,10 @@ class GuiStationShop(DirectObject):
         ship=User.getInstance().getCurrentCharacter().getShip()
         if ship is not None:
             if shipInv:
-                inv=ship.getItemInInventory()
+                inv=ship.getItemInInventoryWithout([C_ITEM_MINERAL])
                 self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").setText("Inventaire soute")
             else:
-                inv=User.getInstance().getCurrentCharacter().getInvStation()
+                inv=User.getInstance().getCurrentCharacter().getInvStationWithout([C_ITEM_MINERAL])
                 self.CEGUI.WindowManager.getWindow("Station/Shop/Gpvente").setText("Inventaire Station")
             i = 0
             j = 0
