@@ -139,8 +139,8 @@ class GuiStationInventory(DirectObject):
             if it.getTypeItem() == C_ITEM_MINERAL:
                 label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
                                                               "Station/Shop/gpachatpanel/label" + str(it.getId()))
-                label.setProperty("UnifiedAreaRect", "{{" + str(0.025 + 0.115 * locI) + ",0},{0.2,0},{" + str(
-                    0.125 + 0.115 * locI) + ",0},{0.3,0}}");
+                label.setProperty("UnifiedAreaRect", "{{" + str(0.0 + 0.115 * locI) + ",0},{0.35,0},{" + str(
+                        0.095 + 0.115 * locI) + ",0},{0.55,0}}")
                 label.setProperty("Font", "Brassiere-s")
                 label.setText(str(it.getQuantity()))
                 panel.addChildWindow(label)
@@ -188,8 +188,8 @@ class GuiStationInventory(DirectObject):
                 if it.getTypeItem() == C_ITEM_MINERAL:
                     label = self.CEGUI.WindowManager.createWindow("Shimstar/Button",
                                                                   "Station/Shop/gpventepanel/label" + str(it.getId()))
-                    label.setProperty("UnifiedAreaRect", "{{" + str(0.025 + 0.115 * locI) + ",0},{0.2,0},{" + str(
-                        0.125 + 0.115 * locI) + ",0},{0.3,0}}");
+                    label.setProperty("UnifiedAreaRect", "{{" + str(0.0 + 0.115 * locI) + ",0},{0.35,0},{" + str(
+                        0.095 + 0.115 * locI) + ",0},{0.55,0}}")
                     label.setProperty("Font", "Brassiere-s")
                     label.setText(str(it.getQuantity()))
                     panel.addChildWindow(label)
@@ -198,6 +198,7 @@ class GuiStationInventory(DirectObject):
         self.CEGUI.WindowManager.getWindow("Station/Shop/solde").setText(str(User.getInstance().getCurrentCharacter().getCoin()) + "    Credit Standard")
 
     def showInfo(self, args):
+        print "showInfo " + str(args)
         if args.window.getChildCount() > 0:
             img = args.window.getChildAtIdx(0)
             item = img.getUserData()
