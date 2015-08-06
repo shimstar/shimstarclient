@@ -74,7 +74,7 @@ class MenuLootsInfo(DirectObject):
         taskMgr.add(self.event,"event loot Info",-40)
 
     def destroy(self):
-        taskMgr.remove("event loot")
+        taskMgr.remove("event loot Info")
         self.junk = None
         MenuLootsInfo.instance = None
 

@@ -20,6 +20,7 @@ from shimstar.gui.shimcegui import *
 # from shimstar.game.particleEngine import *
 from shimstar.gui.game.menuloot import *
 from shimstar.gui.game.menuselecttarget import *
+from shimstar.gui.game.menuasteroidinfo import *
 
 class GameInSpace(DirectObject, threading.Thread):
     instance = None
@@ -271,7 +272,8 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
-                print "ast " + str(obj.getId())
+                MenuAsteroidInfo.getInstance().setTarget(obj)
+                MenuAsteroidInfo.getInstance().show()
             elif isinstance(obj,Junk):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
@@ -349,8 +351,10 @@ class GameInSpace(DirectObject, threading.Thread):
 
                     if distance > maxDistance:
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").setProperty("BackgroundImage", "set:ShimstarImageset image:ReticleMiningKO" )
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").disable()
                     else:
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").setProperty("BackgroundImage", "set:ShimstarImageset image:ReticleMining" )
+                        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").enable()
 
             else:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == True:
@@ -800,6 +804,8 @@ class GameInSpace(DirectObject, threading.Thread):
             MenuSelectTarget.getInstance().destroy()
         if MenuLootsInfo.isInstantiated():
             MenuLootsInfo.getInstance().destroy()
+        if MenuAsteroidInfo.isInstantiated():
+            MenuAsteroidInfo.getInstance().destroy()
         if MenuLoot.isInstantiated():
             MenuLoot.getInstance().destroy()
         if self.ceGuiRootWindow != None:

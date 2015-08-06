@@ -27,6 +27,7 @@ class Asteroid(DirectObject):
         self.text = ""
         self.wiredBox = None
         self.mass = 0
+        self.templateAst = None
         self.minerals = {'id': 0}
         self.loadXml(xmlPart)
         Asteroid.listOfAsteroid[self.id] = self
@@ -47,13 +48,13 @@ class Asteroid(DirectObject):
         hprr = float(xmlPart.getElementsByTagName('hprp')[0].firstChild.data)
         hprp = float(xmlPart.getElementsByTagName('hprr')[0].firstChild.data)
         self.scale = float (xmlPart.getElementsByTagName('scale')[0].firstChild.data)
-        templateAst = asteroidTemplate.getTemplate(self.idTemplate)
+        self.templateAst = asteroidTemplate.getTemplate(self.idTemplate)
         self.pos = (posx, posy, posz)
 
         self.hpr = (hprh, hprr, hprp)
         # print "HERREEEE " + str(templateAst) + "/" + str(self.idTemplate)
-        if templateAst != None:
-            self.name, self.egg, self.mass, self.text, self.eggMiddle, self.eggFar = templateAst.getInfos()
+        if self.templateAst != None:
+            self.name, self.egg, self.mass, self.text, self.eggMiddle, self.eggFar = self.templateAst.getInfos()
             # self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
             self.node = NodePath(FadeLODNode('lodast' + str(self.id)))
             self.node.reparentTo(render)
@@ -77,8 +78,11 @@ class Asteroid(DirectObject):
             self.node.setTag("name", self.name + " kk ")
             self.node.setTag("classname", "asteroid")
             self.node.setTag("id", str(self.id))
-            self.minerals = templateAst.getMinerals()
+            self.minerals = self.templateAst.getMinerals()
 
+
+    def getTemplateName(self):
+        return self.templateAst.getName()
 
     def getMinerals(self):
         return self.minerals

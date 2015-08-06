@@ -43,8 +43,12 @@ class asteroidTemplate():
                 ast.minerals[id] = nb
 
 
+
     def getMinerals(self):
         return self.minerals
+
+    def getName(self):
+        return self.name
 
 
     @staticmethod
