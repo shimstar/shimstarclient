@@ -260,6 +260,10 @@ class GameInSpace(DirectObject, threading.Thread):
             MenuSelectTarget.getInstance().setTarget(newTgt)
 
         if obj is not None:
+            if self.target is not None:
+                if isinstance(self.target,Asteroid):
+                    if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining").isVisible():
+                        self.OutMiningAnimationInstance.start()
             if isinstance(obj, Station):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
@@ -274,6 +278,7 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").show()
                 MenuAsteroidInfo.getInstance().setTarget(obj)
                 MenuAsteroidInfo.getInstance().show()
+                MenuAsteroidInfo.getInstance().setParent(self)
             elif isinstance(obj,Junk):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()

@@ -16,18 +16,18 @@ class MenuAsteroidInfo(DirectObject):
         self.CEGUI = ShimCEGUI.getInstance()
         self.parent = None
         self.lastTicks = 0
-        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").subscribeEvent(PyCEGUI.FrameWindow.EventCloseClicked,
                                                                                          self, 'onCloseClicked')
         self.OutAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowOut")
         self.InAnimationInstance = self.CEGUI.AnimationManager.instantiateAnimation("WindowIn")
         self.OutAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid"))
         self.InAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid"))
-        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Open").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid/Miner").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                             'onMining')
 
     def event(self,task):
         dt = globalClock.getRealTime() - self.lastTicks
-        if dt > 1:
+        if dt > 0.5:
             self.lastTicks = globalClock.getRealTime()
 
             ship = User.getInstance().getCurrentCharacter().getShip()
@@ -52,7 +52,6 @@ class MenuAsteroidInfo(DirectObject):
         return task.cont
 
     def onMining(self,args):
-
         self.parent.onClickMining(args)
 
 
@@ -62,7 +61,6 @@ class MenuAsteroidInfo(DirectObject):
     def setTarget(self,ast):
         self.asteroid=ast
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid/Name").setText(self.asteroid.getName() + str(self.asteroid.getId()))
-        print self.asteroid.getTemplateName()
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid/Img").setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(self.asteroid.getTemplateName()))
 
     def onCloseClicked(self, args):
