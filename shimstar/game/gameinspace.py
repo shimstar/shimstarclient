@@ -21,6 +21,7 @@ from shimstar.gui.shimcegui import *
 from shimstar.gui.game.menuloot import *
 from shimstar.gui.game.menuselecttarget import *
 from shimstar.gui.game.menuasteroidinfo import *
+from shimstar.gui.game.menustationinfo import *
 
 class GameInSpace(DirectObject, threading.Thread):
     instance = None
@@ -264,10 +265,16 @@ class GameInSpace(DirectObject, threading.Thread):
                 if isinstance(self.target,Asteroid):
                     if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining").isVisible():
                         self.OutMiningAnimationInstance.start()
+                    MenuAsteroidInfo.getInstance().hide()
+                elif isinstance(self.target,Station):
+                    MenuStationInfo.getInstance().hide()
             if isinstance(obj, Station):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
+                MenuStationInfo.getInstance().setTarget(obj)
+                MenuStationInfo.getInstance().show()
+                MenuStationInfo.getInstance().setParent(self)
             elif isinstance(obj, Ship):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
@@ -811,6 +818,8 @@ class GameInSpace(DirectObject, threading.Thread):
             MenuLootsInfo.getInstance().destroy()
         if MenuAsteroidInfo.isInstantiated():
             MenuAsteroidInfo.getInstance().destroy()
+        if MenuStationInfo.isInstantiated():
+            MenuStationInfo.getInstance().destroy()
         if MenuLoot.isInstantiated():
             MenuLoot.getInstance().destroy()
         if self.ceGuiRootWindow != None:

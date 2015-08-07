@@ -35,6 +35,7 @@ class MenuAsteroidInfo(DirectObject):
                 ship.lock.acquire()
                 if self.asteroid.getNode().isEmpty() != True and ship.getNode().isEmpty() != True:
                     distance = calcDistance(self.asteroid.getNode(),ship.getNode())
+                    maxDistance = -1
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid/Distance").setText("distance : "+ str(distance))
                     if ship is not None :
                         listOfMining = ship.hasItems(C_ITEM_MINING)
@@ -72,12 +73,12 @@ class MenuAsteroidInfo(DirectObject):
 
     def show(self):
         self.InAnimationInstance.start()
-        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow").moveToFront()
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Asteroid").moveToFront()
         taskMgr.add(self.event,"event asteroid Info",-40)
 
     def destroy(self):
         taskMgr.remove("event asteroid Info")
-        self.junk = None
+        self.asteroid = None
         MenuAsteroidInfo.instance = None
 
     @staticmethod
