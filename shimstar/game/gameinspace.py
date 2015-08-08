@@ -260,7 +260,6 @@ class GameInSpace(DirectObject, threading.Thread):
     def changeTarget(self, obj,external=False,newTgt=None):
         if external==False:
             MenuSelectTarget.getInstance().setTarget(newTgt)
-
         if obj is not None:
             if self.target is not None:
                 if isinstance(self.target,Asteroid):
@@ -308,21 +307,6 @@ class GameInSpace(DirectObject, threading.Thread):
     def renderTarget(self, dt):
         if self.target != None and self.target.getNode().isEmpty() != True:
 
-            # if isinstance(self.target, Ship):
-            #     self.target.getLock().acquire()
-            #
-            #     if dt > 0.05:
-            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
-            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(
-            #             str(self.calcDistance(self.target.node)))
-            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage",
-            #                                                                                "set:ShimstarImageset image:" + self.target.name)
-            #     self.target.getLock().release()
-            #     #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:" + self.target.name + " image:full_image")
-            # ###Reticule de suivi de la cible ou point rouge sur le bord
-            # elif isinstance(self.target, Station):
-            #     if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible() == True:
-            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
             pos = self.map3dToAspect2d(render, self.target.getNode().getPos(render))
             if pos != None:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == False:
@@ -908,7 +892,7 @@ class GameInSpace(DirectObject, threading.Thread):
                  if isinstance(newTarget,NPC):
                     Follower.getInstance().setTarget(newTarget.getShip().getNode())
                     self.target = newTarget.getShip()
-                 elif isinstance(newTarget,Character):
+                 elif "Character" in str(newTarget):
                     Follower.getInstance().setTarget(newTarget.getShip().getNode())
                     self.target = newTarget.getShip()
                  elif isinstance(newTarget,Junk):
