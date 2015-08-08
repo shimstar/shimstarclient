@@ -22,6 +22,7 @@ from shimstar.gui.game.menuloot import *
 from shimstar.gui.game.menuselecttarget import *
 from shimstar.gui.game.menuasteroidinfo import *
 from shimstar.gui.game.menustationinfo import *
+from shimstar.gui.game.menushipinfo import *
 
 class GameInSpace(DirectObject, threading.Thread):
     instance = None
@@ -268,6 +269,8 @@ class GameInSpace(DirectObject, threading.Thread):
                     MenuAsteroidInfo.getInstance().hide()
                 elif isinstance(self.target,Station):
                     MenuStationInfo.getInstance().hide()
+                elif isinstance(self.target,Ship):
+                    MenuShipInfo.getInstance().hide()
             if isinstance(obj, Station):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").show()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
@@ -279,6 +282,9 @@ class GameInSpace(DirectObject, threading.Thread):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").show()
+                MenuShipInfo.getInstance().setTarget(obj)
+                MenuShipInfo.getInstance().show()
+                MenuShipInfo.getInstance().setParent(self)
             elif isinstance(obj, Asteroid):
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/home").hide()
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Reticle/ennemyHullBar").hide()
@@ -302,21 +308,21 @@ class GameInSpace(DirectObject, threading.Thread):
     def renderTarget(self, dt):
         if self.target != None and self.target.getNode().isEmpty() != True:
 
-            if isinstance(self.target, Ship):
-                self.target.getLock().acquire()
-
-                if dt > 0.05:
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(
-                        str(self.calcDistance(self.target.node)))
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage",
-                                                                                           "set:ShimstarImageset image:" + self.target.name)
-                self.target.getLock().release()
-                #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:" + self.target.name + " image:full_image")
-            ###Reticule de suivi de la cible ou point rouge sur le bord
-            elif isinstance(self.target, Station):
-                if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible() == True:
-                    self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
+            # if isinstance(self.target, Ship):
+            #     self.target.getLock().acquire()
+            #
+            #     if dt > 0.05:
+            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.target.getName())
+            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Distance").setText(
+            #             str(self.calcDistance(self.target.node)))
+            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage",
+            #                                                                                "set:ShimstarImageset image:" + self.target.name)
+            #     self.target.getLock().release()
+            #     #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("HoverImage", "set:" + self.target.name + " image:full_image")
+            # ###Reticule de suivi de la cible ou point rouge sur le bord
+            # elif isinstance(self.target, Station):
+            #     if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible() == True:
+            #         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").setVisible(False)
             pos = self.map3dToAspect2d(render, self.target.getNode().getPos(render))
             if pos != None:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == False:
@@ -820,6 +826,8 @@ class GameInSpace(DirectObject, threading.Thread):
             MenuAsteroidInfo.getInstance().destroy()
         if MenuStationInfo.isInstantiated():
             MenuStationInfo.getInstance().destroy()
+        if MenuShipInfo.isInstantiated():
+            MenuShipInfo.getInstance().destroy()
         if MenuLoot.isInstantiated():
             MenuLoot.getInstance().destroy()
         if self.ceGuiRootWindow != None:
