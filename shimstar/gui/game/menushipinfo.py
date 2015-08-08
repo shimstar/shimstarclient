@@ -59,7 +59,10 @@ class MenuShipInfo(DirectObject):
 
     def setTarget(self,ship):
         self.ship=ship
-        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.ship.getName() + str(self.ship.getId()))
+        if "Character" in str(self.ship.owner):
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.ship.owner.getName())
+        else:
+            self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Name").setText(self.ship.getName() + str(self.ship.getId()))
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:ShimstarImageset image:" + str(self.ship.getImg()))
 
     def onCloseClicked(self, args):

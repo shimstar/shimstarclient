@@ -23,7 +23,6 @@ class User(threading.Thread):
     @staticmethod
     def getListOfCharacters(withoutCurrent=False):
         listOfChar = []
-        print User.listOfUser
         for uid in User.listOfUser:
             if withoutCurrent == True:
                 if uid != User.getInstance().getId():
