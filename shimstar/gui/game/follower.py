@@ -36,13 +36,20 @@ class Follower(object):
 
     def setTarget(self, target):
         self.target = target
-        self.active = True
+        if self.target is not None:
+            if self.active == False:
+                self.task = taskMgr.add(self.track, "onscreen follower")
+                self.active = True
+        else:
+            self.active = False
+            self.pointer.hide()
+            taskMgr.remove(self.task)
 
     def getTarget(self):
         return self.target
 
     def track(self, task):
-        if self.target != None and not self.target.isEmpty():
+        if self.target is not None and not self.target.isEmpty():
             if isInView(self.target):
                 self.pointer.hide()
 
