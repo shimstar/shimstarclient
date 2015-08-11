@@ -30,15 +30,23 @@ main.py contains an event dispatcher, and will start some thread:
 - zoneserver, zone and gameinspace if user is into a zone
 
 shimstar/core : constantes and common stuff between station and space game
+
 shimstar/game : stuff for play in space (gameinspace will handle all things about play (movement, shoot,...), UI management
+
 shimstar/gui : stuff about management of game windows
+
     - system : game start on connection, character choose, and load game
     - game : window during game (inventory, targeting,...)
     - station : window into the station (merchant, fitting, ...)
+
 shimstar/items : classes concerning item
+
 shimstar/network
+
 shimstar/npc
+
 shimstar/user
+
 shimstar/world/zone  :  zone is managing all network communication concerning user playing, npc, and different event to play the game.
 
 # Chat 
