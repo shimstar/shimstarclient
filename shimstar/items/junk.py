@@ -1,10 +1,12 @@
 from pandac.PandaModules import *
 from shimstar.core.shimconfig import *
+from direct.stdpy import threading
 
 class Junk:
     junkList = []
     def __init__(self,id,pos=(0,0,0)):
         self.id = id
+        self.lock = threading.Lock()
         self.pos = pos
         self.name = "junk"
         self.egg = "models/junk.bam"
@@ -60,7 +62,9 @@ class Junk:
             self.node.setPos(pos)
 
     def destroy(self):
+        self.lock.acquire()
         if self.node is not None and  not self.node.isEmpty():
             self.node.detachNode()
             self.node.removeNode()
         Junk.junkList.remove(self)
+        self.lock.release()
