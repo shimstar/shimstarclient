@@ -1039,31 +1039,34 @@ class GameInSpace(DirectObject, threading.Thread):
                                     if self.shooting:
                                         #~ if self.mousebtn[0]==1:
                                         #~ print "shot"
-                                        if ship.shot():
-                                            self.pointerLookingAt.setPos(ship.getPos())
-                                            if self.pointToLookAt is not None:
-                                                self.pointerLookingAt.lookAt(self.pointToLookAt)
-                                            else:
-                                                if base.mouseWatcherNode.hasMouse():
-                                                    x = base.mouseWatcherNode.getMouseX()
-                                                    y = base.mouseWatcherNode.getMouseY()
-                                                    t1 = Point3()
-                                                    t2 = Point3()
-                                                    ret = base.camLens.extrude(Point2(x, y), t1, t2)
-                                                    t2 = t2 / 100
-                                                    t2relative = render.getRelativePoint(camera, t2)
-                                                    self.pointerLookingAt.lookAt(t2relative)
-                                            nm = netMessage(C_NETWORK_CHAR_SHOT)
-                                            nm.addUInt(ship.getOwner().getUserId())
-                                            nm.addUInt(ship.getOwner().getId())
-                                            nm.addFloat(ship.getPos().getX())
-                                            nm.addFloat(ship.getPos().getY())
-                                            nm.addFloat(ship.getPos().getZ())
-                                            nm.addFloat(self.pointerLookingAt.getQuat().getR())
-                                            nm.addFloat(self.pointerLookingAt.getQuat().getI())
-                                            nm.addFloat(self.pointerLookingAt.getQuat().getJ())
-                                            nm.addFloat(self.pointerLookingAt.getQuat().getK())
-                                            NetworkZoneServer.getInstance().sendMessage(nm)
+                                        weapons = ship.hasItems(C_ITEM_WEAPON)
+                                        for w in weapons:
+                                            if w.shot():
+                                                self.pointerLookingAt.setPos(ship.getPos())
+                                                if self.pointToLookAt is not None:
+                                                    self.pointerLookingAt.lookAt(self.pointToLookAt)
+                                                else:
+                                                    if base.mouseWatcherNode.hasMouse():
+                                                        x = base.mouseWatcherNode.getMouseX()
+                                                        y = base.mouseWatcherNode.getMouseY()
+                                                        t1 = Point3()
+                                                        t2 = Point3()
+                                                        ret = base.camLens.extrude(Point2(x, y), t1, t2)
+                                                        t2 = t2 / 100
+                                                        t2relative = render.getRelativePoint(camera, t2)
+                                                        self.pointerLookingAt.lookAt(t2relative)
+                                                nm = netMessage(C_NETWORK_CHAR_SHOT)
+                                                nm.addUInt(ship.getOwner().getUserId())
+                                                nm.addUInt(ship.getOwner().getId())
+                                                nm.addFloat(ship.getPos().getX())
+                                                nm.addFloat(ship.getPos().getY())
+                                                nm.addFloat(ship.getPos().getZ())
+                                                nm.addFloat(self.pointerLookingAt.getQuat().getR())
+                                                nm.addFloat(self.pointerLookingAt.getQuat().getI())
+                                                nm.addFloat(self.pointerLookingAt.getQuat().getJ())
+                                                nm.addFloat(self.pointerLookingAt.getQuat().getK())
+                                                nm.addUInt(w.getId())
+                                                NetworkZoneServer.getInstance().sendMessage(nm)
 
                                     if self.keysDown.has_key('t'):
                                         if (self.keysDown['t'] != 0):
@@ -1152,6 +1155,9 @@ class GameInSpace(DirectObject, threading.Thread):
 
                 GameState.lock.release()
         except:
-            print "pb thread gameinspace"
+            # print "pb thread gameinspace"  + str(sys.exc_info()[0])
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
         self.started=False
         print "le thread GameInSpace s'est termine proprement"

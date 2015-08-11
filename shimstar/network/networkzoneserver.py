@@ -141,6 +141,7 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getStdfloat())
             msgTab.append(myIterator.getStdfloat())
             msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NEW_NPC_SHOT:

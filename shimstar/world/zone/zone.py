@@ -395,11 +395,12 @@ class Zone(threading.Thread):
                 bulId = int(netMsg[1])
                 pos = (netMsg[2], netMsg[3], netMsg[4])
                 quat = (netMsg[5], netMsg[6], netMsg[7], netMsg[8])
+                weaponId = int(netMsg[9])
                 user = User.getUserById(usrID)
 
                 if user != None:
                     Bullet.lock.acquire()
-                    user.getCurrentCharacter().addBullet(bulId, pos, quat)
+                    user.getCurrentCharacter().addBullet(bulId, pos, quat,weaponId)
                     Bullet.lock.release()
                 else:
                     print "zone::runNewShot Bullet not affected to user " + str(usrID)

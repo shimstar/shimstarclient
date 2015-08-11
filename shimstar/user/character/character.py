@@ -121,8 +121,8 @@ class Character:
     def getShip(self):
         return self.ship
 
-    def addBullet(self, bulId, pos, quat):
-        self.ship.addBullet(bulId, pos, quat)
+    def addBullet(self, bulId, pos, quat,weaponId):
+        self.ship.addBullet(bulId, pos, quat,weaponId)
 
     def getName(self):
         return self.name

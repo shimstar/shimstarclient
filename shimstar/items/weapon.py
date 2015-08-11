@@ -57,7 +57,7 @@ class Weapon(ShimstarItem):
     def getSpeed(self):
         return self.speed
 
-    def shot(self, pos, quat):
+    def shot(self):
         if globalClock.getRealTime() - self.lastShot > self.cadence:
             self.lastShot = globalClock.getRealTime()
             return True

@@ -39,8 +39,6 @@ class Ship:
         self.template = idTemplate
         self.shipTemplate = None
         self.mainShip = False
-        self.weapons = None
-        self.engine = None
         self.actualSpeed = 0
         self.node = None
         self.img = ""
@@ -157,11 +155,15 @@ class Ship:
     #~ return float(prcent),self.hullpoints,self.maxhull
 
     def getPrcentSpeed(self):
-        if self.engine != None:
-            prcent = float(self.poussee) / float(self.engine.getSpeedMax())
-            return float(prcent), self.poussee, self.engine.getSpeedMax()
-        return 0,0,0
-
+        engines = self.hasItems(C_ITEM_ENGINE)
+        if len(engines) > 0:
+            speedMax = 0
+            for e in engines:
+                speedMax += float(e.getSpeedMax())
+            prcent = float(self.poussee) / float(speedMax)
+            return float(prcent), self.poussee, speedMax
+        else:
+            return 0,0,0
 
     def setOwner(self, owner):
         self.owner = owner
@@ -256,10 +258,7 @@ class Ship:
             if tempSlot.getItem() != None:
                 it = tempSlot.getItem()
                 if it.getTypeItem() == C_ITEM_WEAPON:
-                    self.weapons = it
                     it.setShip(self)
-                if it.getTypeItem() == C_ITEM_ENGINE:
-                    self.engine = it
 
         if self.visible == True:
             self.node = loader.loadModel(shimConfig.getInstance().getConvRessourceDirectory() + self.egg)
@@ -340,10 +339,7 @@ class Ship:
             msg.addUInt(self.owner.userRef.id)
             msg.addUInt(slot.getId())
             NetworkMainServer.getInstance().sendMessage(msg)
-            if itemUninstalled.getTypeItem() == C_ITEM_WEAPON:
-                self.weapons = None
-            if itemUninstalled.getTypeItem() == C_ITEM_ENGINE:
-                self.engine = None
+
 
     def removeTemplateSlots(self):
         self.slots = []
@@ -365,9 +361,7 @@ class Ship:
                 msg.addUInt(itemToInstall.getId())
                 NetworkMainServer.getInstance().sendMessage(msg)
                 if itemToInstall.getTypeItem() == C_ITEM_WEAPON:
-                    self.weapons = itemToInstall
-                if itemToInstall.getTypeItem() == C_ITEM_ENGINE:
-                    self.engine = itemToInstall
+                    itemToInstall.setShip(self)
 
     def addMinerals(self, id, typeMineral, qt):
         alreadyGot = False
@@ -393,9 +387,6 @@ class Ship:
 
     def getSlots(self):
         return self.slots
-
-    def getWeapon(self):
-        return self.weapons
 
     def changeZone(self):
         self.actualSpeed = 0
@@ -445,23 +436,23 @@ class Ship:
         return self.actualSpeed
 
     def getSpeedMax(self):
-        return self.engine.getSpeedMax()
+        engines = self.hasItems(C_ITEM_ENGINE)
+        speedMax = 0
+        for e in engines:
+            speedMax+=e.getSpeedMax()
+        return speedMax
 
-    def addBullet(self, bulId, pos, quat):
-        if self.weapons != None:
-            self.weapons.addBullet(bulId, pos, quat)
-
-    def shot(self):
-        if self.weapons != None:
-            return self.weapons.shot(self.node.getPos(), self.node.getQuat())
-        return None
+    def addBullet(self, bulId, pos, quat,weaponId):
+        weapons = self.hasItems(C_ITEM_WEAPON)
+        for w in weapons:
+            if w.getId() == weaponId:
+                w.addBullet(bulId, pos, quat)
 
     def destroy(self):
         self.lock.acquire()
         try:
             self.node.detachNode()
             self.node.removeNode()
-            print "ship::destroy " + str(self.id)
             if self.textObject != None:
                 self.textObject.detachNode()
                 self.textObject.removeNode()
@@ -525,9 +516,7 @@ class Ship:
         it=s.getItem()
         if it is not None:
             if it.getTypeItem() == C_ITEM_WEAPON:
-                self.weapons = it
-            if it.getTypeItem() == C_ITEM_ENGINE:
-                self.engine = it
+                it.setShip(self)
 
     def hasItems(self,typeItem):
         listOfItem = []
