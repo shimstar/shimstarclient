@@ -119,6 +119,9 @@ class NetworkMainServer(threading.Thread):
                 msgTab.append(myIterator.getUint32())  # id template item associe au slot
                 msgTab.append(myIterator.getUint32())  # id item associe au slot
                 msgTab.append(myIterator.getUint32()) # enabled
+                msgTab.append(myIterator.getInt32()) # x
+                msgTab.append(myIterator.getInt32()) # y
+                msgTab.append(myIterator.getInt32()) # z
 
             nbDialog = int(myIterator.getUint32())  # nb dialogues lus
             msgTab.append(nbDialog)

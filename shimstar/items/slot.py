@@ -12,6 +12,9 @@ class Slot:
         self.types = []
         self.nb = 0
         self.item = None
+        self.x = 0
+        self.y = 0
+        self.z = 0
         if xmlPart != None:
             self.loadXml(xmlPart)
 
@@ -49,6 +52,8 @@ class Slot:
 
     def setItem(self, item):
         self.item = item
+        if item is not None:
+            self.item.slot = self
 
     def getNb(self):
         return self.nb
@@ -61,3 +66,8 @@ class Slot:
 
     def getItem(self):
         return self.item
+
+    def setPos(self,x,y,z):
+        self.x=x
+        self.y=y
+        self.z=z

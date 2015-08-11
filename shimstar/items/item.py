@@ -21,6 +21,7 @@ class ShimstarItem(object):
         self.cost = 0
         self.sell = 0
         self.location = 0
+        self.slot = None
         self.place = 0
         self.space = 0
         self.skillsItem = {}

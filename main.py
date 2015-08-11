@@ -186,6 +186,13 @@ class ShimStarClient(DirectObject):
                             it.setId(idItem)
                             it.setEnabled(enabledItem)
                             tempSlot.setItem(it)
+                        x = netMsg[compteur]
+                        compteur += 1
+                        y = netMsg[compteur]
+                        compteur += 1
+                        z = netMsg[compteur]
+                        compteur += 1
+                        tempSlot.setPos(x,y,z)
 
                         ship.addSlot(tempSlot)
                     GameState.getInstance().setState(C_WAITING_CHARACTER_RECEIVED)

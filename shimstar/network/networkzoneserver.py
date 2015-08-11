@@ -55,7 +55,9 @@ class NetworkZoneServer(threading.Thread):
                         self.myProcessDataFunction(datagram)
             except:
                 # GameState.getInstance().setZoneNetworkStarted(False)
-                print "pb thread networkzoneServer" + str(sys.exc_info()[0])
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
 
 
         # GameState.getInstance().setZoneNetworkStarted(False)
@@ -115,6 +117,9 @@ class NetworkZoneServer(threading.Thread):
                 msgTab.append(myIterator.getUint32()) # templateId
                 msgTab.append(myIterator.getUint32()) # id
                 msgTab.append(myIterator.getUint32()) # Enabled/disabled
+                msgTab.append(myIterator.getInt32()) # pos slot X
+                msgTab.append(myIterator.getInt32()) # pos slot Y
+                msgTab.append(myIterator.getInt32()) # pos slot Z
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NPC_INCOMING:
@@ -184,6 +189,9 @@ class NetworkZoneServer(threading.Thread):
                 msgTab.append(myIterator.getUint32())  #id template item associe au slot
                 msgTab.append(myIterator.getUint32())  #id item associe au slot
                 msgTab.append(myIterator.getUint32()) # enabled
+                msgTab.append(myIterator.getInt32())
+                msgTab.append(myIterator.getInt32())
+                msgTab.append(myIterator.getInt32())
 
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)

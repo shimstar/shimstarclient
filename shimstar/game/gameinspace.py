@@ -1042,7 +1042,7 @@ class GameInSpace(DirectObject, threading.Thread):
                                         weapons = ship.hasItems(C_ITEM_WEAPON)
                                         for w in weapons:
                                             if w.shot():
-                                                self.pointerLookingAt.setPos(ship.getPos())
+                                                self.pointerLookingAt.setPos(ship.getNode(),(w.slot.x,w.slot.y,w.slot.z))
                                                 if self.pointToLookAt is not None:
                                                     self.pointerLookingAt.lookAt(self.pointToLookAt)
                                                 else:
