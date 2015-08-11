@@ -1158,6 +1158,7 @@ class GameInSpace(DirectObject, threading.Thread):
             # print "pb thread gameinspace"  + str(sys.exc_info()[0])
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+            print "pb thread gameinspace"
+            print (exc_type, fname, exc_tb.tb_lineno)
         self.started=False
         print "le thread GameInSpace s'est termine proprement"

@@ -72,7 +72,12 @@ class Zone(threading.Thread):
                 self.runCharOutgoing()
                 self.runJunk()
             except:
-                print "pb thread zone" + str(sys.exc_info()[0])
+                # GameState.getInstance().setZoneNetworkStarted(False)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                self.stopThread = True
+                print "pb thread zone"
         self.started = False
         print "le thread Zone " + str(self.id) + " s'est termine proprement"
 
@@ -173,6 +178,7 @@ class Zone(threading.Thread):
                 tabMsg = msg.getMessage()
                 print "zone::runNewIncoming " + str(tabMsg[0])
                 User.lock.acquire()
+                # print tabMsg
                 userId = tabMsg[0]
                 userFound = User.getUserById(userId)
                 char = None
@@ -234,6 +240,14 @@ class Zone(threading.Thread):
                             it.setId(idItem)
                             it.setEnabled(enabledItem)
                             tempSlot.setItem(it)
+                        x = tabMsg[compteur]
+                        compteur += 1
+                        y = tabMsg[compteur]
+                        compteur += 1
+                        z= tabMsg[compteur]
+                        compteur += 1
+                        tempSlot.setPos(x,y,z)
+
                         ship.addSlot(tempSlot)
                 User.lock.release()
                 NetworkZoneServer.getInstance().removeMessage(msg)
