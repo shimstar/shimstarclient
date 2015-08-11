@@ -306,7 +306,8 @@ class GameInSpace(DirectObject, threading.Thread):
 
     def renderTarget(self, dt):
         if self.target != None and self.target.getNode().isEmpty() != True:
-
+            if isinstance(self.target,Ship) or isinstance(self.target,Junk):
+                self.target.lock.acquire()
             pos = self.map3dToAspect2d(render, self.target.getNode().getPos(render))
             if pos != None:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == False:
@@ -358,10 +359,13 @@ class GameInSpace(DirectObject, threading.Thread):
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").setProperty("BackgroundImage", "set:ShimstarImageset image:ReticleMining" )
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").enable()
 
+
             else:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == True:
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
 
+            if isinstance(self.target,Ship) or isinstance(self.target,Junk):
+                    self.target.lock.release()
                 #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:TempImageset image:full_image")
             # if isinstance(self.target, Ship):
             #     self.target.getLock().release()
