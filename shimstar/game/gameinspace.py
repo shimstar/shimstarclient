@@ -173,10 +173,11 @@ class GameInSpace(DirectObject, threading.Thread):
 
     def speedUp(self, sp):
         ship = User.getInstance().getCurrentCharacter().getShip()
-        if ship != None:
+        if ship is not None:
             ship.lock.acquire()
-            if ship.engine != None:
-                acc = ship.engine.getAcceleration()
+            engines = ship.hasItems(C_ITEM_ENGINE)
+            for en in engines:
+                acc = en.getAcceleration()
                 self.speedup += acc * sp
             ship.lock.release()
 
