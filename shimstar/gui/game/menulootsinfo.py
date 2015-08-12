@@ -36,9 +36,17 @@ class MenuLootsInfo(DirectObject):
                     ship = User.getInstance().getCurrentCharacter().getShip()
                     if ship is not None:
                         ship.lock.acquire()
+                        self.junk.lock.acquire()
                         if self.junk.getNode().isEmpty() != True and ship.getNode().isEmpty() != True:
                             distance = calcDistance(self.junk.getNode(),ship.getNode())
                             self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Distance").setText(str(distance))
+                            if distance > 250:
+                                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Open").setText("[colour='FFFF0000'] Ouvrir" )
+                                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station/Enter").disable()
+                            else:
+                                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/LootsWindow/Open").setText("Ouvrir")
+                                self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Station/Enter").enable()
+                        self.junk.lock.release()
                         ship.lock.release()
             else:
                 self.junk=None
@@ -47,6 +55,7 @@ class MenuLootsInfo(DirectObject):
 
     def onOpen(self,args):
         self.parent.onClickInfo(args)
+        self.OutAnimationInstance.start()
 
     def onDestroy(self,args):
         nm = netMessage(C_NETWORK_DESTROY_JUNK)

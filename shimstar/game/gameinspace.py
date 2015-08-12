@@ -261,6 +261,7 @@ class GameInSpace(DirectObject, threading.Thread):
         if external==False:
             MenuSelectTarget.getInstance().setTarget(newTgt)
         if obj is not None:
+            print self.target
             if self.target is not None:
                 if isinstance(self.target,Asteroid):
                     if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Mining").isVisible():
@@ -358,6 +359,7 @@ class GameInSpace(DirectObject, threading.Thread):
                     else:
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").setProperty("BackgroundImage", "set:ShimstarImageset image:ReticleMining" )
                         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget/Mining").enable()
+
 
 
             else:

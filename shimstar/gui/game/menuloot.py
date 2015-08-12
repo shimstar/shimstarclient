@@ -35,7 +35,7 @@ class MenuLoot(DirectObject):
             nm.addInt(idIt)
             NetworkZoneServer.getInstance().sendMessage(nm)
 
-    def onTakeClicked(self,wnd):
+    def onDestroyClicked(self,wnd):
         nm = netMessage(C_NETWORK_DESTROY_JUNK)
         nm.addInt(User.getInstance().getId())
         nm.addInt(self.junk.getId())

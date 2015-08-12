@@ -71,6 +71,7 @@ class MenuShipInfo(DirectObject):
     def hide(self):
         self.OutAnimationInstance.start()
         taskMgr.remove("event ship Info")
+        print "shipinfo hiding"
 
     def show(self):
         self.InAnimationInstance.start()
