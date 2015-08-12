@@ -49,7 +49,7 @@ class Follower(object):
         return self.target
 
     def track(self, task):
-        if self.target is not None and not self.target.isEmpty() and self.pointer is not None and not self.pointer.isEmpty:
+        if self.target is not None and not self.target.isEmpty() and self.pointer is not None and not self.pointer.isEmpty():
             if isInView(self.target):
                 self.pointer.hide()
 
