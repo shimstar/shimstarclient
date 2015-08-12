@@ -23,6 +23,8 @@ class MenuLoot(DirectObject):
         self.InLootAnimationInstance.setTargetWindow(self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots"))
         self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots/TakeButton").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
                                                                            'onTakeClicked')
+        self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots/DestroyButton").subscribeEvent(PyCEGUI.PushButton.EventClicked, self,
+                                                                           'onDestroyClicked')
 
 
     def onTakeClicked(self,wnd):
@@ -33,6 +35,12 @@ class MenuLoot(DirectObject):
             nm.addInt(idIt)
             NetworkZoneServer.getInstance().sendMessage(nm)
 
+    def onTakeClicked(self,wnd):
+        nm = netMessage(C_NETWORK_DESTROY_JUNK)
+        nm.addInt(User.getInstance().getId())
+        nm.addInt(self.junk.getId())
+        NetworkZoneServer.getInstance().sendMessage(nm)
+        self.OutLootAnimationInstance.start()
 
     def setParent(self,parent):
         self.parent = parent
@@ -102,7 +110,6 @@ class MenuLoot(DirectObject):
 
     def onCloseClicked(self, args):
         self.emptyLootsWindow()
-        # self.wndCegui.WindowManager.getWindow("HUD/Cockpit/Loots").hide()
         self.OutLootAnimationInstance.start()
         taskMgr.remove("event loot")
 
@@ -130,22 +137,14 @@ class MenuLoot(DirectObject):
             if i > 6:
                 i = 0
                 j += 1
-                # ~ print self.items
         numItemI = 0
         numItemJ = 0
-        # print self.items
         for it in self.items:
-            #~ print it
-            #~ loc=it.getLocation()
+
             locI = numItemI % 7
             locJ = int(numItemI / 7)
             panel = self.CEGUI.WindowManager.getWindow("Inventaire/Panel")
             wnd = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Loots/Panel/DragDropSlot" + str(locI) + "-" + str(locJ))
-            #~ if listOfImageSet.has_key("TempImageset" + str(it.getImg()) )==False:
-            #~ customImageset = self.CEGUI.ImageSetManager.createFromImageFile("TempImageset" + str(it.getImg()) , "items/" + str(it.getImg()) + ".png", "images")
-            #~ customImageset.setNativeResolution(PyCEGUI.Size(64,64))
-            #~ customImageset.setAutoScalingEnabled(False)
-            #~ listOfImageSet["TempImageset" + str(it.getImg()) ]=customImageset
             img = self.CEGUI.WindowManager.createWindow("Shimstar/BackgroundImage",
                                                         "HUD/Cockpit/Loots/Panel/DragDropSlot" + str(locI) + "-" + str(
                                                             locJ) + "/img" + str(locI) + "-" + str(locJ))
