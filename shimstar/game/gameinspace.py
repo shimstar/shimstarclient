@@ -309,7 +309,7 @@ class GameInSpace(DirectObject, threading.Thread):
             if isinstance(self.target,Ship) or isinstance(self.target,Junk):
                 self.target.lock.acquire()
             pos = self.map3dToAspect2d(render, self.target.getNode().getPos(render))
-            if pos != None:
+            if pos is not None:
                 if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == False:
                     self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(True)
                 pos2 = self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").getPosition()
@@ -369,14 +369,14 @@ class GameInSpace(DirectObject, threading.Thread):
                 #~ self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship/Img").setProperty("BackgroundImage", "set:TempImageset image:full_image")
             # if isinstance(self.target, Ship):
             #     self.target.getLock().release()
-        elif self.target != None and self.target.getNode().isEmpty() == True:
+        elif self.target is not None and self.target.getNode().isEmpty() == True:
             self.target = None
             if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").isVisible() == True:
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
             Follower.getInstance().destroy()
         else:
             if self.CEGUI.WindowManager.getWindow(
-                    "HUD/Cockpit/ReticleTarget") != None and self.CEGUI.WindowManager.getWindow(
+                    "HUD/Cockpit/ReticleTarget") is not None and self.CEGUI.WindowManager.getWindow(
                     "HUD/Cockpit/ReticleTarget").isVisible() == True:
                 self.CEGUI.WindowManager.getWindow("HUD/Cockpit/ReticleTarget").setVisible(False)
             if self.CEGUI.WindowManager.getWindow("HUD/Cockpit/Ship").isVisible() == True:
@@ -438,8 +438,9 @@ class GameInSpace(DirectObject, threading.Thread):
         Ship.lock.acquire()
         for s in Ship.listOfShip:
             ship = Ship.listOfShip[s]
+            ship.lock.acquire()
             nShip = ship.node
-            if ship != None and nShip != None and nShip.isEmpty() != True:
+            if ship is not  None and nShip is not None and nShip.isEmpty() != True:
                 textObject = ship.getTextObject()
                 distance = 0
                 if ship != User.getInstance().getCurrentCharacter().ship:
@@ -448,7 +449,7 @@ class GameInSpace(DirectObject, threading.Thread):
                     textObject = OnscreenText(text=ship.owner.name, pos=(-0.95, 0.95), scale=0.03, fg=(1, 1, 1, 1))
                     ship.setTextObject(textObject)
                 if abs(distance) < 2000:
-                    if nShip != None and nShip.isEmpty() != True and isInView(nShip) != True:
+                    if nShip is not None and nShip.isEmpty() != True and isInView(nShip) != True:
                         textObject.hide()
                     else:
                         textObject.show()
@@ -464,10 +465,11 @@ class GameInSpace(DirectObject, threading.Thread):
                             textObject.setPos(x, z)
                 else:
                     textObject.hide()
-            elif ship != None:
+            elif ship is not None:
                 textObject = ship.getTextObject()
-                if textObject != None and textObject.isEmpty() != True:
+                if textObject is not None and textObject.isEmpty() != True:
                     textObject.hide()
+            ship.lock.release()
 
         Ship.lock.release()
 
@@ -1056,7 +1058,9 @@ class GameInSpace(DirectObject, threading.Thread):
                                                         t1 = Point3()
                                                         t2 = Point3()
                                                         ret = base.camLens.extrude(Point2(x, y), t1, t2)
+                                                        # print "t2 " + str(t2)
                                                         t2 = t2 / 100
+                                                        # print "t2/100 " + str(t2)
                                                         t2relative = render.getRelativePoint(camera, t2)
                                                         self.pointerLookingAt.lookAt(t2relative)
                                                 nm = netMessage(C_NETWORK_CHAR_SHOT)
