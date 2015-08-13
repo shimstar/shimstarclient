@@ -42,7 +42,8 @@ class chooseItemShip():
     def init(self,slot,ship):
         self.slot = slot
         self.ship = ship
-        self.location = slot.getLocation()
+        if slot is not None:
+            self.location = slot.getLocation()
         self.listOfImageSet = {}
         self.emptyInvWindow()
         self.fillInventory()
