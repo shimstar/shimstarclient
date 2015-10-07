@@ -10,6 +10,7 @@ from shimstar.npc.npc import *
 from shimstar.core.constantes import *
 from shimstar.gui.core.inventory import *
 from shimstar.items.junk import *
+from shimstar.world.zone.iteminspace import *
 
 C_TYPEZONE_SPACE = 1
 C_TYPEZONE_STATION = 2
@@ -71,6 +72,7 @@ class Zone(threading.Thread):
                 self.runRemoveChar()
                 self.runCharOutgoing()
                 self.runJunk()
+                self.runItemInSpace()
             except:
                 # GameState.getInstance().setZoneNetworkStarted(False)
                 exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -88,6 +90,24 @@ class Zone(threading.Thread):
         self.runNewNpc()
         self.runUpdatePosNPC()
         self.runRemoveNpc()
+
+
+    def runItemInSpace(self):
+        tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_ADD_ITEMINSPACE)
+        if len(tempMsg) > 0:
+            for msg in tempMsg:
+                tabMsg = msg.getMessage()
+                id = tabMsg[0]
+                idTemplate = tabMsg[1]
+                hullpoint = tabMsg[2]
+                pos=(tabMsg[3],tabMsg[4],tabMsg[5])
+                quat=(tabMsg[6],tabMsg[7],tabMsg[8],tabMsg[9])
+
+                tempItem = ItemInSpace(id,idTemplate)
+                tempItem.setPos(pos)
+                tempItem.setQuat(quat)
+                tempItem.loadEgg()
+                NetworkZoneServer.getInstance().removeMessage(msg)
 
 
     def runJunk(self):
@@ -176,7 +196,6 @@ class Zone(threading.Thread):
         if len(tempMsg) > 0:
             for msg in tempMsg:
                 tabMsg = msg.getMessage()
-                print "zone::runNewIncoming " + str(tabMsg[0])
                 User.lock.acquire()
                 # print tabMsg
                 userId = tabMsg[0]

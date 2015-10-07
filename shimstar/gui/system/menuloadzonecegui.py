@@ -88,9 +88,8 @@ class MenuLoadZoneCegui(ShowBase):
         GameState.getInstance().setState(C_QUIT_MENU)
 
     def event(self, arg):
-
+        # print "State " + str(GameState.getInstance().getState())
         if GameState.getInstance().getState() == C_WAITING_LOADINGZONE:
-            print "sending asking info npc"
             self.InZoneAnimationInstance.start()
             Zone(User.instance.getCurrentCharacter().getIdZone())
             Zone.getInstance().start()
@@ -100,29 +99,104 @@ class MenuLoadZoneCegui(ShowBase):
             NetworkZoneServer.getInstance().sendMessage(msg)
             self.InNPCAnimationInstance.start()
             self.labelZone.setText("[colour='FF00FF00']OK")
-        elif GameState.getInstance().getState() == C_NPC_RECEIVED:
-            msg = netMessage(C_NETWORK_ASKING_CHAR)
-            msg.addUInt(User.getInstance().getId())
-            NetworkZoneServer.getInstance().sendMessage(msg)
-            GameState.getInstance().setState(C_WAITING_ASKING_INFO_CHARACTER)
-            print "sending asking character npc"
-            self.InPlayerAnimationInstance.start()
-            self.labelNpc.setText("[colour='FF00FF00']OK")
+        elif GameState.getInstance().getState() == C_WAITING_ASKING_INFO_NPC:
+            tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_SEND_NPC_LOADINGZONE)
+            if len(tempMsg) > 0:
+                for msg in tempMsg:
+                    netMsg = msg.getMessage()
+                    nbNpc = int(netMsg[0])
+                    compteur=1
+                    for i in range(nbNpc):
+                        id = netMsg[compteur]
+                        existingNpc = self.getNpcById(id)
+                        NPC.lock.acquire()
+                        if existingNpc == None:
+                            temp = NPC(id, netMsg[compteur+1], netMsg[compteur+2], netMsg[compteur+3], netMsg[compteur+4], netMsg[compteur+5])
+                            self.npc.append(temp)
+                        compteur+=6
+                        NPC.lock.release()
+                    NetworkZoneServer.getInstance().removeMessage(msg)
+                    msg = netMessage(C_NETWORK_ASKING_CHAR)
+                    msg.addUInt(User.getInstance().getId())
+                    NetworkZoneServer.getInstance().sendMessage(msg)
+                    GameState.getInstance().setState(C_WAITING_ASKING_INFO_CHARACTER)
+                    print "sending asking character npc"
+                    self.InPlayerAnimationInstance.start()
+                    self.labelNpc.setText("[colour='FF00FF00']OK")
         elif GameState.getInstance().getState() == C_WAITING_CHARACTER_RECEIVED:
-            msg = netMessage(C_NETWORK_ASKING_OTHER_CHAR)
-            msg.addUInt(User.getInstance().getId())
-            NetworkZoneServer.getInstance().sendMessage(msg)
-            GameState.getInstance().setState(C_WAITING_OTHER_CHAR)
-        elif GameState.getInstance().getState() == C_OTHER_CHAR_RECEIVED:
-            print "sending asking info junk"
-            msg = netMessage(C_NETWORK_ASKING_JUNK)
-            msg.addUInt(User.getInstance().getId())
-            NetworkZoneServer.getInstance().sendMessage(msg)
-            GameState.getInstance().setState(C_WAITING_JUNK_SENT)
+             msg = netMessage(C_NETWORK_ASKING_OTHER_CHAR)
+             msg.addUInt(User.getInstance().getId())
+             NetworkZoneServer.getInstance().sendMessage(msg)
+             GameState.getInstance().setState(C_WAITING_OTHER_CHAR)
+        elif GameState.getInstance().getState() == C_WAITING_OTHER_CHAR:
+            tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_CHAR_SENT)
+            if len(tempMsg) > 0:
+                for msg in tempMsg:
+                    NetworkZoneServer.getInstance().removeMessage(msg)
+                    msg = netMessage(C_NETWORK_ASKING_JUNK)
+                    msg.addUInt(User.getInstance().getId())
+                    NetworkZoneServer.getInstance().sendMessage(msg)
+                    GameState.getInstance().setState(C_WAITING_JUNK_SENT)
+        elif GameState.getInstance().getState() == C_WAITING_JUNK_SENT:
+            tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_JUNK_SENT)
+            if len(tempMsg) > 0:
+                for msg in tempMsg:
+                    NetworkZoneServer.getInstance().removeMessage(msg)
+                    GameState.getInstance().setState(C_JUNK_RECEIVED)
         elif GameState.getInstance().getState() == C_JUNK_RECEIVED:
+            msg = netMessage(C_NETWORK_ASKING_ITEMINSPACE)
+            msg.addUInt(User.getInstance().getId())
+            NetworkZoneServer.getInstance().sendMessage(msg)
+            GameState.getInstance().setState(C_WAITING_FOR_ITEMINSPACE)
+        elif GameState.getInstance().getState() == C_WAITING_FOR_ITEMINSPACE:
+            tempMsg = NetworkZoneServer.getInstance().getListOfMessageById(C_NETWORK_ITEMINSPACE_SENT)
+            if len(tempMsg) > 0:
+                for msg in tempMsg:
+                    NetworkZoneServer.getInstance().removeMessage(msg)
+                    GameState.getInstance().setState(C_ITEMINSPACE_RECEIVED)
+        elif GameState.getInstance().getState() == C_ITEMINSPACE_RECEIVED:
             self.labelPlayers.setText("[colour='FF00FF00']OK")
             self.btnPlay.setText("[colour='FF00FF00']Jouer")
             self.btnPlay.enable()
+        # if GameState.getInstance().getState() == C_WAITING_LOADINGZONE:
+        #     print "sending asking info npc"
+        #     self.InZoneAnimationInstance.start()
+        #     Zone(User.instance.getCurrentCharacter().getIdZone())
+        #     Zone.getInstance().start()
+        #     GameState.getInstance().setState(C_WAITING_ASKING_INFO_NPC)
+        #     msg = netMessage(C_NETWORK_ASKING_NPC)
+        #     msg.addUInt(User.getInstance().getId())
+        #     NetworkZoneServer.getInstance().sendMessage(msg)
+        #     self.InNPCAnimationInstance.start()
+        #     self.labelZone.setText("[colour='FF00FF00']OK")
+        # elif GameState.getInstance().getState() == C_NPC_RECEIVED:
+        #     msg = netMessage(C_NETWORK_ASKING_CHAR)
+        #     msg.addUInt(User.getInstance().getId())
+        #     NetworkZoneServer.getInstance().sendMessage(msg)
+        #     GameState.getInstance().setState(C_WAITING_ASKING_INFO_CHARACTER)
+        #     print "sending asking character npc"
+        #     self.InPlayerAnimationInstance.start()
+        #     self.labelNpc.setText("[colour='FF00FF00']OK")
+        # elif GameState.getInstance().getState() == C_WAITING_CHARACTER_RECEIVED:
+        #     msg = netMessage(C_NETWORK_ASKING_OTHER_CHAR)
+        #     msg.addUInt(User.getInstance().getId())
+        #     NetworkZoneServer.getInstance().sendMessage(msg)
+        #     GameState.getInstance().setState(C_WAITING_OTHER_CHAR)
+        # elif GameState.getInstance().getState() == C_OTHER_CHAR_RECEIVED:
+        #     print "sending asking info junk"
+        #     msg = netMessage(C_NETWORK_ASKING_JUNK)
+        #     msg.addUInt(User.getInstance().getId())
+        #     NetworkZoneServer.getInstance().sendMessage(msg)
+        #     GameState.getInstance().setState(C_WAITING_JUNK_SENT)
+        # elif GameState.getInstance().getState() == C_JUNK_RECEIVED:
+        #     msg = netMessage(C_NETWORK_ASKING_ITEMINSPACE)
+        #     msg.addUInt(User.getInstance().getId())
+        #     NetworkZoneServer.getInstance().sendMessage(msg)
+        #     GameState.getInstance().setState(C_WAITING_FOR_ITEMINSPACE)
+        # elif GameState.getInstance().getState() == C_ITEMINSPACE_RECEIVED:
+        #     self.labelPlayers.setText("[colour='FF00FF00']OK")
+        #     self.btnPlay.setText("[colour='FF00FF00']Jouer")
+        #     self.btnPlay.enable()
 
 
         return Task.cont

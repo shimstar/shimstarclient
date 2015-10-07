@@ -133,6 +133,18 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32())  #hullpoints
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_SEND_NPC_LOADINGZONE:
+            nbNpc = myIterator.getUint32()  #nbNpc
+            msgTab.append(nbNpc)
+            for nbNpc in range(nbNpc):
+                msgTab.append(myIterator.getUint32())  #idnpc
+                msgTab.append(myIterator.getString())  #name
+                msgTab.append(myIterator.getUint32())  #templatenpc
+                msgTab.append(myIterator.getUint32())  #idship
+                msgTab.append(myIterator.getUint32())  #idtemplateship
+                msgTab.append(myIterator.getUint32())  #hullpoints
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_DESTROY_JUNK:
             msgTab.append(myIterator.getUint32())  #idjunk
             temp = message(msgID, msgTab)
@@ -236,6 +248,20 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_ADD_ITEMINSPACE:
+            msgTab = []
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getUint32())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            msgTab.append(myIterator.getStdfloat())
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_ADD_JUNK:
             msgTab = []
             msgTab.append(myIterator.getUint32())
@@ -258,14 +284,24 @@ class NetworkZoneServer(threading.Thread):
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_NPC_SENT:
-            if GameState.getInstance().getState()<=C_NPC_RECEIVED:
-                GameState.getInstance().setState(C_NPC_RECEIVED)
+            msgTab = []
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_JUNK_SENT:
-            if GameState.getInstance().getState()<=C_JUNK_RECEIVED:
-                GameState.getInstance().setState(C_JUNK_RECEIVED)
+            msgTab = []
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
         elif msgID == C_NETWORK_CHAR_SENT:
-            if GameState.getInstance().getState()<=C_WAITING_OTHER_CHAR:
-                GameState.getInstance().setState(C_OTHER_CHAR_RECEIVED)
+            # print "C_NETWORK_CHAR_SENT "
+            msgTab = []
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
+        elif msgID == C_NETWORK_ITEMINSPACE_SENT:
+            print "C_NETWORK_ITEMINSPACE_SENT"
+            msgTab = []
+            temp = message(msgID, msgTab)
+            self.listOfMessage.append(temp)
+
         elif msgID == C_NETWORK_TAKE_DAMAGE_NPC:
             msgTab = []
             msgTab.append(myIterator.getUint32())
@@ -293,9 +329,6 @@ class NetworkZoneServer(threading.Thread):
             msgTab.append(myIterator.getUint32())
             temp = message(msgID, msgTab)
             self.listOfMessage.append(temp)
-        elif msgID == C_NETWORK_REMOVE_NPC:
-            GameState.getInstance().setState(C_WAITING_ASKING_INFO_NPC)
-        # UDP STUFFFFFF
         elif msgID == C_NETWORK_CHARACTER_UPDATE_POS:
             msgTab = []
             msgTab.append(myIterator.getUint32())
